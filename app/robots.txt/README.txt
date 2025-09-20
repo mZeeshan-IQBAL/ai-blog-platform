@@ -1,0 +1,1 @@
+// app/robots.txt/route.js returns robots.txt

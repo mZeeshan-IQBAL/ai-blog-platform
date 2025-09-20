@@ -1,36 +1,128 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# 🚀 AI Knowledge Hub Blog Platform
 
-## Getting Started
+A **full-stack AI-powered blogging platform** built with **Next.js 13 (App Router)**, **MongoDB**, **NextAuth.js**, and **TailwindCSS**.  
+Includes rich text editing, real-time comments & likes with **Pusher**, file uploads with **Cloudinary**, AI-powered summaries & tags, and analytics dashboard with **Chart.js**.
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## ✨ Features
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- 🔐 **Authentication**
+  - Email/Password (Credentials Provider)
+  - Google OAuth
+  - GitHub OAuth
+  - Email Magic Links (Resend)
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+- 📝 **Blog System**
+  - Create/Post articles with **TipTap rich editor**
+  - Markdown rendering
+  - Cover image (via Cloudinary)
+  - Categories/tags (AI suggested)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- 💬 **Realtime Engagement**
+  - Likes 👍
+  - Comments 💬
+  - Live updates via **Pusher**
 
-## Learn More
+- 📊 **Analytics Dashboard**
+  - Views per post
+  - Most viewed / liked
+  - Total posts, users, comments
+  - Chart visualization (React-ChartJS-2)
 
-To learn more about Next.js, take a look at the following resources:
+- 🔍 **Search**
+  - Full-text search powered by **MongoDB Atlas Search**
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- ⚡ **Optimized**
+  - Server-side rendering
+  - Lean Mongoose queries
+  - Stateless API routes
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+## 🛠️ Tech Stack
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- **Frontend/SSR:** Next.js `app/` with Server Components
+- **Styling:** Tailwind CSS
+- **Auth:** NextAuth.js
+- **Database:** MongoDB (Mongoose ORM)
+- **Realtime:** Pusher
+- **Uploads:** Cloudinary
+- **Search:** MongoDB Atlas Search
+- **Cache:** Redis (optional)
+- **AI:** Mock AI functions (summarize, tag, rewrite)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+## 📂 Folder Structure
+ai-blog-platform/
+│
+├── app/
+│   ├── api/
+│   │   ├── auth/[...nextauth]/route.js
+│   │   ├── blogs/route.js
+│   │   ├── comments/route.js
+│   │   ├── likes/route.js
+│   │   ├── posts/route.js
+│   │   ├── search/route.js
+│   │   └── analytics/route.js
+│   ├── (auth)/
+│   │   ├── signin/page.js
+│   │   └── signup/page.js
+│   ├── (blog)/
+│   │   ├── page.js
+│   │   ├── create/page.js
+│   │   └── [id]/page.js
+│   ├── (dashboard)/
+│   │   ├── layout.js
+│   │   ├── page.js
+│   │   └── analytics/page.js
+│   ├── (search)/page.js
+│   ├── layout.js
+│   ├── globals.css
+│   ├── providers.js
+│   └── page.js
+│
+├── components/
+│   ├── layout/Navbar.jsx
+│   ├── layout/Footer.jsx
+│   ├── homepage/Hero.jsx
+│   ├── homepage/Features.jsx
+│   ├── homepage/Stats.jsx
+│   ├── homepage/Testimonials.jsx
+│   ├── blog/BlogCard.jsx
+│   ├── blog/PostHeader.jsx
+│   ├── blog/PostContent.jsx
+│   ├── blog/PostForm.jsx
+│   ├── blog/TagList.jsx
+│   ├── editor/TipTapEditor.jsx
+│   ├── comments/CommentSection.jsx
+│   ├── likes/LikeButton.jsx
+│   └── ui/MarkdownRenderer.jsx
+│
+├── lib/
+│   ├── analytics.js
+│   ├── api.js
+│   ├── auth.js
+│   ├── cloudinary.js
+│   ├── db.js
+│   ├── openai.js
+│   ├── pusher.js
+│   ├── redis.js
+│   └── search.js
+│
+├── models/
+│   ├── User.js
+│   ├── Post.js
+│   ├── Comment.js
+│   └── BlogPost.js
+│
+├── public/placeholder.jpg
+├── config/site.config.js
+├── config/seo.config.js
+├── .env.local (NOT committed)
+├── next.config.js
+├── tailwind.config.js
+├── postcss.config.js
+├── package.json
+└── README.md
