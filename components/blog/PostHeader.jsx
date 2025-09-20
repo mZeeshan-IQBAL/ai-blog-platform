@@ -1,7 +1,10 @@
 // components/blog/PostHeader.jsx
+// components/blog/PostHeader.jsx
 import Image from "next/image";
 import FollowButton from "@/components/engagement/FollowButton";
-import { FaFacebookF, FaTwitter, FaLinkedinIn } from "react-icons/fa";
+import { FaFacebookF } from "react-icons/fa";
+import { FaTwitter } from "react-icons/fa";
+import { FaLinkedinIn } from "react-icons/fa";
 
 export default function PostHeader({ blog }) {
   // Simple reading time estimation (200 words/minute)
@@ -58,10 +61,7 @@ export default function PostHeader({ blog }) {
       {blog.tags?.length > 0 && (
         <div className="flex flex-wrap gap-2 mt-4">
           {blog.tags.map((tag, idx) => (
-            <span
-              key={idx}
-              className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-xs"
-            >
+            <span key={idx} className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-xs">
               #{tag}
             </span>
           ))}
