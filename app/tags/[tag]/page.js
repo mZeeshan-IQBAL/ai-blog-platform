@@ -1,21 +1,40 @@
+// app/tags/[tag]/page.js
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
 import BlogCard from "@/components/blog/BlogCard";
 import { getPostsByTag } from "@/lib/api";
 
+// Generate metadata dynamically based on tag
 export async function generateMetadata({ params }) {
-  const { tag } = await params;
-  return { title: `#${tag} | AI Knowledge Hub` };
+  const { tag } = params;
+  return {
+    title: `#${tag} | AI Knowledge Hub`,
+    description: `Explore articles and posts tagged with #${tag} on AI Knowledge Hub.`,
+  };
 }
 
 export default async function TagPage({ params }) {
-  const { tag } = await params;
+  const { tag } = params;
   const posts = await getPostsByTag(tag);
+
   return (
     <div className="max-w-7xl mx-auto py-16 px-6">
+      {/* Breadcrumbs */}
       <div className="mb-6">
-        <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Tags", href: "/tags" }, { label: `#${tag}` }]} />
+        <Breadcrumbs
+          items={[
+            { label: "Home", href: "/" },
+            { label: "Tags", href: "/tags" },
+            { label: `#${tag}` },
+          ]}
+        />
       </div>
-      <h1 className="text-3xl font-bold mb-6">Tag: <span className="text-blue-600">#{tag}</span></h1>
+
+      {/* Page Title */}
+      <h1 className="text-3xl font-bold mb-6">
+        Tag: <span className="text-blue-600">#{tag}</span>
+      </h1>
+
+      {/* Posts */}
       {posts.length === 0 ? (
         <p className="text-gray-500">No posts for this tag yet.</p>
       ) : (

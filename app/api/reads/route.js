@@ -1,14 +1,32 @@
+// app/api/reads/route.js
+import { NextResponse } from "next/server";
 import { connectToDB } from "@/lib/db";
-import Post from "@/models/Post";
+import Read from "@/models/Read";
 
 export async function POST(request) {
   try {
     const { postId, ms } = await request.json();
-    if (!postId) return Response.json({ error: "postId required" }, { status: 400 });
+
+    if (!postId || !ms) {
+      return NextResponse.json(
+        { error: "postId and ms are required" },
+        { status: 400 }
+      );
+    }
+
     await connectToDB();
-    await Post.findByIdAndUpdate(postId, { $inc: { reads: 1, readMs: Math.max(0, Number(ms) || 0) } });
-    return Response.json({ ok: true });
-  } catch (e) {
-    return Response.json({ ok: false }, { status: 400 });
+
+    await Read.create({
+      postId,
+      ms,
+    });
+
+    return NextResponse.json({ success: true });
+  } catch (err) {
+    console.error("❌ Error saving read:", err);
+    return NextResponse.json(
+      { error: "Failed to record read" },
+      { status: 500 }
+    );
   }
 }

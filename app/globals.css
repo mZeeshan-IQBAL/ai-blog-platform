@@ -2,6 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
+.ProseMirror {
+  min-height: 200px;       /* ensures a nice writing area */
+  outline: none;           /* remove default outline */
+  width: 100%;             /* take full width */
+}
+
+.ProseMirror p {
+  margin: 0;               /* remove weird paragraph spacing */
+}
 body {
   @apply bg-gray-50 text-gray-900;
 }

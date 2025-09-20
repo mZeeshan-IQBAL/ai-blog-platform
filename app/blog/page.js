@@ -1,3 +1,4 @@
+// app/blog/page.js
 import Link from "next/link";
 import { getAllBlogs, getAllTags } from "@/lib/api";
 import BlogCard from "@/components/blog/BlogCard";

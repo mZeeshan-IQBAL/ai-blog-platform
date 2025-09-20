@@ -1,1 +1,0 @@
-// app/rss.xml/route.js returns RSS feed

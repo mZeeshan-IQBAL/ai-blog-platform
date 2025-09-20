@@ -1,14 +1,39 @@
 // components/TagList.jsx
 import Link from "next/link";
 
-export default function TagList({ tags }) {
+export default function TagList({ tags = [], limit }) {
+  if (!tags.length) {
+    return (
+      <p className="text-gray-500 italic text-sm">
+        No tags assigned
+      </p>
+    );
+  }
+
+  const visibleTags = limit ? tags.slice(0, limit) : tags;
+  const hiddenCount = limit && tags.length > limit ? tags.length - limit : 0;
+
   return (
     <div className="flex flex-wrap gap-2">
-      {tags.map((tag) => (
-        <Link key={tag} href={`/tags/${encodeURIComponent(tag)}`} className="bg-blue-100 text-blue-600 px-3 py-1 rounded-full text-xs hover:bg-blue-200">
+      {visibleTags.map((tag) => (
+        <Link
+          key={tag}
+          href={`/tags/${encodeURIComponent(tag)}`}
+          aria-label={`View posts tagged with ${tag}`}
+          className="bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-xs font-medium 
+                     border border-blue-200 shadow-sm
+                     hover:bg-blue-100 hover:text-blue-800 
+                     transition-colors duration-200"
+        >
           #{tag}
         </Link>
       ))}
+
+      {hiddenCount > 0 && (
+        <span className="text-gray-500 text-xs px-2 py-1">
+          +{hiddenCount} more
+        </span>
+      )}
     </div>
   );
 }

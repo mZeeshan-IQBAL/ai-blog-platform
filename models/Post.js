@@ -1,4 +1,4 @@
-// models/Post.js — upgraded with slug support
+// models/Post.js
 import mongoose, { Schema, model, models } from "mongoose";
 
 function slugify(text) {
@@ -11,10 +11,13 @@ function slugify(text) {
     .replace(/-+/g, "-");
 }
 
-const ReactionSchema = new Schema({
-  type: { type: String, enum: ["like", "love", "fire"], required: true },
-  user: { type: Schema.Types.ObjectId, ref: "User", required: true },
-}, { _id: false });
+const ReactionSchema = new Schema(
+  {
+    type: { type: String, enum: ["like", "love", "fire"], required: true },
+    user: { type: String, required: true }, // OAuth user ID
+  },
+  { _id: false }
+);
 
 const PostSchema = new Schema(
   {
@@ -22,19 +25,37 @@ const PostSchema = new Schema(
     slug: { type: String, unique: true, index: true },
     content: { type: String, required: true },
     summary: { type: String, default: "" },
+
+    // 🔹 Engagement
     tags: [{ type: String, lowercase: true, trim: true }],
-    author: { type: Schema.Types.ObjectId, ref: "User", required: true },
-    coAuthors: [{ type: Schema.Types.ObjectId, ref: "User" }],
+    category: { type: String, trim: true, default: "General" },
+
+    // 🔹 Author info (snapshot for UI speed)
+    authorId: { type: String, required: true }, // OAuth/Google ID
+    authorName: { type: String, required: true },
+    authorImage: { type: String, default: "" },
+
+    coAuthors: [{ type: String }],
     series: { type: String, trim: true, default: "" },
     coverImage: { type: String, default: "" },
-    likes: [{ type: Schema.Types.ObjectId, ref: "User" }],
+
+    // 🔹 Reactions & Engagement
+    likes: [{ type: String }],
     reactions: [ReactionSchema],
     views: { type: Number, default: 0 },
     reads: { type: Number, default: 0 },
     readMs: { type: Number, default: 0 },
+    shares: { type: Number, default: 0 },
+
+    // 🔹 Publishing
     published: { type: Boolean, default: true },
     scheduledAt: { type: Date },
     comments: [{ type: Schema.Types.ObjectId, ref: "Comment" }],
+
+    // 🔹 SEO fields
+    seoTitle: { type: String, default: "" },
+    seoDescription: { type: String, default: "" },
+
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now },
   },
@@ -44,6 +65,7 @@ const PostSchema = new Schema(
   }
 );
 
+// Slug generation
 PostSchema.pre("save", async function (next) {
   this.updatedAt = new Date();
   if (!this.isModified("title") && this.slug) return next();
@@ -51,11 +73,13 @@ PostSchema.pre("save", async function (next) {
   let base = slugify(this.title || "post");
   if (!base) base = Math.random().toString(36).slice(2, 8);
 
-  // Ensure uniqueness by appending incrementing suffix if needed
   let candidate = base;
   let i = 1;
   while (
-    await (models.Post || mongoose.model("Post")).exists({ slug: candidate, _id: { $ne: this._id } })
+    await (models.Post || mongoose.model("Post")).exists({
+      slug: candidate,
+      _id: { $ne: this._id },
+    })
   ) {
     candidate = `${base}-${i++}`;
   }
@@ -63,12 +87,15 @@ PostSchema.pre("save", async function (next) {
   next();
 });
 
-// ✅ Virtual for like count
+// Virtuals
 PostSchema.virtual("likeCount").get(function () {
   return this.likes?.length || 0;
 });
 
-// ✅ Prevent recompiling model on hot reload
-const Post = models.Post || model("Post", PostSchema);
+// Recompile on hot-reload
+if (models.Post) {
+  delete models.Post;
+}
 
+const Post = model("Post", PostSchema);
 export default Post;

@@ -1,3 +1,4 @@
+// components/analytics/ReadTracker.jsx
 "use client";
 import { useEffect, useRef } from "react";
 
