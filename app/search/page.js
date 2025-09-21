@@ -1,21 +1,41 @@
 // app/search/page.js
 "use client";
 
+import { Suspense } from "react";
 import { useState, useEffect, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
 
+// ✅ Outer wrapper with Suspense
 export default function SearchPage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-center">Loading search...</div>}>
+      <SearchPageContent />
+    </Suspense>
+  );
+}
+
+// ✅ Moved your actual logic here
+function SearchPageContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const [query, setQuery] = useState(searchParams.get('q') || "");
+  const [query, setQuery] = useState(searchParams.get("q") || "");
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // Debounced search function
+  // ✅ Safe fetch wrapper
+  const safeJson = async (res) => {
+    try {
+      return await res.json();
+    } catch {
+      return [];
+    }
+  };
+
+  // ✅ Debounced search function
   const searchPosts = useCallback(async (searchQuery) => {
     if (!searchQuery.trim() || searchQuery.length < 2) {
       setResults([]);
@@ -26,11 +46,14 @@ export default function SearchPage() {
     setError("");
 
     try {
-      const response = await fetch(`/api/search?q=${encodeURIComponent(searchQuery)}`);
-      if (!response.ok) throw new Error('Search failed');
-      
-      const data = await response.json();
-      setResults(data);
+      const response = await fetch(
+        `/api/search?q=${encodeURIComponent(searchQuery)}`,
+        { cache: "no-store" }
+      );
+      if (!response.ok) throw new Error("Search failed");
+
+      const data = await safeJson(response);
+      setResults(Array.isArray(data) ? data : []);
     } catch (err) {
       setError("Failed to search. Please try again.");
       setResults([]);
@@ -39,17 +62,17 @@ export default function SearchPage() {
     }
   }, []);
 
-  // Debounce search
+  // ✅ Debounce search
   useEffect(() => {
     const timer = setTimeout(() => {
       searchPosts(query);
-      
-      // Update URL without causing navigation
+
+      // Update URL without navigation
       if (query.trim()) {
         const newUrl = `/search?q=${encodeURIComponent(query)}`;
-        window.history.replaceState(null, '', newUrl);
+        window.history.replaceState(null, "", newUrl);
       } else {
-        window.history.replaceState(null, '', '/search');
+        window.history.replaceState(null, "", "/search");
       }
     }, 300);
 
@@ -59,27 +82,43 @@ export default function SearchPage() {
   const clearSearch = () => {
     setQuery("");
     setResults([]);
-    router.replace('/search');
+    router.replace("/search");
   };
 
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         <div className="mb-6">
-          <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Search" }]} />
+          <Breadcrumbs
+            items={[{ label: "Home", href: "/" }, { label: "Search" }]}
+          />
         </div>
 
         {/* Search Header */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">Search Articles</h1>
-          <p className="text-gray-600">Find articles by title, content, tags, or category</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-4">
+            Search Articles
+          </h1>
+          <p className="text-gray-600">
+            Find articles by title, content, tags, or category
+          </p>
         </div>
 
         {/* Search Input */}
         <div className="relative mb-8">
           <div className="relative">
-            <svg className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            <svg
+              className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
             </svg>
             <input
               type="text"
@@ -94,20 +133,33 @@ export default function SearchPage() {
                 onClick={clearSearch}
                 className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100"
               >
-                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                <svg
+                  className="h-5 w-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
                 </svg>
               </button>
             )}
           </div>
-          
+
           {/* Search Stats */}
           {query.trim() && (
             <div className="mt-3 text-sm text-gray-600">
               {loading ? (
                 <span>Searching...</span>
               ) : (
-                <span>{results.length} result{results.length !== 1 ? 's' : ''} for &quot;{query}&quot;</span>
+                <span>
+                  {results.length} result{results.length !== 1 ? "s" : ""} for
+                  &quot;{query}&quot;
+                </span>
               )}
             </div>
           )}
@@ -131,9 +183,14 @@ export default function SearchPage() {
         {!loading && query.trim() && results.length === 0 && !error && (
           <div className="text-center py-12">
             <div className="text-6xl mb-4">🔍</div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">No articles found</h3>
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+              No articles found
+            </h3>
             <p className="text-gray-600 mb-6">
-              Try different keywords or browse our <Link href="/blog" className="text-blue-600 hover:underline">latest articles</Link>
+              Try different keywords or browse our{" "}
+              <Link href="/blog" className="text-blue-600 hover:underline">
+                latest articles
+              </Link>
             </p>
             <button
               onClick={clearSearch}
@@ -171,7 +228,7 @@ export default function SearchPage() {
                     <div className="flex-1 min-w-0">
                       {/* Title */}
                       <h2 className="text-xl font-semibold text-gray-900 mb-2 line-clamp-2">
-                        <Link 
+                        <Link
                           href={`/blog/${post.slug || post._id}`}
                           className="hover:text-blue-600 transition-colors"
                         >
@@ -181,7 +238,9 @@ export default function SearchPage() {
 
                       {/* Excerpt */}
                       <p className="text-gray-600 mb-3 line-clamp-2">
-                        {post.excerpt || post.summary || "No description available"}
+                        {post.excerpt ||
+                          post.summary ||
+                          "No description available"}
                       </p>
 
                       {/* Meta Info */}
@@ -200,20 +259,21 @@ export default function SearchPage() {
                             <span>{post.authorName}</span>
                           </div>
                         )}
-                        
+
                         {post.createdAt && (
                           <time>
-                            {new Date(post.createdAt).toLocaleDateString('en-US', {
-                              year: 'numeric',
-                              month: 'short',
-                              day: 'numeric'
-                            })}
+                            {new Date(post.createdAt).toLocaleDateString(
+                              "en-US",
+                              {
+                                year: "numeric",
+                                month: "short",
+                                day: "numeric",
+                              }
+                            )}
                           </time>
                         )}
-                        
-                        {post.views && (
-                          <span>{post.views} views</span>
-                        )}
+
+                        {post.views && <span>{post.views} views</span>}
                       </div>
 
                       {/* Tags */}
@@ -241,7 +301,9 @@ export default function SearchPage() {
         {!query.trim() && (
           <div className="text-center py-16">
             <div className="text-6xl mb-4">🔍</div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">Start your search</h3>
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+              Start your search
+            </h3>
             <p className="text-gray-600">
               Enter keywords to find articles, tutorials, and insights
             </p>
