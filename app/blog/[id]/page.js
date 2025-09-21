@@ -3,8 +3,9 @@ import { getBlog } from "@/lib/api";
 import { incrementViews } from "@/lib/analytics";
 import PostHeader from "@/components/blog/PostHeader";
 import PostContent from "@/components/blog/PostContent";
+import LikeButton from "@/components/likes/LikeButton";
 import ReactionBar from "@/components/engagement/ReactionBar";
-import BookmarkButton from "@/components/engagement/BookmarkButton";
+import BookmarkButton from "@/components/dashboard/BookmarkButton";
 import CommentSection from "@/components/comments/CommentSection";
 import { notFound } from "next/navigation";
 import Link from "next/link";
@@ -13,7 +14,7 @@ import ReadTracker from "@/components/analytics/ReadTracker";
 
 // ✅ Metadata with await params
 export async function generateMetadata({ params }) {
-  const { id } = await params; // Await params in Next.js 15
+  const { id } = await params;
   const blog = await getBlog(id);
   if (!blog) return { title: "Post Not Found" };
 
@@ -25,7 +26,7 @@ export async function generateMetadata({ params }) {
 
 // ✅ Blog Post Page
 export default async function BlogPostPage({ params }) {
-  const { id } = await params; // Await params
+  const { id } = await params;
   const blog = await getBlog(id);
 
   if (!blog) return notFound();
@@ -36,24 +37,45 @@ export default async function BlogPostPage({ params }) {
   return (
     <div className="max-w-4xl mx-auto py-12 px-6">
       <div className="mb-6 flex items-center justify-between gap-3">
-        <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Blog", href: "/blog" }, { label: blog.title }]} />
-        <Link href="/blog" className="md:hidden inline-flex items-center gap-2 border border-gray-200 px-3 py-2 rounded hover:bg-gray-50">
+        <Breadcrumbs
+          items={[
+            { label: "Home", href: "/" },
+            { label: "Blog", href: "/blog" },
+            { label: blog.title },
+          ]}
+        />
+        <Link
+          href="/blog"
+          className="md:hidden inline-flex items-center gap-2 border border-gray-200 px-3 py-2 rounded hover:bg-gray-50"
+        >
           ← Back to Blog
         </Link>
-        <Link href="/blog" className="hidden md:inline-flex items-center gap-2 border border-gray-200 px-3 py-2 rounded hover:bg-gray-50">
+        <Link
+          href="/blog"
+          className="hidden md:inline-flex items-center gap-2 border border-gray-200 px-3 py-2 rounded hover:bg-gray-50"
+        >
           ← Back to Blog
         </Link>
       </div>
+
       {/* Header */}
       <PostHeader blog={blog} />
 
-      {/* Engagement + Views */}
-      <div className="flex justify-between items-center mb-8">
-        <div className="flex items-center gap-3">
+      {/* Enhanced Engagement Section */}
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-8 p-4 bg-gray-50 rounded-xl border">
+        <div className="flex items-center gap-3 flex-wrap">
+          <LikeButton 
+            postId={blog.id} 
+            initialLikes={blog.likes?.length || blog.likes || 0}
+            initiallyLiked={false} // Component will check user's like status
+          />
           <ReactionBar targetType="post" targetId={blog.id} />
           <BookmarkButton postId={blog.id} />
         </div>
-        <div className="text-sm text-gray-500">{blog.views || 0} views</div>
+        <div className="flex items-center gap-3 text-sm text-gray-500">
+          <span>👁️ {blog.views || 0} views</span>
+          <span>📅 {new Date(blog.createdAt).toLocaleDateString()}</span>
+        </div>
       </div>
 
       {/* Blog Content */}

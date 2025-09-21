@@ -1,3 +1,4 @@
+// app/api/analytics/route.js
 import { connectToDB } from "@/lib/db";
 import Post from "@/models/Post";
 import User from "@/models/User";

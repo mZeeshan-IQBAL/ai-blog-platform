@@ -17,7 +17,6 @@ export default function PostForm() {
   const [previewUrl, setPreviewUrl] = useState("");
   const [showPreview, setShowPreview] = useState(false);
 
-  // Word count & reading time
   const wordCount = content?.split(/\s+/).filter(Boolean).length || 0;
   const readingTime = Math.ceil(wordCount / 200);
 
@@ -26,50 +25,40 @@ export default function PostForm() {
     setLoading(true);
     setError("");
 
-    if (!title.trim()) {
-      setError("Title cannot be empty.");
+    if (!title.trim() || !content.trim()) {
+      setError("Title and content cannot be empty.");
       setLoading(false);
       return;
     }
-    if (!content.trim()) {
-      setError("Content cannot be empty.");
-      setLoading(false);
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append("title", title);
-    formData.append("content", content);
-    formData.append("category", category);
-    formData.append("tags", JSON.stringify(tags));
-    if (imageFile) formData.append("image", imageFile);
 
     try {
+      const formData = new FormData();
+      formData.append("title", title);
+      formData.append("content", content);
+      formData.append("category", category);
+      formData.append("tags", JSON.stringify(tags));
+      if (imageFile) formData.append("image", imageFile);
+
+      // Standard fetch to Node API (not Edge runtime)
       const res = await fetch("/api/blogs", {
         method: "POST",
         body: formData,
       });
 
-      let data = {};
-      try {
-        data = await res.json();
-      } catch {
-        data = {};
-      }
+      const data = await res.json();
 
-      if (res.ok) {
-        setTitle("");
-        setContent("");
-        setImageFile(null);
-        setPreviewUrl("");
-        setTags([]);
-        router.push("/blog");
-      } else {
-        setError(data.error || "Unexpected error. Please try again.");
-      }
+      if (!res.ok) throw new Error(data.error || "Failed to create blog");
+
+      // Reset form and redirect
+      setTitle("");
+      setContent("");
+      setImageFile(null);
+      setPreviewUrl("");
+      setTags([]);
+      router.push("/blog");
     } catch (err) {
-      console.error("🚨 Network error:", err);
-      setError("Network error. Please try again.");
+      console.error("❌ Blog creation failed:", err);
+      setError(err.message || "Network error. Please try again.");
     }
 
     setLoading(false);
@@ -77,34 +66,32 @@ export default function PostForm() {
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
-    if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        setError("Image must be smaller than 5MB.");
-        return;
-      }
-      setImageFile(file);
-      const reader = new FileReader();
-      reader.onloadend = () => setPreviewUrl(reader.result);
-      reader.readAsDataURL(file);
-    } else {
+    if (!file) {
       setImageFile(null);
       setPreviewUrl("");
+      return;
     }
+
+    if (file.size > 5 * 1024 * 1024) {
+      setError("Image must be smaller than 5MB.");
+      return;
+    }
+
+    setImageFile(file);
+    const reader = new FileReader();
+    reader.onloadend = () => setPreviewUrl(reader.result);
+    reader.readAsDataURL(file);
   };
 
   const handleTagAdd = (e) => {
     if (e.key === "Enter" && tagInput.trim()) {
       e.preventDefault();
-      if (!tags.includes(tagInput.trim())) {
-        setTags([...tags, tagInput.trim()]);
-      }
+      if (!tags.includes(tagInput.trim())) setTags([...tags, tagInput.trim()]);
       setTagInput("");
     }
   };
 
-  const handleTagRemove = (tag) => {
-    setTags(tags.filter((t) => t !== tag));
-  };
+  const handleTagRemove = (tag) => setTags(tags.filter((t) => t !== tag));
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -112,9 +99,7 @@ export default function PostForm() {
 
       {/* Title */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Title
-        </label>
+        <label className="block text-sm font-medium text-gray-700 mb-2">Title</label>
         <input
           type="text"
           value={title}
@@ -127,9 +112,7 @@ export default function PostForm() {
 
       {/* Category */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Category
-        </label>
+        <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
         <select
           value={category}
           onChange={(e) => setCategory(e.target.value)}
@@ -177,35 +160,21 @@ export default function PostForm() {
 
       {/* Cover Image */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Cover Image (Optional)
-        </label>
+        <label className="block text-sm font-medium text-gray-700 mb-2">Cover Image (Optional)</label>
         <input
           type="file"
           accept="image/*"
           onChange={handleImageChange}
           className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
         />
-        {previewUrl && (
-          <div className="mt-2">
-            <img
-              src={previewUrl}
-              alt="Preview"
-              className="h-32 object-cover rounded"
-            />
-          </div>
-        )}
+        {previewUrl && <img src={previewUrl} alt="Preview" className="h-32 object-cover rounded mt-2" />}
       </div>
 
       {/* Content */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Content
-        </label>
+        <label className="block text-sm font-medium text-gray-700 mb-2">Content</label>
         <TipTapEditor onChange={setContent} />
-        <p className="text-xs text-gray-500 mt-1">
-          {wordCount} words • ~{readingTime} min read
-        </p>
+        <p className="text-xs text-gray-500 mt-1">{wordCount} words • ~{readingTime} min read</p>
       </div>
 
       {/* Actions */}
@@ -230,17 +199,8 @@ export default function PostForm() {
       {showPreview && (
         <div className="mt-6 border-t pt-6">
           <h2 className="text-xl font-bold mb-2">{title || "Untitled Post"}</h2>
-          {previewUrl && (
-            <img
-              src={previewUrl}
-              alt="Preview"
-              className="h-48 w-full object-cover rounded mb-4"
-            />
-          )}
-          <div
-            className="prose max-w-none"
-            dangerouslySetInnerHTML={{ __html: content }}
-          />
+          {previewUrl && <img src={previewUrl} alt="Preview" className="h-48 w-full object-cover rounded mb-4" />}
+          <div className="prose max-w-none" dangerouslySetInnerHTML={{ __html: content }} />
         </div>
       )}
     </form>

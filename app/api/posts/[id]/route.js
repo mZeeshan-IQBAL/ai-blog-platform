@@ -1,3 +1,4 @@
+// app/api/posts/[id]/route.js
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { connectToDB } from "@/lib/db";

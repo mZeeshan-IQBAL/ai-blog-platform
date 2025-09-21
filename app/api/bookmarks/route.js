@@ -5,83 +5,81 @@ import { connectToDB } from "@/lib/db";
 import User from "@/models/User";
 import Post from "@/models/Post";
 
-// GET /api/bookmarks → return all bookmarks for the logged in user
 export async function GET() {
-  const session = await getServerSession(authOptions);
-  if (!session) {
-    return Response.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
   try {
+    const session = await getServerSession(authOptions);
+    if (!session) {
+      return Response.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    console.log("📋 Getting bookmarks for user:", session.user.id);
+
     await connectToDB();
 
-    const user = await User.findOne({ email: session.user.email }).populate({
-      path: "bookmarks",
-      select: "title slug coverImage createdAt",
-    });
+    // Get user's bookmarked post IDs (you might store these differently)
+    const user = await User.findOne({ providerId: session.user.id }).select("bookmarks");
+    
+    if (!user || !user.bookmarks || user.bookmarks.length === 0) {
+      return Response.json([]);
+    }
 
-    return Response.json(user?.bookmarks || [], { status: 200 });
-  } catch (err) {
-    console.error("GET /api/bookmarks error:", err);
-    return Response.json({ error: "Failed to fetch bookmarks" }, { status: 500 });
+    // Get the actual posts
+    const bookmarkedPosts = await Post.find({
+      _id: { $in: user.bookmarks }
+    }).select("title slug coverImage createdAt category authorName authorImage");
+
+    return Response.json(bookmarkedPosts);
+  } catch (error) {
+    console.error("❌ Error fetching bookmarks:", error);
+    return Response.json({ error: "Failed to fetch bookmarks", details: error.message }, { status: 500 });
   }
 }
 
-// POST /api/bookmarks → add a bookmark
+// Add bookmark
 export async function POST(request) {
-  const session = await getServerSession(authOptions);
-  if (!session) {
-    return Response.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
   try {
-    await connectToDB();
+    const session = await getServerSession(authOptions);
+    if (!session) {
+      return Response.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const { postId } = await request.json();
 
-    if (!postId) {
-      return Response.json({ error: "Missing postId" }, { status: 400 });
-    }
-
-    const post = await Post.findById(postId);
-    if (!post) {
-      return Response.json({ error: "Post not found" }, { status: 404 });
-    }
+    await connectToDB();
 
     await User.findOneAndUpdate(
-      { email: session.user.email },
-      { $addToSet: { bookmarks: post._id } }
+      { providerId: session.user.id },
+      { $addToSet: { bookmarks: postId } },
+      { upsert: true }
     );
 
-    return Response.json({ success: true, postId }, { status: 201 });
-  } catch (err) {
-    console.error("POST /api/bookmarks error:", err);
+    return Response.json({ success: true });
+  } catch (error) {
+    console.error("❌ Error adding bookmark:", error);
     return Response.json({ error: "Failed to add bookmark" }, { status: 500 });
   }
 }
 
-// DELETE /api/bookmarks → remove a bookmark
+// Remove bookmark
 export async function DELETE(request) {
-  const session = await getServerSession(authOptions);
-  if (!session) {
-    return Response.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
   try {
-    await connectToDB();
-    const { postId } = await request.json();
-
-    if (!postId) {
-      return Response.json({ error: "Missing postId" }, { status: 400 });
+    const session = await getServerSession(authOptions);
+    if (!session) {
+      return Response.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const { postId } = await request.json();
+
+    await connectToDB();
+
     await User.findOneAndUpdate(
-      { email: session.user.email },
+      { providerId: session.user.id },
       { $pull: { bookmarks: postId } }
     );
 
-    return Response.json({ success: true, postId }, { status: 200 });
-  } catch (err) {
-    console.error("DELETE /api/bookmarks error:", err);
+    return Response.json({ success: true });
+  } catch (error) {
+    console.error("❌ Error removing bookmark:", error);
     return Response.json({ error: "Failed to remove bookmark" }, { status: 500 });
   }
 }

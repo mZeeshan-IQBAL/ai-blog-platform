@@ -1,17 +1,42 @@
-// models/User.js — extended with bookmarks and follows
-import { Schema, model, models } from "mongoose";
+// models/User.js
+import mongoose from "mongoose";
 
-// User schema
-const UserSchema = new Schema({
+const UserSchema = new mongoose.Schema({
   name: { type: String, required: true },
-  email: { type: String, unique: true },
-  password: { type: String }, // optional, non-hashed for demo
+  email: { type: String, required: true, unique: true },
   image: { type: String },
   role: { type: String, enum: ["USER", "ADMIN"], default: "USER" },
-  bookmarks: [{ type: Schema.Types.ObjectId, ref: "Post" }],
-  follows: [{ type: Schema.Types.ObjectId, ref: "User" }],
+  
+  // OAuth provider info
+  provider: { type: String },
+  providerId: { type: String, unique: true },
+  
+  // Social features
+  follows: [{ type: String }], // Array of providerIds that this user follows
+  followers: [{ type: String }], // Array of providerIds that follow this user
+  bookmarks: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Post' }], // Add this line
+  
+  // Additional user info
+  bio: { type: String },
+  website: { type: String },
+  location: { type: String },
+  
+  // Account status
+  verified: { type: Boolean, default: false },
+  active: { type: Boolean, default: true },
+  
+  // Timestamps
   createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now },
 });
 
-const User = models.User || model("User", UserSchema);
+// Update timestamp on save
+UserSchema.pre('save', function(next) {
+  this.updatedAt = new Date();
+  next();
+});
+
+// Prevent recompilation during development
+const User = mongoose.models.User || mongoose.model("User", UserSchema);
+
 export default User;

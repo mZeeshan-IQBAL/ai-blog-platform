@@ -3,15 +3,45 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import LikeButton from "@/components/likes/LikeButton";
+import FollowButton from "@/components/engagement/FollowButton";
+
+// ✅ Function to strip HTML tags and get clean text
+function stripHtmlTags(html) {
+  if (!html) return "";
+  return html
+    .replace(/<[^>]*>/g, " ") // Remove HTML tags
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/\s+/g, " ")
+    .trim();
+}
 
 export default function BlogCard({ blog }) {
   const src = blog.coverImage || "/images/placeholder.jpg";
-  const href = `/blog/${blog.slug || blog.id}`;
-  const authorImage = blog.author?.image || null;
+  const href = `/blog/${blog.slug || blog._id}`;
 
-  // Estimate reading time (basic: 200 words/minute)
-  const wordCount = blog.content?.split(" ").length || 0;
-  const readingTime = Math.ceil(wordCount / 200);
+  // Author info fallback
+  const authorName = blog.authorName || "Anonymous";
+  const authorImage = blog.authorImage || null;
+  const authorId = blog.authorId || blog.author?.id;
+
+  // ✅ Get clean text excerpt
+  const cleanContent = stripHtmlTags(blog.content);
+  const excerpt =
+    blog.summary ||
+    (cleanContent.slice(0, 150) +
+      (cleanContent.length > 150 ? "..." : ""));
+
+  // Estimate reading time (200 words per minute)
+  const wordCount = cleanContent
+    .split(" ")
+    .filter((word) => word.length > 0).length;
+  const readingTime = Math.ceil(wordCount / 200) || 1;
 
   return (
     <article className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group border border-gray-100 flex flex-col">
@@ -21,6 +51,7 @@ export default function BlogCard({ blog }) {
           src={src}
           alt={blog.title || "Blog Cover"}
           fill
+          priority={true}
           className="object-cover object-center group-hover:scale-105 transition-transform duration-500"
           sizes="(max-width: 768px) 100vw,
                  (max-width: 1200px) 50vw,
@@ -52,58 +83,79 @@ export default function BlogCard({ blog }) {
 
         {/* Title */}
         <h3 className="text-xl font-bold mb-2 line-clamp-2 leading-snug">
-          <Link href={href} className="hover:text-blue-600 transition-colors">
+          <Link
+            href={href}
+            className="hover:text-blue-600 transition-colors"
+          >
             {blog.title}
           </Link>
         </h3>
 
         {/* Excerpt */}
         <p className="text-gray-600 mb-4 line-clamp-3 text-sm">
-          {blog.excerpt}
+          {excerpt}
         </p>
 
-        {/* Author Info */}
-        <div className="flex items-center gap-3 mb-4">
-          {authorImage ? (
-            <Image
-              src={authorImage}
-              alt={blog.author?.name || "Author"}
-              width={32}
-              height={32}
-              className="rounded-full object-cover"
-            />
-          ) : (
-            <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-xs font-semibold text-gray-600">
-              {blog.author?.name?.charAt(0) || "A"}
+        {/* Author Info - ✅ Updated with clickable profile */}
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            {/* Author Avatar - Clickable */}
+            <Link
+              href={`/profile/${authorId}`}
+              className="flex-shrink-0 hover:opacity-80 transition-opacity"
+              title="View Profile"
+            >
+              {authorImage ? (
+                <Image
+                  src={authorImage}
+                  alt={authorName}
+                  width={32}
+                  height={32}
+                  className="rounded-full object-cover"
+                />
+              ) : (
+                <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-xs font-semibold text-gray-600">
+                  {authorName.charAt(0)}
+                </div>
+              )}
+            </Link>
+
+            <div className="flex flex-col">
+              {/* Author Name - Clickable */}
+              <Link
+                href={`/profile/${authorId}`}
+                className="font-medium text-gray-800 text-sm hover:text-blue-600 transition-colors"
+                title="View Profile"
+              >
+                {authorName}
+              </Link>
+              <time className="text-xs text-gray-500">
+                {new Date(blog.createdAt).toLocaleDateString("en-US", {
+                  year: "numeric",
+                  month: "short",
+                  day: "numeric",
+                })}{" "}
+                • {readingTime} min read
+              </time>
             </div>
-          )}
-          <div className="flex flex-col">
-            <span className="font-medium text-gray-800 text-sm">
-              {blog.author?.name || "Anonymous"}
-            </span>
-            <time className="text-xs text-gray-500">
-              {new Date(blog.createdAt).toLocaleDateString("en-US", {
-                year: "numeric",
-                month: "short",
-                day: "numeric",
-              })}{" "}
-              • {readingTime} min read
-            </time>
           </div>
+
+          {/* Follow Button */}
+          {authorId && <FollowButton authorId={authorId} />}
         </div>
 
         {/* Footer */}
         <div className="mt-auto flex justify-between items-center text-sm text-gray-600 border-t pt-3">
-          {/* Stats */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
+            <LikeButton
+              postId={blog._id || blog.id}
+              initialLikes={blog.likes?.length || blog.likes || 0}
+              initiallyLiked={false}
+            />
             <span className="flex items-center gap-1 hover:text-blue-600 transition">
-              👍 {blog.likes || 0}
-            </span>
-            <span className="flex items-center gap-1 hover:text-blue-600 transition">
-              💬 {blog.comments || 0}
+              💬 {blog.comments?.length || 0}
             </span>
           </div>
-          {/* CTA */}
           <Link
             href={href}
             className="text-blue-600 font-medium hover:underline text-sm"

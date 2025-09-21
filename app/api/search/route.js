@@ -2,9 +2,18 @@
 import { searchPosts } from "@/lib/search";
 
 export async function GET(request) {
-  const { searchParams } = new URL(request.url);
-  const q = searchParams.get("q") || "";
+  try {
+    const { searchParams } = new URL(request.url);
+    const q = searchParams.get("q") || "";
 
-  const results = await searchPosts(q);
-  return Response.json(results);
+    if (!q.trim()) {
+      return Response.json([]);
+    }
+
+    const results = await searchPosts(q);
+    return Response.json(results);
+  } catch (error) {
+    console.error("Search API error:", error);
+    return Response.json({ error: "Search failed" }, { status: 500 });
+  }
 }
