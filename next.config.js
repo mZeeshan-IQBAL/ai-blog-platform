@@ -22,7 +22,20 @@ const nextConfig = {
       },
     ],
   },
-  // Add other config options here if needed
-}
 
-module.exports = nextConfig
+  // Alias for `@` → src/
+  webpack: (config) => {
+    config.resolve.alias = {
+      '@': require('path').resolve(__dirname, 'src'),
+    };
+    return config;
+  },
+
+  // ✅ Force dynamic rendering for any page not safe to pre-render
+  experimental: {
+    forceSwcTransforms: true, // keeps SWC stable on Windows
+  },
+  output: 'standalone',
+};
+
+module.exports = nextConfig;
