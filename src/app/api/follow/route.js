@@ -1,113 +1,156 @@
-// app/api/follow/route.js
-export const dynamic = "force-dynamic";
+// src/app/api/follow/route.js
+import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { connectToDB } from "@/lib/db";
 import User from "@/models/User";
+import { pusherServer } from "@/lib/pusherServer";
 
-export async function GET() {
+export async function GET(request) {
+  const session = await getServerSession(authOptions);
+  
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   try {
-    const session = await getServerSession(authOptions);
-    if (!session) return Response.json([], { status: 200 });
-    
-    console.log("📋 Getting follows for user:", session.user.id);
-    
     await connectToDB();
     
-    const user = await User.findOne({ providerId: session.user.id }).select("follows");
-    const follows = user?.follows || [];
+    const { searchParams } = new URL(request.url);
+    const targetUserId = searchParams.get("targetUserId");
+
+    if (!targetUserId) {
+      // Return all follows IDs if no target specified
+      const user = await User.findById(session.user.id).select("follows");
+      if (!user) {
+        return NextResponse.json({ error: "User not found" }, { status: 404 });
+      }
+      return NextResponse.json(user.follows || []);
+    }
+
+    // Validate targetUserId format
+    if (!/^[0-9a-fA-F]{24}$/.test(targetUserId)) {
+      return NextResponse.json({ error: "Invalid userId format" }, { status: 400 });
+    }
+
+    const user = await User.findById(session.user.id);
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    // ✅ Use "follows" instead of "following"
+    const isFollowing = user.follows.some(id => id.toString() === targetUserId.toString());
     
-    console.log("📋 User follows:", follows);
-    return Response.json(follows.map(String));
+    return NextResponse.json({ isFollowing });
   } catch (error) {
-    console.error("❌ Error fetching follows:", error);
-    return Response.json({ error: "Failed to fetch follows", details: error.message }, { status: 500 });
+    console.error("❌ Follow GET error:", error);
+    return NextResponse.json({ 
+      error: "Failed to load follow status"
+    }, { status: 500 });
   }
 }
 
 export async function POST(request) {
+  const session = await getServerSession(authOptions);
+  
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   try {
-    const session = await getServerSession(authOptions);
-    if (!session) return Response.json({ error: "Unauthorized" }, { status: 401 });
-    
     await connectToDB();
     
-    const { userId } = await request.json();
-    
-    if (userId === session.user.id) {
-      return Response.json({ error: "Cannot follow yourself" }, { status: 400 });
+    const body = await request.json();
+    const { targetUserId } = body;
+
+    if (!targetUserId) {
+      return NextResponse.json({ error: "targetUserId is required" }, { status: 400 });
     }
 
-    console.log("👤 Following user:", userId, "by:", session.user.id);
+    if (!/^[0-9a-fA-F]{24}$/.test(targetUserId)) {
+      return NextResponse.json({ error: "Invalid userId format" }, { status: 400 });
+    }
 
-    // Ensure current user exists - use upsert but handle duplicates properly
-    let user = await User.findOne({ providerId: session.user.id });
-    
+    const user = await User.findById(session.user.id);
     if (!user) {
-      // Check if user exists with this email
-      const existingUser = await User.findOne({ email: session.user.email });
-      
-      if (existingUser) {
-        // Update existing user
-        user = await User.findOneAndUpdate(
-          { email: session.user.email },
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    // ✅ Ensure user has email to prevent MongoDB duplicate key error
+    if (!user.email) {
+      user.email = session.user.email || `${session.user.id}@placeholder.com`;
+      await user.save();
+    }
+
+    // ✅ Use "follows" instead of "following"
+    if (!user.follows.includes(targetUserId)) {
+      user.follows.push(targetUserId);
+      await user.save();
+
+      // ✅ Trigger follow notification
+      const targetUser = await User.findById(targetUserId);
+      if (targetUser?.providerId && targetUser.providerId !== user.providerId) {
+        await pusherServer.trigger(
+          `private-user-${targetUser.providerId}`,
+          "notification",
           {
-            name: session.user.name,
-            image: session.user.image || "",
-            provider: "google",
-            providerId: session.user.id,
-            updatedAt: new Date(),
-          },
-          { new: true }
+            type: "follow",
+            fromUser: {
+              id: session.user.id,
+              name: session.user.name,
+              email: session.user.email,
+              image: session.user.image
+            },
+            createdAt: new Date().toISOString()
+          }
         );
-      } else {
-        // Create new user
-        user = await User.create({
-          name: session.user.name,
-          email: session.user.email,
-          image: session.user.image || "",
-          provider: "google",
-          providerId: session.user.id,
-        });
       }
     }
 
-    // Add to follows list
-    const result = await User.findOneAndUpdate(
-      { providerId: session.user.id },
-      { $addToSet: { follows: userId } },
-      { new: true }
-    );
-
-    console.log("✅ Follow successful. User now follows:", result?.follows?.length || 0, "users");
-    return Response.json({ ok: true, followsCount: result?.follows?.length || 0 });
+    return NextResponse.json({ success: true, following: true });
   } catch (error) {
-    console.error("❌ Error following user:", error);
-    return Response.json({ error: "Failed to follow user", details: error.message }, { status: 500 });
+    console.error("❌ Follow POST error:", error);
+    return NextResponse.json({ 
+      error: "Failed to follow user"
+    }, { status: 500 });
   }
 }
 
 export async function DELETE(request) {
+  const session = await getServerSession(authOptions);
+  
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   try {
-    const session = await getServerSession(authOptions);
-    if (!session) return Response.json({ error: "Unauthorized" }, { status: 401 });
-    
     await connectToDB();
     
-    const { userId } = await request.json();
-    
-    console.log("👤 Unfollowing user:", userId, "by:", session.user.id);
-    
-    const result = await User.findOneAndUpdate(
-      { providerId: session.user.id },
-      { $pull: { follows: userId } },
-      { new: true }
-    );
+    const body = await request.json();
+    const { targetUserId } = body;
 
-    console.log("✅ Unfollow successful. User now follows:", result?.follows?.length || 0, "users");
-    return Response.json({ ok: true, followsCount: result?.follows?.length || 0 });
+    if (!targetUserId) {
+      return NextResponse.json({ error: "targetUserId is required" }, { status: 400 });
+    }
+
+    if (!/^[0-9a-fA-F]{24}$/.test(targetUserId)) {
+      return NextResponse.json({ error: "Invalid userId format" }, { status: 400 });
+    }
+
+    const user = await User.findById(session.user.id);
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    // ✅ Remove from follows array
+    user.follows = user.follows.filter(id => id.toString() !== targetUserId.toString());
+    await user.save();
+
+    return NextResponse.json({ success: true, following: false });
   } catch (error) {
-    console.error("❌ Error unfollowing user:", error);
-    return Response.json({ error: "Failed to unfollow user", details: error.message }, { status: 500 });
+    console.error("❌ Follow DELETE error:", error);
+    return NextResponse.json({ 
+      error: "Failed to unfollow user"
+    }, { status: 500 });
   }
 }

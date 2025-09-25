@@ -1,11 +1,12 @@
-// components/engagement/FollowButton.jsx
+
+// components/engagement/BookmarkButton.jsx
 "use client";
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 
-export default function FollowButton({ authorId }) {
+export default function BookmarkButton({ postId }) {
   const { data: session, status } = useSession();
-  const [following, setFollowing] = useState(false);
+  const [bookmarked, setBookmarked] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [mounted, setMounted] = useState(false);
@@ -14,8 +15,7 @@ export default function FollowButton({ authorId }) {
     setMounted(true);
   }, []);
 
-  const shouldShow =
-    mounted && authorId && session?.user?.id !== authorId && status === "authenticated";
+  const shouldShow = mounted && postId && status === "authenticated";
   const isLoading = status === "loading" || !mounted;
 
   useEffect(() => {
@@ -23,19 +23,10 @@ export default function FollowButton({ authorId }) {
 
     let cancelled = false;
 
-    async function checkFollowStatus() {
+    async function checkBookmarkStatus() {
       try {
-        // ✅ Add timeout to prevent hanging requests
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 5000);
-
-        const res = await fetch(`/api/follow?targetUserId=${authorId}`, { 
-          method: "GET", 
-          signal: controller.signal 
-        });
-
-        clearTimeout(timeoutId);
-
+        const res = await fetch("/api/bookmarks", { method: "GET" });
+        
         if (!res.ok) {
           const errorData = await res.json();
           throw new Error(errorData.error || `HTTP ${res.status}: ${res.statusText}`);
@@ -43,51 +34,47 @@ export default function FollowButton({ authorId }) {
 
         const data = await res.json();
         if (!cancelled) {
-          setFollowing(data.isFollowing || false);
+          setBookmarked(data.some(id => id.toString() === postId.toString()));
         }
       } catch (err) {
         if (!cancelled) {
-          // ✅ Show more specific error message
-          const errorMessage = err.name === "AbortError" 
-            ? "Request timed out" 
-            : err.message;
-          setError(errorMessage);
+          setError(err.message || "Something went wrong. Please try again.");
         }
       }
     }
 
-    checkFollowStatus();
+    checkBookmarkStatus();
     return () => {
       cancelled = true;
     };
-  }, [shouldShow, authorId]);
+  }, [shouldShow, postId]);
 
   const toggle = async () => {
     if (status !== "authenticated") {
-      alert("Please sign in to follow.");
+      alert("Please sign in to bookmark posts.");
       return;
     }
 
     setLoading(true);
     setError("");
 
-    const prev = following;
-    setFollowing(!prev);
+    const prev = bookmarked;
+    setBookmarked(!prev);
 
     try {
-      const res = await fetch("/api/follow", {
+      const res = await fetch("/api/bookmarks", {
         method: prev ? "DELETE" : "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ targetUserId: authorId }),
+        body: JSON.stringify({ postId }),
       });
 
       if (!res.ok) {
         const errorData = await res.json();
-        throw new Error(errorData.error || `Failed to ${prev ? "unfollow" : "follow"}`);
+        throw new Error(errorData.error || `Failed to ${prev ? "unbookmark" : "bookmark"}`);
       }
     } catch (err) {
       setError(err.message || "Something went wrong. Please try again.");
-      setFollowing(prev);
+      setBookmarked(prev);
     } finally {
       setLoading(false);
     }
@@ -109,13 +96,13 @@ export default function FollowButton({ authorId }) {
 
   return (
     <button
-      aria-pressed={following}
+      aria-pressed={bookmarked}
       onClick={toggle}
       disabled={loading}
       className={`px-3 py-1 rounded text-sm transition-all duration-200 font-medium ${
-        following
-          ? "bg-green-100 text-green-700 hover:bg-green-200"
-          : "bg-blue-100 text-blue-700 hover:bg-blue-200"
+        bookmarked
+          ? "bg-yellow-100 text-yellow-700 hover:bg-yellow-200"
+          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
       } ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
     >
       {loading ? (
@@ -123,10 +110,10 @@ export default function FollowButton({ authorId }) {
           <div className="w-3 h-3 border border-current border-t-transparent rounded-full animate-spin"></div>
           Saving...
         </div>
-      ) : following ? (
-        "Following"
+      ) : bookmarked ? (
+        "Bookmarked"
       ) : (
-        "Follow"
+        "Bookmark"
       )}
     </button>
   );

@@ -1,4 +1,4 @@
-// lib/redis.js — optional Redis client with safe fallbacks
+//src/lib/redis.js — optional Redis client with safe fallbacks
 import { createClient } from "redis";
 
 let client = null;

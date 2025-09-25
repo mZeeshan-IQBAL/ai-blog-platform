@@ -1,4 +1,4 @@
-// components/ui/Breadcrumbs.jsx
+//src/components/ui/Breadcrumbs.jsx
 "use client";
 
 import Link from "next/link";

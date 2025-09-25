@@ -5,7 +5,7 @@ import PostHeader from "@/components/blog/PostHeader";
 import PostContent from "@/components/blog/PostContent";
 import LikeButton from "@/components/likes/LikeButton";
 import ReactionBar from "@/components/engagement/ReactionBar";
-import BookmarkButton from "@/components/dashboard/BookmarkButton";
+import BookmarkButton from "@/components/engagement/BookmarkButton";
 import CommentSection from "@/components/comments/CommentSection";
 import { notFound } from "next/navigation";
 import Link from "next/link";
@@ -64,8 +64,8 @@ export default async function BlogPostPage({ params }) {
       {/* Enhanced Engagement Section */}
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-8 p-4 bg-gray-50 rounded-xl border">
         <div className="flex items-center gap-3 flex-wrap">
-          <LikeButton 
-            postId={blog.id} 
+          <LikeButton
+            postId={blog.id}
             initialLikes={blog.likes?.length || blog.likes || 0}
             initiallyLiked={false} // Component will check user's like status
           />

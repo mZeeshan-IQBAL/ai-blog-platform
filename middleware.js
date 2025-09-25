@@ -1,14 +1,20 @@
-// 2. Updated middleware.js (enhanced for billing protection)
+// middleware.js (for custom JWT tokens)
 import { NextResponse } from "next/server";
 
 export function middleware(request) {
   const url = request.nextUrl.clone();
-  const token = request.cookies.get("token");
+  
+  // Check for NextAuth session cookies (common names)
+  const sessionToken = request.cookies.get("next-auth.session-token") || 
+                      request.cookies.get("__Secure-next-auth.session-token") ||
+                      request.cookies.get("token"); // Your custom token
   
   // Check if user is authenticated
-  if (!token) {
-    // Allow access to billing success and public routes
-    if (url.pathname.startsWith('/billing/success') || url.pathname === '/pricing') {
+  if (!sessionToken) {
+    // Allow access to billing success, auth routes, and public routes
+    if (url.pathname.startsWith('/billing/success') || 
+        url.pathname === '/pricing' ||
+        url.pathname.startsWith('/auth/')) {
       return NextResponse.next();
     }
     
@@ -16,14 +22,22 @@ export function middleware(request) {
     return NextResponse.redirect(url);
   }
 
-  // For billing routes, you might want to add additional checks
+  // For billing routes, add additional checks
   if (url.pathname.startsWith('/billing')) {
-    // Add any billing-specific middleware logic here
-    // For example, checking if user has valid session
     const response = NextResponse.next();
     
     // Add billing-related headers if needed
     response.headers.set('X-Billing-Route', 'true');
+    
+    return response;
+  }
+
+  // For dashboard routes
+  if (url.pathname.startsWith('/dashboard')) {
+    const response = NextResponse.next();
+    
+    // Add dashboard-specific headers if needed
+    response.headers.set('X-Dashboard-Route', 'true');
     
     return response;
   }
@@ -36,7 +50,7 @@ export const config = {
   matcher: [
     "/profile/:path*", 
     "/billing/:path*",
-    "/dashboard/:path*", // Add dashboard protection
-    "/api/billing/:path*" // Protect billing API routes
+    "/dashboard/:path*",
+    "/api/billing/:path*"
   ],
 };

@@ -2,9 +2,9 @@
 "use client";
 import { useSession } from "next-auth/react";
 import { useState, useEffect } from "react";
-import Pusher from "pusher-js";
 import { motion } from "framer-motion";
 import { Heart } from "lucide-react";
+import { getPusherClient } from "@/lib/pusherClient";
 
 export default function LikeButton({ postId, initialLikes = 0, initiallyLiked = false }) {
   const { data: session, status } = useSession();
@@ -51,23 +51,28 @@ export default function LikeButton({ postId, initialLikes = 0, initiallyLiked = 
 
   // Setup realtime updates via Pusher
   useEffect(() => {
-    if (!mounted || !postId || !process.env.NEXT_PUBLIC_PUSHER_KEY) return;
+    if (!mounted || !postId) return;
     
-    let pusher;
+    const pusher = getPusherClient();
+    if (!pusher) return;
+
     let channel;
     
     try {
-      pusher = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY, {
-        cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER,
-        forceTLS: true,
-      });
-
       channel = pusher.subscribe(`post-${postId}`);
+      
+      // Bind like-update event
       channel.bind("like-update", (data) => {
         if (data.counts) {
           setLikes(data.counts.like || 0);
         }
       });
+
+      // Optional: Bind error event for debugging
+      channel.bind("error", (err) => {
+        console.error("🚨 Channel error:", err);
+      });
+
     } catch (error) {
       console.warn("Pusher connection failed:", error);
     }
@@ -76,9 +81,6 @@ export default function LikeButton({ postId, initialLikes = 0, initiallyLiked = 
       if (channel) {
         channel.unbind_all();
         channel.unsubscribe();
-      }
-      if (pusher) {
-        pusher.disconnect();
       }
     };
   }, [mounted, postId]);

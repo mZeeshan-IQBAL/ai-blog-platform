@@ -5,7 +5,8 @@ import { authOptions } from "@/lib/auth";
 import { connectToDB } from "@/lib/db";
 import Post from "@/models/Post";
 import Comment from "@/models/Comment";
-
+import User from "@/models/User";
+import { pusherServer } from "@/lib/pusherServer";
 
 const ALLOWED = ["like", "love", "fire"];
 
@@ -44,15 +45,59 @@ export async function POST(request) {
   doc.reactions = doc.reactions || [];
   const userId = session.user.id;
   // Remove any existing reaction by user (switching types)
-  doc.reactions = doc.reactions.filter((r) => String(r.user) !== String(userId));
-  // If previously had same reaction and was the only one, toggling off would be handled by above; add new if requested type set
-  doc.reactions.push({ type: reaction, user: userId });
+  const existingReactionIndex = doc.reactions.findIndex((r) => String(r.user) === String(userId));
+  const hadExistingReaction = existingReactionIndex !== -1;
+  const existingReactionType = hadExistingReaction ? doc.reactions[existingReactionIndex].type : null;
+  
+  if (hadExistingReaction) {
+    doc.reactions.splice(existingReactionIndex, 1);
+  }
+  
+  // Only add new reaction if it's different from existing or if we're toggling on
+  if (!hadExistingReaction || existingReactionType !== reaction) {
+    doc.reactions.push({ type: reaction, user: userId });
+  }
+
   await doc.save();
 
   const counts = ALLOWED.reduce((acc, t) => {
     acc[t] = doc.reactions.filter((r) => r.type === t).length;
     return acc;
   }, {});
+
+  // ✅ Trigger real-time update for reactions
+  pusherServer.trigger(`${targetType}-${targetId}`, "reaction-update", {
+    counts,
+    userReaction: reaction
+  });
+
+  // ✅ Send notification for likes on posts
+  if (targetType === "post" && reaction === "like" && (!hadExistingReaction || existingReactionType !== "like")) {
+    const post = doc;
+    if (String(post.author) !== String(userId)) {
+      const author = await User.findById(post.author);
+      if (author?.providerId) {
+        await pusherServer.trigger(
+          `private-user-${author.providerId}`,
+          "notification",
+          {
+            type: "like",
+            fromUser: {
+              id: session.user.id,
+              name: session.user.name,
+              email: session.user.email,
+              image: session.user.image
+            },
+            extra: {
+              postId: targetId,
+              postTitle: post.title
+            },
+            createdAt: new Date().toISOString()
+          }
+        );
+      }
+    }
+  }
 
   return Response.json({ ok: true, counts });
 }

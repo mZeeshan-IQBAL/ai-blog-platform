@@ -1,4 +1,4 @@
-// models/Post.js
+// src/models/Post.js
 import mongoose, { Schema, model, models } from "mongoose";
 
 function slugify(text) {

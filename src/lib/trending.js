@@ -1,3 +1,4 @@
+// src/lib/trending.js
 import { connectToDB } from "./db";
 import Post from "@/models/Post";
 

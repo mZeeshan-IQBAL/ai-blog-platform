@@ -1,3 +1,4 @@
+// src/lib/resend.js
 import { Resend } from "resend";
 
 let client = null;

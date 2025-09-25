@@ -17,9 +17,14 @@ export default function PostForm() {
   const [previewUrl, setPreviewUrl] = useState("");
   const [showPreview, setShowPreview] = useState(false);
 
+  // AI State
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiSuggestion, setAiSuggestion] = useState("");
+
   const wordCount = content?.split(/\s+/).filter(Boolean).length || 0;
   const readingTime = Math.ceil(wordCount / 200);
 
+  // ✅ Submit blog
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -39,17 +44,15 @@ export default function PostForm() {
       formData.append("tags", JSON.stringify(tags));
       if (imageFile) formData.append("image", imageFile);
 
-      // Standard fetch to Node API (not Edge runtime)
       const res = await fetch("/api/blogs", {
         method: "POST",
         body: formData,
       });
 
       const data = await res.json();
-
       if (!res.ok) throw new Error(data.error || "Failed to create blog");
 
-      // Reset form and redirect
+      // Reset form
       setTitle("");
       setContent("");
       setImageFile(null);
@@ -60,10 +63,10 @@ export default function PostForm() {
       console.error("❌ Blog creation failed:", err);
       setError(err.message || "Network error. Please try again.");
     }
-
     setLoading(false);
   };
 
+  // ✅ Image handler
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (!file) {
@@ -71,18 +74,17 @@ export default function PostForm() {
       setPreviewUrl("");
       return;
     }
-
     if (file.size > 5 * 1024 * 1024) {
       setError("Image must be smaller than 5MB.");
       return;
     }
-
     setImageFile(file);
     const reader = new FileReader();
     reader.onloadend = () => setPreviewUrl(reader.result);
     reader.readAsDataURL(file);
   };
 
+  // ✅ Tags
   const handleTagAdd = (e) => {
     if (e.key === "Enter" && tagInput.trim()) {
       e.preventDefault();
@@ -90,8 +92,49 @@ export default function PostForm() {
       setTagInput("");
     }
   };
-
   const handleTagRemove = (tag) => setTags(tags.filter((t) => t !== tag));
+
+  // ✅ AI suggestion
+  const handleAISuggestion = async () => {
+    console.log("🔑 HF Key loaded?", process.env.NEXT_PUBLIC_HF_API_KEY ? "Yes" : "No");
+    if (!content.trim()) {
+      setError("Please write some content first so AI has context.");
+      return;
+    }
+
+    setAiLoading(true);
+    setAiSuggestion("");
+    try {
+      const res = await fetch("https://api-inference.huggingface.co/models/google/flan-t5-base", {
+        method: "POST",
+        headers: {
+          "Authorization": "Bearer " + process.env.NEXT_PUBLIC_HF_API_KEY, // add key in .env.local
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          inputs: `Improve and expand this blog draft: ${content}`,
+          parameters: { max_new_tokens: 120, temperature: 0.7 },
+        }),
+      });
+
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+
+      setAiSuggestion(data[0]?.generated_text || "No suggestions found.");
+    } catch (err) {
+      console.error("❌ AI suggestion failed:", err);
+      setAiSuggestion("AI couldn’t generate suggestions this time 🌱. Try again!");
+    }
+    setAiLoading(false);
+  };
+
+  // ✅ Insert suggestion into editor
+  const handleInsertAISuggestion = () => {
+    if (aiSuggestion) {
+      setContent((prev) => prev + "<p>" + aiSuggestion + "</p>");
+      setAiSuggestion(""); // Clear after insertion
+    }
+  };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -173,8 +216,34 @@ export default function PostForm() {
       {/* Content */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">Content</label>
-        <TipTapEditor onChange={setContent} />
+        <TipTapEditor onChange={setContent} initialContent={content} />
         <p className="text-xs text-gray-500 mt-1">{wordCount} words • ~{readingTime} min read</p>
+      </div>
+
+      {/* AI Suggestions */}
+      <div>
+        <button
+          type="button"
+          disabled={aiLoading}
+          onClick={handleAISuggestion}
+          className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition disabled:opacity-50"
+        >
+          {aiLoading ? "Thinking 🤖..." : "Get AI Suggestion"}
+        </button>
+
+        {aiSuggestion && (
+          <div className="mt-4 p-4 bg-purple-50 border border-purple-200 rounded-lg">
+            <h3 className="font-semibold text-purple-800 mb-2">AI Suggestion:</h3>
+            <p className="text-gray-700 whitespace-pre-line mb-3">{aiSuggestion}</p>
+            <button
+              type="button"
+              onClick={handleInsertAISuggestion}
+              className="bg-green-600 text-white px-3 py-1 rounded-md hover:bg-green-700 transition"
+            >
+              Insert into Editor
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Actions */}

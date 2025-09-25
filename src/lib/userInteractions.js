@@ -1,4 +1,4 @@
-// lib/userInteractions.js
+// src/lib/userInteractions.js
 export async function getUserInteractions(postId, userId) {
   if (!userId) {
     return {

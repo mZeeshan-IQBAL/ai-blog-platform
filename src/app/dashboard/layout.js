@@ -2,15 +2,28 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
+import { connectToDB } from "@/lib/db";
+
+export const dynamic = "force-dynamic";
 
 export default async function DashboardLayout({ children }) {
-  const session = await getServerSession(authOptions);
+  // Connect to DB first
+  try {
+    await connectToDB();
+  } catch (err) {
+    console.error("DB connection failed:", err);
+    redirect("/auth/signin");
+  }
 
-  // ✅ Protect route 
-  // If you only want admins -> check role
-  // if (!session || session.user.role !== "ADMIN") redirect("/");
+  // Get session
+  let session;
+  try {
+    session = await getServerSession(authOptions);
+  } catch (err) {
+    console.error("Session fetch error:", err);
+    redirect("/auth/signin");
+  }
 
-  // If you want just authenticated users:
   if (!session) redirect("/auth/signin");
 
   return (

@@ -1,86 +1,113 @@
-// app/api/bookmarks/route.js
-import Post from "@/models/Post";
-export const dynamic = "force-dynamic";
+// src/app/api/bookmarks/route.js
+import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { connectToDB } from "@/lib/db";
 import User from "@/models/User";
+import { pusherServer } from "@/lib/pusherServer";
 
-export async function GET() {
-  try {
-    const session = await getServerSession(authOptions);
-    if (!session) {
-      return Response.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    console.log("📋 Getting bookmarks for user:", session.user.id);
-
-    await connectToDB();
-
-    // Get user's bookmarked post IDs (you might store these differently)
-    const user = await User.findOne({ providerId: session.user.id }).select("bookmarks");
-    
-    if (!user || !user.bookmarks || user.bookmarks.length === 0) {
-      return Response.json([]);
-    }
-
-    // Get the actual posts
-    const bookmarkedPosts = await Post.find({
-      _id: { $in: user.bookmarks }
-    }).select("title slug coverImage createdAt category authorName authorImage");
-
-    return Response.json(bookmarkedPosts);
-  } catch (error) {
-    console.error("❌ Error fetching bookmarks:", error);
-    return Response.json({ error: "Failed to fetch bookmarks", details: error.message }, { status: 500 });
-  }
-}
-
-// Add bookmark
 export async function POST(request) {
+  const session = await getServerSession(authOptions);
+  
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   try {
-    const session = await getServerSession(authOptions);
-    if (!session) {
-      return Response.json({ error: "Unauthorized" }, { status: 401 });
+    await connectToDB();
+    
+    const body = await request.json();
+    const { postId } = body;
+
+    if (!postId) {
+      return NextResponse.json({ error: "postId is required" }, { status: 400 });
     }
 
-    const { postId } = await request.json();
+    // ✅ Find user with full data
+    const user = await User.findById(session.user.id);
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
 
-    await connectToDB();
+    // ✅ Ensure user has email (critical for MongoDB unique index)
+    if (!user.email) {
+      user.email = session.user.email || `${session.user.id}@placeholder.com`;
+      await user.save();
+    }
 
-    await User.findOneAndUpdate(
-      { providerId: session.user.id },
-      { $addToSet: { bookmarks: postId } },
-      { upsert: true }
-    );
+    // ✅ Add bookmark if not already bookmarked
+    if (!user.bookmarks.includes(postId)) {
+      user.bookmarks.push(postId);
+      await user.save();
 
-    return Response.json({ success: true });
+      // ✅ Optional: Send bookmark notification to post author
+      // You'll need to import Post model and get post author
+    }
+
+    return NextResponse.json({ success: true, bookmarked: true });
   } catch (error) {
     console.error("❌ Error adding bookmark:", error);
-    return Response.json({ error: "Failed to add bookmark" }, { status: 500 });
+    return NextResponse.json({ 
+      error: "Failed to bookmark post"
+    }, { status: 500 });
   }
 }
 
-// Remove bookmark
 export async function DELETE(request) {
+  const session = await getServerSession(authOptions);
+  
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   try {
-    const session = await getServerSession(authOptions);
-    if (!session) {
-      return Response.json({ error: "Unauthorized" }, { status: 401 });
+    await connectToDB();
+    
+    const body = await request.json();
+    const { postId } = body;
+
+    if (!postId) {
+      return NextResponse.json({ error: "postId is required" }, { status: 400 });
     }
 
-    const { postId } = await request.json();
+    const user = await User.findById(session.user.id);
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
 
-    await connectToDB();
+    // ✅ Remove from bookmarks array
+    user.bookmarks = user.bookmarks.filter(id => id.toString() !== postId.toString());
+    await user.save();
 
-    await User.findOneAndUpdate(
-      { providerId: session.user.id },
-      { $pull: { bookmarks: postId } }
-    );
-
-    return Response.json({ success: true });
+    return NextResponse.json({ success: true, bookmarked: false });
   } catch (error) {
     console.error("❌ Error removing bookmark:", error);
-    return Response.json({ error: "Failed to remove bookmark" }, { status: 500 });
+    return NextResponse.json({ 
+      error: "Failed to remove bookmark"
+    }, { status: 500 });
+  }
+}
+
+export async function GET(request) {
+  const session = await getServerSession(authOptions);
+  
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  try {
+    await connectToDB();
+    
+    const user = await User.findById(session.user.id).select("bookmarks");
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    return NextResponse.json(user.bookmarks || []);
+  } catch (error) {
+    console.error("❌ Error getting bookmarks:", error);
+    return NextResponse.json({ 
+      error: "Failed to load bookmarks"
+    }, { status: 500 });
   }
 }
