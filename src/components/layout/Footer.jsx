@@ -13,7 +13,6 @@ const NewsletterSignup = () => {
     e.preventDefault();
     setIsSubmitting(true);
     
-    // Simulate API call
     setTimeout(() => {
       setMessage('Thanks for subscribing!');
       setEmail('');
@@ -23,54 +22,40 @@ const NewsletterSignup = () => {
   };
 
   return (
-    <div className="bg-gradient-to-r from-blue-600/10 to-purple-600/10 p-6 lg:p-8 rounded-2xl border border-blue-200/20 backdrop-blur-sm">
-      <div className="text-center mb-6">
-        <h3 className="text-xl font-bold text-white mb-2">
-          Stay Updated
-        </h3>
-        <p className="text-gray-300 text-sm">
-          Get the latest AI insights and trending content delivered to your inbox.
-        </p>
-      </div>
+    <div className="bg-gray-800 p-6 rounded-xl">
+      <h3 className="text-lg font-semibold text-white mb-2">
+        Stay in the loop
+      </h3>
+      <p className="text-gray-400 text-sm mb-4">
+        Get the latest AI insights delivered to your inbox.
+      </p>
       
-      <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3">
+      <form onSubmit={handleSubmit} className="flex gap-2">
         <input
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="Enter your email"
-          className="flex-1 px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent backdrop-blur-sm"
+          className="flex-1 px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           required
         />
         <button
           type="submit"
           disabled={isSubmitting}
-          className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-lg font-semibold hover:from-blue-700 hover:to-purple-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105"
+          className="bg-blue-600 text-white px-6 py-2 rounded-lg font-medium text-sm hover:bg-blue-700 transition-colors disabled:opacity-50"
         >
-          {isSubmitting ? (
-            <div className="flex items-center gap-2">
-              <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-              Subscribing...
-            </div>
-          ) : (
-            'Subscribe'
-          )}
+          {isSubmitting ? '...' : 'Subscribe'}
         </button>
       </form>
       
       {message && (
-        <div className="mt-4 text-center">
-          <p className="text-green-400 text-sm font-medium">{message}</p>
-        </div>
+        <p className="mt-3 text-green-400 text-sm">{message}</p>
       )}
     </div>
   );
 };
 
-// Social media links component
+// Social media links
 const SocialLinks = () => {
   const socials = [
     {
@@ -112,47 +97,18 @@ const SocialLinks = () => {
   ];
 
   return (
-    <div className="flex items-center gap-4">
-      <span className="text-gray-400 text-sm">Follow us:</span>
-      <div className="flex gap-3">
-        {socials.map((social) => (
-          <a
-            key={social.name}
-            href={social.href}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="w-10 h-10 bg-white/5 hover:bg-white/10 rounded-lg flex items-center justify-center text-gray-400 hover:text-white transition-all duration-200 hover:scale-110 group"
-            aria-label={social.name}
-          >
-            {social.icon}
-            <span className="sr-only">{social.name}</span>
-          </a>
-        ))}
-      </div>
-    </div>
-  );
-};
-
-// Quick stats component
-const QuickStats = () => {
-  const stats = [
-    { label: 'Active Members', value: '25K+' },
-    { label: 'Posts Published', value: '120K+' },
-    { label: 'Countries', value: '80+' },
-    { label: 'Success Stories', value: '500+' }
-  ];
-
-  return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-      {stats.map((stat) => (
-        <div key={stat.label} className="text-center">
-          <div className="text-2xl lg:text-3xl font-bold text-white mb-1">
-            {stat.value}
-          </div>
-          <div className="text-gray-400 text-sm">
-            {stat.label}
-          </div>
-        </div>
+    <div className="flex gap-4">
+      {socials.map((social) => (
+        <a
+          key={social.name}
+          href={social.href}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center text-gray-400 hover:text-white hover:bg-gray-700 transition-colors"
+          aria-label={social.name}
+        >
+          {social.icon}
+        </a>
       ))}
     </div>
   );
@@ -163,29 +119,11 @@ export default function Footer() {
 
   const footerSections = [
     {
-      title: 'Platform',
+      title: 'Product',
       links: [
         { name: 'Features', href: '/features' },
         { name: 'Pricing', href: '/pricing' },
         { name: 'API Docs', href: '/docs' },
-        { name: 'Integrations', href: '/integrations' }
-      ]
-    },
-    {
-      title: 'Community',
-      links: [
-        { name: 'Blog', href: '/blog' },
-        { name: 'Forums', href: '/forums' },
-        { name: 'Events', href: '/events' },
-        { name: 'Contributors', href: '/contributors' }
-      ]
-    },
-    {
-      title: 'Resources',
-      links: [
-        { name: 'Help Center', href: '/help' },
-        { name: 'Tutorials', href: '/tutorials' },
-        { name: 'Guides', href: '/guides' },
         { name: 'Changelog', href: '/changelog' }
       ]
     },
@@ -193,94 +131,67 @@ export default function Footer() {
       title: 'Company',
       links: [
         { name: 'About', href: '/about' },
+        { name: 'Blog', href: '/blog' },
         { name: 'Careers', href: '/careers' },
-        { name: 'Contact', href: '/contact' },
-        { name: 'Press Kit', href: '/press' }
+        { name: 'Contact', href: '/contact' }
+      ]
+    },
+    {
+      title: 'Resources',
+      links: [
+        { name: 'Community', href: '/community' },
+        { name: 'Help Center', href: '/help' },
+        { name: 'Partners', href: '/partners' },
+        { name: 'Status', href: '/status' }
+      ]
+    },
+    {
+      title: 'Legal',
+      links: [
+        { name: 'Privacy', href: '/privacy' },
+        { name: 'Terms', href: '/terms' },
+        { name: 'Security', href: '/security' },
+        { name: 'Cookies', href: '/cookies' }
       ]
     }
   ];
 
-  const legalLinks = [
-    { name: 'Privacy Policy', href: '/privacy' },
-    { name: 'Terms of Service', href: '/terms' },
-    { name: 'Cookie Policy', href: '/cookies' },
-    { name: 'GDPR', href: '/gdpr' }
-  ];
-
   return (
-    <footer className="relative bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-gray-300 mt-20 overflow-hidden">
-      {/* Background elements */}
-      <div 
-        className="absolute inset-0 opacity-20"
-        style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239C92AC' fill-opacity='0.05'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
-        }}
-      ></div>
-      <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-600/10 rounded-full filter blur-3xl"></div>
-      <div className="absolute bottom-0 right-1/4 w-80 h-80 bg-purple-600/10 rounded-full filter blur-3xl"></div>
-
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-20">
-        {/* Top section with branding and newsletter */}
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 mb-16">
+    <footer className="bg-gray-900 text-gray-300 mt-auto">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
+        {/* Top section */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-12">
           {/* Brand section */}
           <div>
-            <Link href="/" className="inline-block mb-6">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-                  <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-                  </svg>
-                </div>
-                <span className="text-2xl font-bold text-white">
-                  AI Knowledge Hub
-                </span>
+            <Link href="/" className="inline-flex items-center gap-2 mb-6">
+              <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+                <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                </svg>
               </div>
+              <span className="text-xl font-bold text-white">
+                AI Knowledge Hub
+              </span>
             </Link>
 
-            <p className="text-gray-400 mb-8 max-w-md leading-relaxed">
-              Empowering developers, researchers, and AI enthusiasts to share knowledge, 
-              collaborate on projects, and shape the future of artificial intelligence.
+            <p className="text-gray-400 mb-6 max-w-md">
+              Empowering developers and researchers to share knowledge and shape the future of AI.
             </p>
 
             <SocialLinks />
-
-            {/* Trust badges */}
-            <div className="flex items-center gap-6 mt-8">
-              <div className="flex items-center gap-2 text-sm text-gray-400">
-                <svg className="w-4 h-4 text-green-400" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                </svg>
-                Trusted Platform
-              </div>
-              <div className="flex items-center gap-2 text-sm text-gray-400">
-                <svg className="w-4 h-4 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                ISO Certified
-              </div>
-              <div className="flex items-center gap-2 text-sm text-gray-400">
-                <svg className="w-4 h-4 text-purple-400" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
-                </svg>
-                GDPR Compliant
-              </div>
-            </div>
           </div>
 
-          {/* Newsletter section */}
-          <div>
+          {/* Newsletter */}
+          <div className="lg:max-w-md lg:ml-auto w-full">
             <NewsletterSignup />
           </div>
         </div>
 
-        {/* Stats section */}
-        <QuickStats />
-
         {/* Links section */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12 mb-16">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 pb-8 border-b border-gray-800">
           {footerSections.map((section) => (
             <div key={section.title}>
-              <h3 className="text-white font-semibold mb-6 text-lg">
+              <h3 className="text-sm font-semibold text-white uppercase tracking-wider mb-4">
                 {section.title}
               </h3>
               <ul className="space-y-3">
@@ -288,12 +199,9 @@ export default function Footer() {
                   <li key={link.name}>
                     <Link 
                       href={link.href}
-                      className="text-gray-400 hover:text-white transition-colors duration-200 flex items-center group"
+                      className="text-sm text-gray-400 hover:text-white transition-colors"
                     >
                       {link.name}
-                      <svg className="w-3 h-3 ml-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
                     </Link>
                   </li>
                 ))}
@@ -303,35 +211,24 @@ export default function Footer() {
         </div>
 
         {/* Bottom section */}
-        <div className="pt-8 border-t border-gray-700">
-          <div className="flex flex-col lg:flex-row justify-between items-center gap-6">
-            {/* Copyright */}
-            <div className="text-gray-400 text-sm text-center lg:text-left">
-              <p>© {currentYear} AI Knowledge Hub. All rights reserved.</p>
-              <p className="mt-1">
-                Built with ❤️ by developers, for developers.
-              </p>
-            </div>
-
-            {/* Legal links */}
-            <div className="flex flex-wrap justify-center lg:justify-end gap-6">
-              {legalLinks.map((link, index) => (
-                <Link
-                  key={link.name}
-                  href={link.href}
-                  className="text-gray-400 hover:text-white text-sm transition-colors duration-200"
-                >
-                  {link.name}
-                </Link>
-              ))}
-            </div>
+        <div className="pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+          <div className="text-sm text-gray-400">
+            © {currentYear} AI Knowledge Hub. All rights reserved.
           </div>
-
-          {/* Additional info */}
-          <div className="mt-8 pt-6 border-t border-gray-800 text-center">
-            <p className="text-gray-500 text-xs">
-              This platform is powered by cutting-edge AI technology and maintained by a passionate community of developers.
-            </p>
+          
+                    <div className="flex items-center gap-6 text-sm text-gray-400">
+            <span className="flex items-center gap-2">
+              <svg className="w-4 h-4 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+              </svg>
+              SOC2 Compliant
+            </span>
+            <span className="flex items-center gap-2">
+              <svg className="w-4 h-4 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+              </svg>
+              GDPR Ready
+            </span>
           </div>
         </div>
       </div>

@@ -2,7 +2,7 @@
 import mongoose from "mongoose";
 
 // =======================
-// Subscription Schema
+// Subscription Schema (Updated for EasyPaisa/JazzCash)
 // =======================
 const subscriptionSchema = new mongoose.Schema(
   {
@@ -13,19 +13,18 @@ const subscriptionSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["active", "cancelled", "expired", "trial"],
+      enum: ["active", "cancelled", "expired"],
       default: "active",
     },
-    // PayPal fields
-    paymentId: String,
-    subscriptionId: String,
+    // Payment details (generic for EasyPaisa/JazzCash)
+    transactionId: String, // e.g., EasyPaisa transaction ID
     payerEmail: String,
-    amount: { type: Number, default: 0 },
+    amount: { type: Number, default: 0 }, // in PKR
+    currency: { type: String, default: "PKR" },
 
-    // Billing dates
-    startDate: { type: Date, default: Date.now },
-    nextBillingDate: Date,
-    cancelledAt: Date,
+    // Time-based access (CRITICAL for one-time payments)
+    startDate: Date,        // Set when payment succeeds
+    expiresAt: Date,        // startDate + 30 days (or plan duration)
 
     // Usage tracking
     usage: {
@@ -54,16 +53,15 @@ const UserSchema = new mongoose.Schema({
   image: { type: String },
   role: { type: String, enum: ["USER", "ADMIN"], default: "USER" },
 
-  // Provider Fields (critical for notifications / NextAuth)
+  // Provider Fields
   provider: { type: String, required: true, default: "credentials" },
-  providerId: { type: String, required: true }, // now required + unique per provider
-  // index to ensure uniqueness across providers
+  providerId: { type: String, required: true },
 }, 
 {
   timestamps: true,
 });
 
-// Enforce uniqueness for provider + providerId combination
+// Enforce uniqueness
 UserSchema.index({ provider: 1, providerId: 1 }, { unique: true });
 
 // =======================
@@ -88,7 +86,7 @@ UserSchema.add({
   active: { type: Boolean, default: true },
 });
 
-// Email notification preferences
+// Email preferences
 UserSchema.add({
   emailNotifications: { type: Boolean, default: true },
   notificationPreferences: {
@@ -117,12 +115,17 @@ UserSchema.add({
 UserSchema.pre("save", function (next) {
   this.updatedAt = new Date();
 
-  // If providerId is missing somehow, ensure fallback
   if (!this.providerId) {
     this.providerId = this._id.toString();
   }
 
-  if (this.isModified("subscription.plan")) {
+  // Only auto-set startDate if it's a new paid subscription
+  if (this.isModified("subscription.plan") && this.subscription.plan !== "free") {
+    if (!this.subscription.startDate) {
+      this.subscription.startDate = new Date();
+      // Set expiresAt to 30 days from now (adjust per plan if needed)
+      this.subscription.expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+    }
     this.updatePlanLimits();
   }
 
@@ -143,9 +146,17 @@ UserSchema.methods.updatePlanLimits = function () {
 };
 
 UserSchema.methods.hasFeatureAccess = function (feature) {
+  // Check if access is still valid (not expired)
+  if (this.subscription.expiresAt && new Date() > new Date(this.subscription.expiresAt)) {
+    this.subscription.status = "expired";
+    this.save(); // Optional: auto-update status
+    return feature === "basic";
+  }
+
   if (!this.subscription || this.subscription.status !== "active") {
     return feature === "basic";
   }
+
   const planFeatures = {
     free: ["basic"],
     starter: ["basic", "advanced", "priority-support", "analytics"],
@@ -156,6 +167,11 @@ UserSchema.methods.hasFeatureAccess = function (feature) {
 };
 
 UserSchema.methods.canPerformAction = function (actionType) {
+  // First check if subscription is still valid
+  if (this.subscription.expiresAt && new Date() > new Date(this.subscription.expiresAt)) {
+    return actionType === "basic"; // or false for all paid actions
+  }
+
   const { usage, limits } = this.subscription;
   switch (actionType) {
     case "create_post": return limits.posts === -1 || usage.posts < limits.posts;

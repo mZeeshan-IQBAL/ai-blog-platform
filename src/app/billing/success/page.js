@@ -1,10 +1,9 @@
-// 2. src/app/billing/success/page.js
+// src/app/billing/success/page.js
 "use client";
-import { useSearchParams } from "next/navigation";
-import { useRouter } from "next/navigation";
+import { Suspense, useEffect } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { CheckCircle } from "lucide-react";
-import { Suspense, useEffect } from "react";
 
 function SuccessContent() {
   const params = useSearchParams();
@@ -12,15 +11,13 @@ function SuccessContent() {
   const { data: session, status } = useSession();
   const plan = params.get("plan") || "starter";
 
-  // Redirect guest users to login
   useEffect(() => {
-    if (status === "loading") return; // still checking auth
+    if (status === "loading") return;
     if (!session) {
       router.push("/auth/signin");
     }
   }, [session, status, router]);
 
-  // While loading session, show spinner
   if (status === "loading") {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -29,22 +26,20 @@ function SuccessContent() {
     );
   }
 
-  // If no session, don’t render
   if (!session) return null;
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <div className="bg-white p-8 rounded-xl shadow-md max-w-lg w-full text-center">
         <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-6" />
-        <h1 className="text-3xl font-bold mb-4 text-green-700">
-          Payment Successful!
-        </h1>
+        <h1 className="text-3xl font-bold mb-4 text-green-700">Payment Successful!</h1>
         <p className="text-lg mb-6">
           Welcome to the <strong>{plan}</strong> plan,{" "}
           <span className="text-blue-600">{session.user?.name || "User"}</span>!
         </p>
         <p className="text-gray-600 mb-8">
-          Your subscription is now active. You can start using all the features immediately.
+          You now have <strong>30 days of full access</strong>. 
+          No automatic charges — we’ll email you before expiry.
         </p>
         <div className="space-y-3">
           <button
@@ -57,7 +52,7 @@ function SuccessContent() {
             onClick={() => router.push("/billing/manage")}
             className="w-full bg-gray-200 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-300 transition"
           >
-            Manage Subscription
+            View Access Details
           </button>
         </div>
       </div>
@@ -67,13 +62,7 @@ function SuccessContent() {
 
 export default function SuccessPage() {
   return (
-    <Suspense
-      fallback={
-        <div className="min-h-screen flex items-center justify-center">
-          Loading...
-        </div>
-      }
-    >
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
       <SuccessContent />
     </Suspense>
   );

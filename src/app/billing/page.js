@@ -1,6 +1,6 @@
 // src/app/billing/page.js
-import { Suspense } from 'react';
-import BillingContent from './BillingContent';
+import { Suspense } from "react";
+import BillingContent from "./BillingContent";
 
 export const dynamic = "force-dynamic";
 

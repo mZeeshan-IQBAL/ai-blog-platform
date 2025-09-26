@@ -1,73 +1,58 @@
-// src/app/billing/manage/page.js (add error handling)
+// src/app/billing/manage/page.js
+
 "use client";
+
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
-import {
-  Calendar,
-  AlertCircle,
-  Settings,
-  User,
-  Database,
-  FileText,
-} from "lucide-react";
+import { Calendar, AlertCircle, Settings, CreditCard } from "lucide-react";
 
 export default function ManageSubscription() {
-  const { data: session, status } = useSession();
   const router = useRouter();
   const [subscription, setSubscription] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-
-  // Redirect guests to login
-  useEffect(() => {
-    if (status === "loading") return;
-    if (!session) {
-      router.push("/auth/signin");
-    }
-  }, [session, status, router]);
 
   useEffect(() => {
-    if (session) fetchSubscription();
-  }, [session]);
+    fetchSubscription();
+  }, []);
 
-  // Fetch subscription info
   const fetchSubscription = async () => {
     try {
       const response = await fetch("/api/billing/subscription");
-      if (!response.ok) throw new Error("Failed to fetch subscription");
-
-      const data = await response.json();
-      setSubscription(data.subscription);
-      setError("");
-    } catch (err) {
-      console.error("Error fetching subscription:", err);
-      setError("Failed to load subscription details");
+      if (response.ok) {
+        const data = await response.json();
+        setSubscription(data.subscription);
+      }
+    } catch (error) {
+      console.error("Error fetching subscription:", error);
     }
     setLoading(false);
   };
 
-  // Cancel subscription
   const cancelSubscription = async () => {
-    if (!confirm("Cancel subscription? (Takes effect end of billing period)"))
+    if (
+      !confirm(
+        "Are you sure you want to cancel your subscription? You will lose access at the end of your current period."
+      )
+    )
       return;
 
-    setLoading(true);
     try {
       const response = await fetch("/api/billing/cancel", { method: "POST" });
-      if (!response.ok) throw new Error("Cancel failed");
 
-      alert("✅ Subscription cancelled");
-      fetchSubscription();
-    } catch (err) {
-      console.error("Error cancelling subscription:", err);
-      alert("❌ Failed to cancel subscription");
+      if (response.ok) {
+        alert("Subscription cancelled successfully");
+        fetchSubscription();
+      } else {
+        const err = await response.json();
+        alert(err.error || "Failed to cancel subscription");
+      }
+    } catch (error) {
+      console.error("Error cancelling subscription:", error);
+      alert("Failed to cancel subscription");
     }
-    setLoading(false);
   };
 
-  // Show loading spinner
-  if (status === "loading" || loading) {
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
@@ -75,31 +60,16 @@ export default function ManageSubscription() {
     );
   }
 
-  if (!session) return null;
+  const formatDate = (dateString) => {
+    if (!dateString) return "—";
+    return new Date(dateString).toLocaleDateString();
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-2xl mx-auto px-4">
         <h1 className="text-3xl font-bold mb-8">Manage Subscription</h1>
 
-        {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
-            {error}
-          </div>
-        )}
-
-        {/* Account Info */}
-        <div className="bg-white rounded-lg shadow p-6 mb-6">
-          <div className="flex items-center">
-            <User className="w-5 h-5 mr-2 text-gray-400" />
-            <div>
-              <p className="text-sm text-gray-600">Logged in as:</p>
-              <p className="font-medium">{session.user.email}</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Subscription Info */}
         {subscription ? (
           <div className="space-y-6">
             {/* Current Plan */}
@@ -110,9 +80,9 @@ export default function ManageSubscription() {
                   <p className="text-3xl font-bold text-blue-600 capitalize">
                     {subscription.plan || "Free"}
                   </p>
-                  <p className="text-gray-600">
-                    ${subscription.amount || 0}/month
-                  </p>
+                  {subscription.amount > 0 && (
+                    <p className="text-gray-600">₨{subscription.amount}/month</p>
+                  )}
                 </div>
                 <div className="text-right">
                   <span
@@ -120,121 +90,57 @@ export default function ManageSubscription() {
                       subscription.status === "active"
                         ? "bg-green-100 text-green-800"
                         : subscription.status === "cancelled"
-                        ? "bg-yellow-100 text-yellow-800"
-                        : "bg-red-100 text-red-800"
+                          ? "bg-yellow-100 text-yellow-800"
+                          : "bg-red-100 text-red-800"
                     }`}
                   >
-                    {subscription.status || "inactive"}
+                    {subscription.status === "cancelled" ? "Cancelling" : subscription.status}
                   </span>
-
-                  {subscription.status === "cancelled" &&
-                    subscription.nextBillingDate && (
-                      <p className="text-sm text-gray-600 mt-2">
-                        Active until{" "}
-                        {new Date(
-                          subscription.nextBillingDate
-                        ).toLocaleDateString()}
-                      </p>
-                    )}
                 </div>
               </div>
             </div>
 
-            {/* Billing Info */}
-            {subscription.status === "active" && (
+            {/* Access Period */}
+            {(subscription.status === "active" || subscription.status === "cancelled") && (
               <div className="bg-white rounded-lg shadow p-6">
                 <h3 className="text-lg font-semibold mb-4 flex items-center">
                   <Calendar className="w-5 h-5 mr-2" />
-                  Billing Information
+                  Access Period
                 </h3>
                 <div className="space-y-3">
-                  {subscription.nextBillingDate && (
-                    <div className="flex justify-between">
-                      <span>Next billing date:</span>
-                      <span className="font-medium">
-                        {new Date(
-                          subscription.nextBillingDate
-                        ).toLocaleDateString()}
-                      </span>
-                    </div>
-                  )}
                   <div className="flex justify-between">
-                    <span>Payment method:</span>
-                    <span className="font-medium">PayPal</span>
+                    <span>Start date:</span>
+                    <span className="font-medium">{formatDate(subscription.startDate)}</span>
                   </div>
-                  {subscription.payerEmail && (
-                    <div className="flex justify-between">
-                      <span>PayPal account:</span>
-                      <span className="font-medium">
-                        {subscription.payerEmail}
-                      </span>
+                  <div className="flex justify-between">
+                    <span>Access until:</span>
+                    <span className="font-medium">{formatDate(subscription.expiresAt)}</span>
+                  </div>
+                  {subscription.status === "cancelled" && (
+                    <div className="flex justify-between text-yellow-700">
+                      <span>Auto-renewal:</span>
+                      <span className="font-medium">Disabled</span>
                     </div>
                   )}
                 </div>
               </div>
             )}
 
-            {/* Usage Stats */}
-            {subscription.usage && (
+            {/* Payment Method */}
+            {subscription.amount > 0 && (
               <div className="bg-white rounded-lg shadow p-6">
-                <h3 className="text-lg font-semibold mb-4">Usage</h3>
-                <div className="space-y-4">
-                  {/* Storage */}
-                  <div>
-                    <div className="flex justify-between mb-1">
-                      <span className="flex items-center">
-                        <Database className="w-4 h-4 mr-1" /> Storage
-                      </span>
-                      <span className="text-sm">
-                        {subscription.usage.storage || 0} GB /{" "}
-                        {subscription.limits?.storage || 5} GB
-                      </span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div
-                        className="bg-blue-600 h-2 rounded-full"
-                        style={{
-                          width: `${Math.min(
-                            ((subscription.usage.storage || 0) /
-                              (subscription.limits?.storage || 5)) *
-                              100,
-                            100
-                          )}%`,
-                        }}
-                      ></div>
-                    </div>
-                  </div>
-
-                  {/* Posts */}
-                  <div>
-                    <div className="flex justify-between mb-1">
-                      <span className="flex items-center">
-                        <FileText className="w-4 h-4 mr-1" /> Posts
-                      </span>
-                      <span className="text-sm">
-                        {subscription.usage.posts || 0} /{" "}
-                        {subscription.limits?.posts === -1
-                          ? "Unlimited"
-                          : subscription.limits?.posts || 5}
-                      </span>
-                    </div>
-                    {subscription.limits?.posts !== -1 && (
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div
-                          className="bg-blue-600 h-2 rounded-full"
-                          style={{
-                            width: `${Math.min(
-                              ((subscription.usage.posts || 0) /
-                                (subscription.limits?.posts || 5)) *
-                                100,
-                              100
-                            )}%`,
-                          }}
-                        ></div>
-                      </div>
-                    )}
-                  </div>
-                </div>
+                <h3 className="text-lg font-semibold mb-4 flex items-center">
+                  <CreditCard className="w-5 h-5 mr-2" />
+                  Payment Method
+                </h3>
+                <p className="text-gray-600">
+                  Paid via <strong>EasyPaisa / JazzCash</strong> (one-time payment)
+                </p>
+                {subscription.payerEmail && (
+                  <p className="text-sm text-gray-500 mt-2">
+                    Payment confirmed for: {subscription.payerEmail}
+                  </p>
+                )}
               </div>
             )}
 
@@ -251,13 +157,15 @@ export default function ManageSubscription() {
                     <div>
                       <p className="font-medium">Change Plan</p>
                       <p className="text-sm text-gray-600">
-                        Upgrade or downgrade your subscription
+                        {subscription.status === "active"
+                          ? "Upgrade or extend your access"
+                          : "Choose a new plan"}
                       </p>
                     </div>
                   </div>
                 </button>
 
-                {subscription.status === "active" && (
+                {subscription.status === "active" && subscription.plan !== "free" && (
                   <button
                     onClick={cancelSubscription}
                     className="w-full text-left p-3 border border-red-200 rounded-lg hover:bg-red-50 transition text-red-600"
@@ -265,10 +173,7 @@ export default function ManageSubscription() {
                     <div className="flex items-center">
                       <AlertCircle className="w-5 h-5 mr-3" />
                       <div>
-                        <p className="font-medium">Cancel Subscription</p>
-                        <p className="text-sm">
-                          Cancel your subscription (effective at period end)
-                        </p>
+                        <p className="font-medium">Cancel Auto-Renewal</p>
                       </div>
                     </div>
                   </button>

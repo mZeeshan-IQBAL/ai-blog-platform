@@ -1,6 +1,7 @@
 // components/homepage/Testimonials.jsx
 'use client';
 import { useState, useEffect, useRef } from 'react';
+import Link from 'next/link';
 
 // Enhanced testimonials data with more details
 const testimonials = [
@@ -109,20 +110,20 @@ const TestimonialCard = ({ testimonial, index }) => {
   return (
     <div
       ref={cardRef}
-      className={`group relative transform transition-all duration-700 ${
+      className={`transform transition-all duration-700 ${
         isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
       }`}
     >
-      <div className={`relative overflow-hidden rounded-2xl p-8 transition-all duration-500 hover:scale-105 ${
+      <div className={`relative overflow-hidden rounded-2xl p-8 transition-shadow duration-300 ${
         testimonial.featured 
-          ? 'bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-200 shadow-xl' 
-          : 'bg-white border border-gray-200 shadow-lg hover:shadow-xl'
+          ? 'bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-200 shadow-lg' 
+          : 'bg-white border border-gray-200 shadow-lg'
       }`}>
         
         {/* Featured badge */}
         {testimonial.featured && (
           <div className="absolute top-4 right-4">
-            <span className="bg-gradient-to-r from-blue-500 to-purple-600 text-white text-xs font-bold px-3 py-1 rounded-full">
+            <span className="bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full">
               ⭐ Featured
             </span>
           </div>
@@ -138,7 +139,7 @@ const TestimonialCard = ({ testimonial, index }) => {
           <StarRating rating={testimonial.rating} />
 
           {/* Testimonial text */}
-          <blockquote className="text-gray-700 text-lg leading-relaxed mb-6 italic font-medium">
+          <blockquote className="text-gray-600 text-lg leading-relaxed mb-6 italic font-medium">
             "{testimonial.text}"
           </blockquote>
 
@@ -157,10 +158,10 @@ const TestimonialCard = ({ testimonial, index }) => {
             </div>
             
             <div className="text-left">
-              <h4 className="font-bold text-gray-900 text-lg">
+              <h4 className="font-semibold text-gray-900 text-lg">
                 {testimonial.name}
               </h4>
-              <p className="text-blue-600 font-semibold text-sm">
+              <p className="text-blue-600 font-medium text-sm">
                 {testimonial.role}
               </p>
               <p className="text-gray-500 text-xs">
@@ -169,9 +170,6 @@ const TestimonialCard = ({ testimonial, index }) => {
             </div>
           </div>
         </div>
-
-        {/* Hover overlay */}
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-50/0 to-purple-50/0 group-hover:from-blue-50/30 group-hover:to-purple-50/20 transition-all duration-500 rounded-2xl"></div>
       </div>
     </div>
   );
@@ -247,13 +245,8 @@ const TestimonialCarousel = ({ testimonials }) => {
 
 export default function Testimonials() {
   return (
-    <section className="relative py-20 lg:py-28 overflow-hidden">
-      {/* Background elements */}
-      <div className="absolute inset-0 bg-gradient-to-br from-gray-50 via-blue-50/30 to-indigo-50/50"></div>
-      <div className="absolute top-20 left-10 w-72 h-72 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"></div>
-      <div className="absolute bottom-20 right-10 w-80 h-80 bg-purple-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse" style={{ animationDelay: '2s' }}></div>
-
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="py-20 lg:py-28 bg-gray-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section header */}
         <div className="text-center mb-16">
           <div className="inline-flex items-center gap-2 bg-blue-100 text-blue-700 px-4 py-2 rounded-full text-sm font-semibold mb-4">
@@ -263,14 +256,11 @@ export default function Testimonials() {
             Testimonials
           </div>
           
-          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight">
-            Trusted by
-            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
-              Innovation Leaders
-            </span>
+          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-6 leading-tight">
+            Trusted by Innovation Leaders
           </h2>
           
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
             Join thousands of researchers, developers, and AI enthusiasts who are already 
             transforming their careers with our platform.
           </p>
@@ -295,31 +285,21 @@ export default function Testimonials() {
         {/* Bottom stats */}
         <div className="mt-20 grid grid-cols-2 lg:grid-cols-4 gap-8 text-center">
           <div>
-            <div className="text-3xl font-bold text-blue-600 mb-2">4.9/5</div>
+            <div className="text-2xl font-bold text-gray-900 mb-2">4.9/5</div>
             <div className="text-gray-600 text-sm">Average Rating</div>
           </div>
           <div>
-            <div className="text-3xl font-bold text-blue-600 mb-2">10K+</div>
+            <div className="text-2xl font-bold text-gray-900 mb-2">10K+</div>
             <div className="text-gray-600 text-sm">Happy Users</div>
           </div>
           <div>
-            <div className="text-3xl font-bold text-blue-600 mb-2">99%</div>
+            <div className="text-2xl font-bold text-gray-900 mb-2">99%</div>
             <div className="text-gray-600 text-sm">Satisfaction Rate</div>
           </div>
           <div>
-            <div className="text-3xl font-bold text-blue-600 mb-2">24/7</div>
+            <div className="text-2xl font-bold text-gray-900 mb-2">24/7</div>
             <div className="text-gray-600 text-sm">Community Support</div>
           </div>
-        </div>
-
-        {/* CTA */}
-        <div className="text-center mt-16">
-          <button className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-xl font-semibold hover:from-blue-700 hover:to-purple-700 transform hover:scale-105 transition-all duration-200 shadow-xl hover:shadow-2xl">
-            Join Our Community Today
-          </button>
-          <p className="text-gray-500 text-sm mt-4">
-            Free to join • No credit card required
-          </p>
         </div>
       </div>
     </section>

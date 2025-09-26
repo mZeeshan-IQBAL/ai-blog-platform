@@ -3,7 +3,7 @@ import "./globals.css";
 import Providers from "./providers";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
-import { auth } from "@/lib/auth"; // Import your auth function
+import { auth } from "@/lib/auth";
 
 export const metadata = {
   title: "AI Knowledge Hub",
@@ -11,13 +11,12 @@ export const metadata = {
 };
 
 export default async function RootLayout({ children }) {
-  // ✅ Fetch session server-side
   const session = await auth();
-  
+
   return (
     <html lang="en">
       <body className="bg-gray-50">
-        {/* ✅ Pass session to Providers */}
+        {/* ✅ NO PAYPAL SCRIPT - removed completely */}
         <Providers session={session}>
           <Navbar />
           {children}

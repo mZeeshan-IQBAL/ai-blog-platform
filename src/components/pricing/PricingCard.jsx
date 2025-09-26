@@ -3,79 +3,100 @@ import React from "react";
 import Link from "next/link";
 
 export default function PricingCard({ plan, isPopular, isHighlighted }) {
-  const baseClass =
-    "bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden transition-transform transform hover:-translate-y-1 hover:shadow-xl";
-  const popularClass = isPopular ? "ring-2 ring-blue-500 scale-[1.02]" : "";
-  const highlightedClass = isHighlighted
-    ? "bg-gradient-to-br from-blue-50 to-purple-50"
-    : "";
+  // Determine the correct href based on plan type
+  const getHref = () => {
+    if (plan.slug === "free") {
+      return "/dashboard"; // Direct to dashboard for free plan
+    }
+    if (plan.slug === "enterprise") {
+      return "/contact"; // Enterprise goes to contact
+    }
+    return `/pricing/${plan.slug}`; // Paid plans go through auth flow
+  };
 
   return (
-    <div className={`${baseClass} ${popularClass} ${highlightedClass}`}>
+    <div
+      className={`
+        relative flex flex-col h-full bg-white rounded-lg border p-6
+        ${isPopular ? "border-blue-500 shadow-sm" : "border-gray-200"}
+        ${isHighlighted ? "bg-gray-50" : ""}
+        transition-shadow hover:shadow-md
+      `}
+    >
       {/* Popular Label */}
       {isPopular && (
-        <div className="bg-blue-600 text-white text-xs font-semibold px-3 py-1 text-center uppercase tracking-wide">
-          Most Popular
+        <div className="absolute -top-3 left-6">
+          <span className="bg-blue-500 text-white text-xs font-medium px-3 py-1 rounded">
+            Popular
+          </span>
         </div>
       )}
 
-      <div className="p-8 flex flex-col h-full">
-        {/* Plan Name */}
-        <h3 className="text-2xl font-bold text-gray-900 mb-2">{plan.name}</h3>
-        <p className="text-gray-600 mb-6 text-sm">{plan.description}</p>
+      {/* Plan Name */}
+      <h3 className="text-xl font-semibold text-gray-900 mb-2 mt-2">
+        {plan.name}
+      </h3>
+      
+      {/* Description */}
+      <p className="text-sm text-gray-600 mb-6">
+        {plan.description}
+      </p>
 
-        {/* Price */}
-        <div className="mb-8">
-          <div className="flex items-baseline">
-            <span className="text-4xl font-extrabold text-gray-900">
-              {plan.price}
-            </span>
-            {plan.period && (
-              <span className="text-sm text-gray-500 ml-2">{plan.period}</span>
-            )}
-          </div>
-          {plan.price !== "Custom" && (
-            <div className="text-xs text-gray-500 mt-1">
-              per month, billed yearly
-            </div>
+      {/* Price */}
+      <div className="mb-6">
+        <div className="flex items-baseline gap-1">
+          <span className="text-3xl font-bold text-gray-900">
+            {plan.price}
+          </span>
+          {plan.period && (
+            <span className="text-sm text-gray-500">{plan.period}</span>
           )}
         </div>
-
-        {/* Features */}
-        <ul className="space-y-3 mb-8 flex-1">
-          {plan.features.map((feature, index) => (
-            <li
-              key={index}
-              className="flex items-start text-sm text-gray-700 leading-snug"
-            >
-              <svg
-                className="w-5 h-5 text-green-500 mt-0.5 mr-2 flex-shrink-0"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                  clipRule="evenodd"
-                />
-              </svg>
-              {feature}
-            </li>
-          ))}
-        </ul>
-
-        {/* CTA Button */}
-        <Link
-          href={`/pricing/${plan.slug}`}
-          className={`block w-full text-center py-3 px-4 rounded-lg font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 transition ${
-            plan.slug === "free"
-              ? "bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500"
-              : "bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 focus:ring-purple-500"
-          }`}
-        >
-          {plan.cta}
-        </Link>
+        {/* Remove "billed annually" - not applicable for one-time payments */}
+        {plan.price !== "Custom" && plan.slug !== "free" && (
+          <p className="text-xs text-gray-500 mt-1">one-time payment for 30 days</p>
+        )}
       </div>
+
+      {/* Features */}
+      <ul className="space-y-2.5 mb-8 flex-1">
+        {plan.features.map((feature, index) => (
+          <li key={index} className="flex items-start text-sm text-gray-700">
+            <svg
+              className="w-4 h-4 text-green-500 mt-0.5 mr-2 flex-shrink-0"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M5 13l4 4L19 7"
+              />
+            </svg>
+            {feature}
+          </li>
+        ))}
+      </ul>
+
+      {/* CTA Button */}
+      <Link
+        href={getHref()}
+        className={`
+          block w-full text-center py-2.5 px-4 rounded-md font-medium
+          transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2
+          ${
+            plan.slug === "enterprise"
+              ? "bg-gray-900 text-white hover:bg-gray-800 focus:ring-gray-500"
+              : plan.slug === "free"
+              ? "bg-white text-gray-900 border border-gray-300 hover:bg-gray-50 focus:ring-gray-500"
+              : "bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500"
+          }
+        `}
+      >
+        {plan.cta}
+      </Link>
     </div>
   );
 }

@@ -6,14 +6,29 @@ import { authOptions } from "@/lib/auth";
 export default async function PlanPage({ params }) {
   const { slug } = params;
 
-  // Extra safety: check the session on the server
+  // Validate plan slug
+  const validPlans = ["free", "starter", "pro", "business", "enterprise"];
+  if (!validPlans.includes(slug)) {
+    redirect("/pricing"); // Redirect invalid slugs to pricing page
+  }
+
   const session = await getServerSession(authOptions);
 
   if (!session) {
-    // Should already be handled by middleware, but just in case:
-    redirect(`/auth/signup?redirect=/pricing/${slug}`);
+    redirect(`/auth/signin?callbackUrl=/pricing/${slug}`);
   }
 
-  // User is authenticated → forward them to billing with ?plan
+  // Handle special plans
+  if (slug === "free") {
+    // Free plan: go directly to dashboard
+    redirect("/dashboard");
+  }
+
+  if (slug === "enterprise") {
+    // Enterprise: go to contact page
+    redirect("/contact");
+  }
+
+  // All other paid plans: go to billing
   redirect(`/billing?plan=${slug}`);
 }
