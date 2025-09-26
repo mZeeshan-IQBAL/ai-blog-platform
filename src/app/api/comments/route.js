@@ -9,6 +9,7 @@ import Comment from "@/models/Comment";
 import User from "@/models/User";
 import { pusherServer } from "@/lib/pusherServer";
 import { sendEmail } from "@/lib/resend";
+import { emailTemplates } from "@/lib/emailTemplates";
 
 export async function GET(req) {
   try {
@@ -67,11 +68,27 @@ export async function POST(request) {
         createdAt: new Date().toISOString(),
       });
 
-      if (postAuthor.email) {
+      // Send email notification
+      if (postAuthor.email && postAuthor.emailNotifications !== false && postAuthor.notificationPreferences?.comments !== false) {
+        const emailData = emailTemplates.comment({
+          fromUser: {
+            name: session.user.name,
+            image: session.user.image,
+            id: providerId
+          },
+          post: {
+            title: post.title,
+            _id: postId
+          },
+          comment: {
+            content: comment.content
+          }
+        });
+        
         await sendEmail({
           to: postAuthor.email,
-          subject: "New comment on your post",
-          html: `<p><b>${session.user.name}</b> commented: "${comment.content}"</p>`,
+          subject: emailData.subject,
+          html: emailData.html
         });
       }
     }

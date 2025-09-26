@@ -6,6 +6,8 @@ import { authOptions } from "@/lib/auth";
 import { connectToDB } from "@/lib/db";
 import User from "@/models/User";
 import { pusherServer } from "@/lib/pusherServer";
+import { sendEmail } from "@/lib/resend";
+import { emailTemplates } from "@/lib/emailTemplates";
 
 export async function GET(request) {
   const session = await getServerSession(authOptions);
@@ -88,27 +90,46 @@ export async function POST(request) {
       user.follows.push(targetUserId);
       await user.save();
 
-      // ✅ Trigger follow notification
-      const targetUser = await User.findById(targetUserId);
-      if (targetUser?.providerId && targetUser.providerId !== session.user.id) {
-        console.log(`📩 Sending follow notification to ${targetUser.name} (${targetUser.providerId})`);
-        await pusherServer.trigger(
-          `private-user-${targetUser.providerId}`,
-          "notification",
-          {
-            type: "follow",
-            fromUser: {
-              id: session.user.id,
-              name: session.user.name,
-              email: session.user.email,
-              image: session.user.image
-            },
-            createdAt: new Date().toISOString()
+        // ✅ Trigger follow notification
+        const targetUser = await User.findById(targetUserId);
+        if (targetUser?.providerId && targetUser.providerId !== session.user.id) {
+          console.log(`📩 Sending follow notification to ${targetUser.name} (${targetUser.providerId})`);
+          
+          // Send push notification
+          await pusherServer.trigger(
+            `private-user-${targetUser.providerId}`,
+            "notification",
+            {
+              type: "follow",
+              fromUser: {
+                id: session.user.id,
+                name: session.user.name,
+                email: session.user.email,
+                image: session.user.image
+              },
+              createdAt: new Date().toISOString()
+            }
+          );
+          
+          // Send email notification
+          if (targetUser.email && targetUser.emailNotifications !== false && targetUser.notificationPreferences?.follows !== false) {
+            const emailData = emailTemplates.follow({
+              fromUser: {
+                name: session.user.name,
+                image: session.user.image,
+                id: session.user.id
+              }
+            });
+            
+            await sendEmail({
+              to: targetUser.email,
+              subject: emailData.subject,
+              html: emailData.html
+            });
           }
-        );
-      } else {
-        console.log(`❌ Could not send follow notification. Target user: ${targetUser?.name}, providerId: ${targetUser?.providerId}`);
-      }
+        } else {
+          console.log(`❌ Could not send follow notification. Target user: ${targetUser?.name}, providerId: ${targetUser?.providerId}`);
+        }
     }
 
     return NextResponse.json({ success: true, following: true });

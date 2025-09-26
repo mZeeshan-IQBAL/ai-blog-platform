@@ -5,7 +5,10 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { connectToDB } from "@/lib/db";
 import User from "@/models/User";
+import Post from "@/models/Post";
 import { pusherServer } from "@/lib/pusherServer";
+import { sendEmail } from "@/lib/resend";
+import { emailTemplates } from "@/lib/emailTemplates";
 
 export async function POST(request) {
   const session = await getServerSession(authOptions);
@@ -41,8 +44,56 @@ export async function POST(request) {
       user.bookmarks.push(postId);
       await user.save();
 
-      // ✅ Optional: Send bookmark notification to post author
-      // You'll need to import Post model and get post author
+      // ✅ Send bookmark notification to post author
+      const post = await Post.findById(postId);
+      if (post && String(post.authorId) !== String(session.user.id)) {
+        // Find the author by their providerId
+        const postAuthor = await User.findOne({ providerId: post.authorId });
+        if (postAuthor?.providerId) {
+          console.log(`📩 Sending bookmark notification to ${postAuthor.name} (${postAuthor.providerId})`);
+          
+          // Send push notification
+          await pusherServer.trigger(
+            `private-user-${postAuthor.providerId}`,
+            "notification",
+            {
+              type: "bookmark",
+              fromUser: {
+                id: session.user.id,
+                name: session.user.name,
+                email: session.user.email,
+                image: session.user.image
+              },
+              extra: {
+                postId: postId,
+                postTitle: post.title
+              },
+              createdAt: new Date().toISOString()
+            }
+          );
+          
+          // Send email notification
+          if (postAuthor.email && postAuthor.emailNotifications !== false && postAuthor.notificationPreferences?.bookmarks !== false) {
+            const emailData = emailTemplates.bookmark({
+              fromUser: {
+                name: session.user.name,
+                image: session.user.image,
+                id: session.user.id
+              },
+              post: {
+                title: post.title,
+                _id: postId
+              }
+            });
+            
+            await sendEmail({
+              to: postAuthor.email,
+              subject: emailData.subject,
+              html: emailData.html
+            });
+          }
+        }
+      }
     }
 
     return NextResponse.json({ success: true, bookmarked: true });

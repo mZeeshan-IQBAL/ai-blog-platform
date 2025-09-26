@@ -7,6 +7,8 @@ import Post from "@/models/Post";
 import Comment from "@/models/Comment";
 import User from "@/models/User";
 import { pusherServer } from "@/lib/pusherServer";
+import { sendEmail } from "@/lib/resend";
+import { emailTemplates } from "@/lib/emailTemplates";
 
 const ALLOWED = ["like", "love", "fire"];
 
@@ -79,6 +81,8 @@ export async function POST(request) {
       const author = await User.findOne({ providerId: post.authorId });
       if (author?.providerId) {
         console.log(`📩 Sending like notification to ${author.name} (${author.providerId})`);
+        
+        // Send push notification
         await pusherServer.trigger(
           `private-user-${author.providerId}`,
           "notification",
@@ -97,6 +101,27 @@ export async function POST(request) {
             createdAt: new Date().toISOString()
           }
         );
+        
+        // Send email notification
+        if (author.email && author.emailNotifications !== false && author.notificationPreferences?.likes !== false) {
+          const emailData = emailTemplates.like({
+            fromUser: {
+              name: session.user.name,
+              image: session.user.image,
+              id: session.user.id
+            },
+            post: {
+              title: post.title,
+              _id: targetId
+            }
+          });
+          
+          await sendEmail({
+            to: author.email,
+            subject: emailData.subject,
+            html: emailData.html
+          });
+        }
       } else {
         console.log(`❌ Could not find author for notification. Post authorId: ${post.authorId}`);
       }

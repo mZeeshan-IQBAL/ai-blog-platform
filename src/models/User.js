@@ -88,6 +88,17 @@ UserSchema.add({
   active: { type: Boolean, default: true },
 });
 
+// Email notification preferences
+UserSchema.add({
+  emailNotifications: { type: Boolean, default: true },
+  notificationPreferences: {
+    likes: { type: Boolean, default: true },
+    comments: { type: Boolean, default: true },
+    bookmarks: { type: Boolean, default: true },
+    follows: { type: Boolean, default: true }
+  }
+});
+
 // Subscription
 UserSchema.add({
   subscription: {
