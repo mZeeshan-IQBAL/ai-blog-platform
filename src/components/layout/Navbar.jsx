@@ -5,7 +5,6 @@ import Link from "next/link";
 import { useSession, signIn, signOut } from "next-auth/react";
 import { useEffect, useState } from "react";
 import useSearch from "@/app/hooks/useSearch";
-import { usePathname } from "next/navigation";
 import { getPusherClient } from "@/lib/pusherClient";
 
 /* -------------------- User Dropdown -------------------- */
@@ -16,6 +15,7 @@ const UserDropdown = ({ user, onSignOut }) => {
     { name: "Profile", href: "/profile", icon: "👤" },
     { name: "Dashboard", href: "/dashboard", icon: "📊" },
     { name: "My Posts", href: "/my-posts", icon: "📝" },
+    { name: "Settings", href: "/settings", icon: "⚙️" },
   ];
 
   return (
@@ -81,7 +81,20 @@ const UserDropdown = ({ user, onSignOut }) => {
 
 /* -------------------- Nav Links -------------------- */
 const NavLinks = () => {
-  const pathname = usePathname();
+  const [pathname, setPathname] = useState('');
+  
+  useEffect(() => {
+    // Safely get pathname on client side
+    if (typeof window !== 'undefined') {
+      try {
+        const path = window.location.pathname;
+        setPathname(path);
+      } catch (error) {
+        console.error('Error getting pathname:', error);
+      }
+    }
+  }, []);
+
   const navItems = [
     { name: "Home", href: "/" },
     { name: "Blogs", href: "/blog" },
