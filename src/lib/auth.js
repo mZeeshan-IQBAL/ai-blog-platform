@@ -52,6 +52,74 @@ export const authOptions = {
   ],
 
   callbacks: {
+    async signIn({ user, account, profile, email, credentials }) {
+      try {
+        console.log('🔐 signIn callback triggered');
+        console.log('👤 User:', user);
+        console.log('📱 Account:', account);
+        console.log('👤 Profile:', profile);
+        
+        // Skip for credentials provider as it's handled in authorize
+        if (account?.provider === 'credentials') {
+          console.log('✅ Credentials sign-in, skipping user creation');
+          return true;
+        }
+
+        if (account?.provider && profile) {
+          await connectToDB();
+          
+          const providerId = `${account.provider}-${profile.id}`;
+          console.log('🔍 Looking for user with providerId:', providerId);
+          
+          let existingUser = await User.findOne({ 
+            $or: [
+              { providerId },
+              { email: profile.email || user.email }
+            ]
+          });
+
+          if (!existingUser) {
+            console.log('👥 Creating new user for OAuth sign-in');
+            const newUser = await User.create({
+              name: profile.name || user.name,
+              email: profile.email || user.email,
+              image: profile.picture || profile.avatar_url || user.image,
+              provider: account.provider,
+              providerId,
+              role: 'USER',
+            });
+            
+            console.log('✅ New user created:', newUser._id);
+            
+            // Update user object for JWT callback
+            user.id = newUser._id.toString();
+            user.providerId = providerId;
+            user.role = 'USER';
+          } else {
+            console.log('👤 Existing user found:', existingUser._id);
+            
+            // Update existing user info
+            existingUser.name = profile.name || user.name || existingUser.name;
+            existingUser.image = profile.picture || profile.avatar_url || user.image || existingUser.image;
+            if (!existingUser.providerId) {
+              existingUser.providerId = providerId;
+            }
+            await existingUser.save();
+            
+            // Update user object for JWT callback
+            user.id = existingUser._id.toString();
+            user.providerId = existingUser.providerId;
+            user.role = existingUser.role;
+          }
+        }
+
+        return true;
+      } catch (error) {
+        console.error('❌ signIn callback error:', error);
+        return false;
+      }
+    },
+
     async jwt({ token, user, account, profile }) {
       if (user) {
         token.id = user.id;
