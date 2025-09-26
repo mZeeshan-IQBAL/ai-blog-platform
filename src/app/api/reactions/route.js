@@ -74,9 +74,11 @@ export async function POST(request) {
   // ✅ Send notification for likes on posts
   if (targetType === "post" && reaction === "like" && (!hadExistingReaction || existingReactionType !== "like")) {
     const post = doc;
-    if (String(post.author) !== String(userId)) {
-      const author = await User.findById(post.author);
+    if (String(post.authorId) !== String(userId)) {
+      // Find the author by their providerId (which is stored in authorId for posts)
+      const author = await User.findOne({ providerId: post.authorId });
       if (author?.providerId) {
+        console.log(`📩 Sending like notification to ${author.name} (${author.providerId})`);
         await pusherServer.trigger(
           `private-user-${author.providerId}`,
           "notification",
@@ -95,6 +97,8 @@ export async function POST(request) {
             createdAt: new Date().toISOString()
           }
         );
+      } else {
+        console.log(`❌ Could not find author for notification. Post authorId: ${post.authorId}`);
       }
     }
   }

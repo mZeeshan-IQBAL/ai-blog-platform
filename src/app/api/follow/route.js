@@ -1,4 +1,5 @@
 // src/app/api/follow/route.js
+export const dynamic = "force-dynamic";
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
@@ -89,7 +90,8 @@ export async function POST(request) {
 
       // ✅ Trigger follow notification
       const targetUser = await User.findById(targetUserId);
-      if (targetUser?.providerId && targetUser.providerId !== user.providerId) {
+      if (targetUser?.providerId && targetUser.providerId !== session.user.id) {
+        console.log(`📩 Sending follow notification to ${targetUser.name} (${targetUser.providerId})`);
         await pusherServer.trigger(
           `private-user-${targetUser.providerId}`,
           "notification",
@@ -104,6 +106,8 @@ export async function POST(request) {
             createdAt: new Date().toISOString()
           }
         );
+      } else {
+        console.log(`❌ Could not send follow notification. Target user: ${targetUser?.name}, providerId: ${targetUser?.providerId}`);
       }
     }
 

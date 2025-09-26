@@ -1,4 +1,5 @@
 // src/app/api/billing/cancel/route.js
+export const dynamic = "force-dynamic";
 import { NextResponse } from 'next/server';
 import { connectToDB } from '@/lib/db';
 import User from '@/models/User';

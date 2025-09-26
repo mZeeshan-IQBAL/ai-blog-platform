@@ -1,4 +1,5 @@
 // src/app/api/notify/route.js
+export const dynamic = "force-dynamic";
 import { pusherServer } from "@/lib/pusherServer";
 
 export async function POST(req) {

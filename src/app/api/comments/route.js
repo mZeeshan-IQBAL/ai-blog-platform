@@ -56,8 +56,9 @@ export async function POST(request) {
     });
 
     // Notify post author - ✅ Use consistent private-user channel
-    const postAuthor = await User.findById(post.author);
+    const postAuthor = await User.findOne({ providerId: post.authorId });
     if (postAuthor?.providerId && postAuthor.providerId !== providerId) {
+      console.log(`📩 Sending comment notification to ${postAuthor.name} (${postAuthor.providerId})`);
       await pusherServer.trigger(`private-user-${postAuthor.providerId}`, "notification", {
         type: "comment",
         message: "commented on your post",
