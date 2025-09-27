@@ -4,7 +4,6 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { connectToDB } from "@/lib/db";
 import Post from "@/models/Post";
-import { generateSummary, suggestTags } from "@/lib/openai";
 import { uploadImage } from "@/lib/cloudinary";
 import { cacheDel } from "@/lib/redis";
 import { revalidatePath } from "next/cache";
@@ -80,26 +79,6 @@ export async function POST(request) {
     }
   }
 
-  // 🤖 AI Enhancements — Non-blocking (post still saves if AI fails)
-  let summary = "";
-  let tags = [];
-  const publishedRaw = formData.get("published");
-  const scheduledAtRaw = formData.get("scheduledAt");
-  const published = publishedRaw === "true" || publishedRaw === true;
-  const scheduledAt = scheduledAtRaw ? new Date(scheduledAtRaw) : null;
-
-  try {
-    // Generate summary and tags concurrently for performance
-    const [aiSummary, aiTags] = await Promise.all([
-      generateSummary(content),
-      suggestTags(content)
-    ]);
-    summary = aiSummary;
-    tags = aiTags;
-  } catch (error) {
-    console.warn("⚠️ AI processing failed — saving without AI enhancements:", error.message);
-    // Do NOT fail the request — AI is enhancement, not requirement
-  }
 
   // 💾 Save to database
   try {
