@@ -96,7 +96,6 @@ export default function PostForm() {
 
   // ✅ AI suggestion
   const handleAISuggestion = async () => {
-    console.log("🔑 HF Key loaded?", process.env.NEXT_PUBLIC_HF_API_KEY ? "Yes" : "No");
     if (!content.trim()) {
       setError("Please write some content first so AI has context.");
       return;
@@ -104,30 +103,29 @@ export default function PostForm() {
 
     setAiLoading(true);
     setAiSuggestion("");
+
     try {
-      const res = await fetch("https://api-inference.huggingface.co/models/google/flan-t5-base", {
+      const res = await fetch("/api/ai-suggest", {
         method: "POST",
         headers: {
-          "Authorization": "Bearer " + process.env.NEXT_PUBLIC_HF_API_KEY, // add key in .env.local
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          inputs: `Improve and expand this blog draft: ${content}`,
-          parameters: { max_new_tokens: 120, temperature: 0.7 },
-        }),
+        body: JSON.stringify({ content }), // send only content
       });
 
       const data = await res.json();
-      if (data.error) throw new Error(data.error);
+      if (data.error) {
+        throw new Error(data.error);
+      }
 
-      setAiSuggestion(data[0]?.generated_text || "No suggestions found.");
+      setAiSuggestion(data.suggestion || "No suggestions found.");
     } catch (err) {
       console.error("❌ AI suggestion failed:", err);
       setAiSuggestion("AI couldn’t generate suggestions this time 🌱. Try again!");
+    } finally {
+      setAiLoading(false);
     }
-    setAiLoading(false);
   };
-
   // ✅ Insert suggestion into editor
   const handleInsertAISuggestion = () => {
     if (aiSuggestion) {
@@ -203,21 +201,27 @@ export default function PostForm() {
 
       {/* Cover Image */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">Cover Image (Optional)</label>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Cover Image (Optional)
+        </label>
         <input
           type="file"
           accept="image/*"
           onChange={handleImageChange}
           className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
         />
-        {previewUrl && <img src={previewUrl} alt="Preview" className="h-32 object-cover rounded mt-2" />}
+        {previewUrl && (
+          <img src={previewUrl} alt="Preview" className="h-32 object-cover rounded mt-2" />
+        )}
       </div>
 
       {/* Content */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">Content</label>
         <TipTapEditor onChange={setContent} initialContent={content} />
-        <p className="text-xs text-gray-500 mt-1">{wordCount} words • ~{readingTime} min read</p>
+        <p className="text-xs text-gray-500 mt-1">
+          {wordCount} words • ~{readingTime} min read
+        </p>
       </div>
 
       {/* AI Suggestions */}
@@ -268,7 +272,9 @@ export default function PostForm() {
       {showPreview && (
         <div className="mt-6 border-t pt-6">
           <h2 className="text-xl font-bold mb-2">{title || "Untitled Post"}</h2>
-          {previewUrl && <img src={previewUrl} alt="Preview" className="h-48 w-full object-cover rounded mb-4" />}
+          {previewUrl && (
+            <img src={previewUrl} alt="Preview" className="h-48 w-full object-cover rounded mb-4" />
+          )}
           <div className="prose max-w-none" dangerouslySetInnerHTML={{ __html: content }} />
         </div>
       )}
