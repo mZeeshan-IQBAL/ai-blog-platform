@@ -1,43 +1,59 @@
-// app/api/ai-suggest/route.js
+// src/app/api/ai-suggest/route.js
+import OpenAI from "openai";
+
+// Initialize OpenAI client with OpenRouter
+const openai = new OpenAI({
+  baseURL: "https://openrouter.ai/api/v1",
+  apiKey: process.env.OPENROUTER_API_KEY, // Store key in .env.local
+  defaultHeaders: {
+    "HTTP-Referer": "https://ai-blog-platform-theta.vercel.app/", // optional
+    "X-Title": "AI Blog Platform", // optional
+  },
+});
+
 export async function POST(req) {
   try {
-    const { content } = await req.json();
+    const { content, mode = "rewrite" } = await req.json();
 
     if (!content) {
       return new Response(JSON.stringify({ error: "Missing content" }), { status: 400 });
     }
 
-    const response = await fetch(
-      "https://api-inference.huggingface.co/models/facebook/bart-large-cnn",
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${process.env.HF_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          inputs: `Improve and expand this blog draft: ${content}`,
-          parameters: { max_length: 200 },
-        }),
-      }
-    );
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`HF API error: ${response.status} ${errorText}`);
+    // Build prompt dynamically
+    let prompt;
+    if (mode === "summarize") {
+      prompt = `Simplify and summarize the following blog post into easy-to-understand wording (3-6 sentences). 
+Make it clear and reader-friendly, avoiding complex vocabulary. 
+Return only the simplified summary:\n\n${content}`;
+    } else if (mode === "rewrite") {
+      prompt = `Rewrite the following blog draft in a polished, motivational style. 
+Keep the length close to the original. 
+Return only the rewritten text, without any introductions or extra notes:\n\n${content}`;
+    } else if (mode === "continue") {
+      prompt = `Continue writing the following blog draft in a natural and consistent way. 
+Return only the continuation text:\n\n${content}`;
+    } else {
+      return new Response(JSON.stringify({ error: "Invalid mode" }), { status: 400 });
     }
 
-    const data = await response.json();
+    // Call OpenRouter
+    const completion = await openai.chat.completions.create({
+      model: "deepseek/deepseek-chat-v3.1:free", // you can swap for gpt-4o, claude, etc.
+      messages: [{ role: "user", content: prompt }],
+    });
 
-    if (data.error) throw new Error(data.error);
+    const text = completion.choices[0]?.message?.content?.trim();
 
-    // use BART's response format
-    const suggestion = data[0]?.summary_text || "No suggestion generated 🤷";
-
-    return new Response(JSON.stringify({ suggestion }), { status: 200 });
+    return new Response(JSON.stringify({ suggestion: text }), { status: 200 });
   } catch (err) {
-    console.error("❌ API route error:", err.message);
-    return new Response(JSON.stringify({ error: err.message }), { status: 500 });
+    console.error("❌ OpenRouter API error:", err.message);
+    return new Response(
+      JSON.stringify({
+        error: err.message,
+        apiKeyExists: !!process.env.OPENROUTER_API_KEY,
+      }),
+      { status: 500 }
+    );
   }
 }
 

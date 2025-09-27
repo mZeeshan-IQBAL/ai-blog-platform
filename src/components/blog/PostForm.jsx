@@ -1,37 +1,45 @@
-// components/PostForm.jsx
+// PostForm.jsx
 "use client";
-import { useState } from "react";
+
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import TipTapEditor from "@/components/editor/TipTapEditor";
 
 export default function PostForm() {
   const router = useRouter();
+  const editorRef = useRef(null);
+
+  // Form state
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("General");
   const [tags, setTags] = useState([]);
   const [tagInput, setTagInput] = useState("");
   const [imageFile, setImageFile] = useState(null);
-  const [content, setContent] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
   const [previewUrl, setPreviewUrl] = useState("");
+  const [content, setContent] = useState("");
   const [showPreview, setShowPreview] = useState(false);
 
-  // AI State
+  // Status
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  // AI
   const [aiLoading, setAiLoading] = useState(false);
   const [aiSuggestion, setAiSuggestion] = useState("");
+  const [aiMode, setAiMode] = useState("");
 
+  // Helpers
   const wordCount = content?.split(/\s+/).filter(Boolean).length || 0;
   const readingTime = Math.ceil(wordCount / 200);
 
-  // ✅ Submit blog
+  // Submit blog
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
     setError("");
+    setLoading(true);
 
     if (!title.trim() || !content.trim()) {
-      setError("Title and content cannot be empty.");
+      setError("Title and content are required.");
       setLoading(false);
       return;
     }
@@ -44,29 +52,29 @@ export default function PostForm() {
       formData.append("tags", JSON.stringify(tags));
       if (imageFile) formData.append("image", imageFile);
 
-      const res = await fetch("/api/blogs", {
-        method: "POST",
-        body: formData,
-      });
-
+      const res = await fetch("/api/blogs", { method: "POST", body: formData });
       const data = await res.json();
+
       if (!res.ok) throw new Error(data.error || "Failed to create blog");
 
-      // Reset form
+      // Reset
       setTitle("");
-      setContent("");
+      setCategory("General");
+      setTags([]);
+      setTagInput("");
       setImageFile(null);
       setPreviewUrl("");
-      setTags([]);
+      setContent("");
       router.push("/blog");
     } catch (err) {
       console.error("❌ Blog creation failed:", err);
-      setError(err.message || "Network error. Please try again.");
+      setError(err.message || "Network error. Try again.");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
-  // ✅ Image handler
+  // Image upload
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (!file) {
@@ -79,59 +87,66 @@ export default function PostForm() {
       return;
     }
     setImageFile(file);
+
     const reader = new FileReader();
     reader.onloadend = () => setPreviewUrl(reader.result);
     reader.readAsDataURL(file);
   };
 
-  // ✅ Tags
+  // Tags
   const handleTagAdd = (e) => {
     if (e.key === "Enter" && tagInput.trim()) {
       e.preventDefault();
-      if (!tags.includes(tagInput.trim())) setTags([...tags, tagInput.trim()]);
+      if (!tags.includes(tagInput.trim())) {
+        setTags([...tags, tagInput.trim()]);
+      }
       setTagInput("");
     }
   };
   const handleTagRemove = (tag) => setTags(tags.filter((t) => t !== tag));
 
-  // ✅ AI suggestion
-  const handleAISuggestion = async () => {
+  // AI Suggestion
+  const handleAISuggestion = async (mode = "rewrite") => {
     if (!content.trim()) {
-      setError("Please write some content first so AI has context.");
+      setError("Write some content first.");
       return;
     }
-
     setAiLoading(true);
+    setAiMode(mode);
     setAiSuggestion("");
 
     try {
       const res = await fetch("/api/ai-suggest", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ content }), // send only content
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content, mode }),
       });
-
       const data = await res.json();
-      if (data.error) {
-        throw new Error(data.error);
-      }
+      if (data.error) throw new Error(data.error);
 
-      setAiSuggestion(data.suggestion || "No suggestions found.");
+      setAiSuggestion(data.suggestion || "AI returned no text.");
     } catch (err) {
-      console.error("❌ AI suggestion failed:", err);
-      setAiSuggestion("AI couldn’t generate suggestions this time 🌱. Try again!");
+      console.error("❌ AI failed:", err);
+      setAiSuggestion("AI could not generate text. Try again.");
     } finally {
       setAiLoading(false);
     }
   };
-  // ✅ Insert suggestion into editor
+
+  // Insert AI Suggestion
   const handleInsertAISuggestion = () => {
-    if (aiSuggestion) {
-      setContent((prev) => prev + "<p>" + aiSuggestion + "</p>");
-      setAiSuggestion(""); // Clear after insertion
+    if (!aiSuggestion) return;
+
+    if (aiMode === "continue") {
+      editorRef.current?.insertHTML(`<p>${aiSuggestion}</p>`); // append
+      setContent((prev) => prev + " " + aiSuggestion);
+    } else {
+      editorRef.current?.setContent(`<p>${aiSuggestion}</p>`); // replace
+      setContent(aiSuggestion);
     }
+
+    setAiSuggestion("");
+    setAiMode("");
   };
 
   return (
@@ -140,24 +155,24 @@ export default function PostForm() {
 
       {/* Title */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">Title</label>
+        <label className="block text-sm font-medium mb-1">Title</label>
         <input
           type="text"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="Enter blog title"
           required
-          className="w-full p-3 border rounded focus:ring focus:ring-blue-200"
+          className="w-full p-2 border rounded"
         />
       </div>
 
       {/* Category */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
+        <label className="block text-sm font-medium mb-1">Category</label>
         <select
           value={category}
           onChange={(e) => setCategory(e.target.value)}
-          className="w-full p-3 border rounded"
+          className="w-full p-2 border rounded"
         >
           <option>General</option>
           <option>Technology</option>
@@ -169,28 +184,28 @@ export default function PostForm() {
 
       {/* Tags */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Tags (press Enter to add)
+        <label className="block text-sm font-medium mb-1">
+          Tags (press Enter)
         </label>
         <input
           type="text"
           value={tagInput}
           onChange={(e) => setTagInput(e.target.value)}
           onKeyDown={handleTagAdd}
-          placeholder="Add a tag and press Enter"
-          className="w-full p-3 border rounded"
+          placeholder="Add a tag"
+          className="w-full p-2 border rounded"
         />
         <div className="flex flex-wrap gap-2 mt-2">
           {tags.map((tag) => (
             <span
               key={tag}
-              className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm flex items-center gap-2"
+              className="px-2 py-1 bg-gray-200 rounded text-sm flex items-center gap-1"
             >
               {tag}
               <button
                 type="button"
                 onClick={() => handleTagRemove(tag)}
-                className="text-xs text-red-500 hover:text-red-700"
+                className="text-xs text-red-500"
               >
                 ✕
               </button>
@@ -201,81 +216,108 @@ export default function PostForm() {
 
       {/* Cover Image */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Cover Image (Optional)
+        <label className="block text-sm font-medium mb-1">
+          Cover Image (optional)
         </label>
-        <input
-          type="file"
-          accept="image/*"
-          onChange={handleImageChange}
-          className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-        />
+        <input type="file" accept="image/*" onChange={handleImageChange} />
         {previewUrl && (
-          <img src={previewUrl} alt="Preview" className="h-32 object-cover rounded mt-2" />
+          <img src={previewUrl} alt="Preview" className="h-32 mt-2 rounded" />
         )}
       </div>
 
       {/* Content */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">Content</label>
-        <TipTapEditor onChange={setContent} initialContent={content} />
+        <label className="block text-sm font-medium mb-1">Content</label>
+        <TipTapEditor
+          ref={editorRef}
+          onChange={setContent}
+          initialContent={content}
+        />
         <p className="text-xs text-gray-500 mt-1">
           {wordCount} words • ~{readingTime} min read
         </p>
       </div>
 
-      {/* AI Suggestions */}
-      <div>
+      {/* AI Buttons */}
+      <div className="flex gap-3">
         <button
           type="button"
           disabled={aiLoading}
-          onClick={handleAISuggestion}
-          className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition disabled:opacity-50"
+          onClick={() => handleAISuggestion("rewrite")}
+          className="px-3 py-2 bg-purple-600 text-white rounded disabled:opacity-50"
         >
-          {aiLoading ? "Thinking 🤖..." : "Get AI Suggestion"}
+          {aiLoading && aiMode === "rewrite" ? "Thinking..." : "Rewrite"}
         </button>
-
-        {aiSuggestion && (
-          <div className="mt-4 p-4 bg-purple-50 border border-purple-200 rounded-lg">
-            <h3 className="font-semibold text-purple-800 mb-2">AI Suggestion:</h3>
-            <p className="text-gray-700 whitespace-pre-line mb-3">{aiSuggestion}</p>
-            <button
-              type="button"
-              onClick={handleInsertAISuggestion}
-              className="bg-green-600 text-white px-3 py-1 rounded-md hover:bg-green-700 transition"
-            >
-              Insert into Editor
-            </button>
-          </div>
-        )}
+        <button
+          type="button"
+          disabled={aiLoading}
+          onClick={() => handleAISuggestion("summarize")}
+          className="px-3 py-2 bg-green-600 text-white rounded disabled:opacity-50"
+        >
+          {aiLoading && aiMode === "summarize" ? "Thinking..." : "Summarize"}
+        </button>
+        <button
+          type="button"
+          disabled={aiLoading}
+          onClick={() => handleAISuggestion("continue")}
+          className="px-3 py-2 bg-blue-600 text-white rounded disabled:opacity-50"
+        >
+          {aiLoading && aiMode === "continue" ? "Thinking..." : "Continue"}
+        </button>
       </div>
 
+      {/* AI Suggestion Output */}
+      {aiSuggestion && (
+        <div className="mt-4 p-3 border rounded bg-gray-50">
+          <h3 className="font-semibold mb-2">
+            AI Suggestion ({aiMode})
+          </h3>
+          <p className="text-gray-700 whitespace-pre-line mb-3">{aiSuggestion}</p>
+          <button
+            type="button"
+            onClick={handleInsertAISuggestion}
+            className="px-3 py-1 bg-blue-600 text-white rounded"
+          >
+            Insert
+          </button>
+        </div>
+      )}
+
       {/* Actions */}
-      <div className="flex items-center gap-4">
+      <div className="flex gap-4">
         <button
           type="submit"
           disabled={loading}
-          className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
+          className="px-4 py-2 bg-blue-600 text-white rounded disabled:opacity-50"
         >
           {loading ? "Publishing..." : "Publish"}
         </button>
         <button
           type="button"
           onClick={() => setShowPreview(!showPreview)}
-          className="bg-gray-100 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-200 transition"
+          className="px-4 py-2 bg-gray-200 rounded"
         >
           {showPreview ? "Hide Preview" : "Live Preview"}
         </button>
       </div>
 
-      {/* Live Preview */}
+      {/* Preview */}
       {showPreview && (
-        <div className="mt-6 border-t pt-6">
-          <h2 className="text-xl font-bold mb-2">{title || "Untitled Post"}</h2>
+        <div className="mt-6 border-t pt-4">
+          <h2 className="text-lg font-bold mb-2">
+            {title || "Untitled Post"}
+          </h2>
           {previewUrl && (
-            <img src={previewUrl} alt="Preview" className="h-48 w-full object-cover rounded mb-4" />
+            <img
+              src={previewUrl}
+              alt="Preview"
+              className="h-48 w-full object-cover rounded mb-4"
+            />
           )}
-          <div className="prose max-w-none" dangerouslySetInnerHTML={{ __html: content }} />
+          <div
+            className="prose max-w-none"
+            dangerouslySetInnerHTML={{ __html: content }}
+          />
         </div>
       )}
     </form>
