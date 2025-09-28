@@ -44,9 +44,9 @@ export default function BlogCard({ blog }) {
   const readingTime = Math.ceil(wordCount / 200) || 1;
 
   return (
-    <article className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group border border-gray-100 flex flex-col">
+    <article className="bg-card text-card-foreground rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden group border border-border flex flex-col">
       {/* Cover Image */}
-      <div className="relative w-full aspect-video overflow-hidden bg-gray-100">
+      <div className="relative w-full aspect-video overflow-hidden bg-muted">
         <Image
           src={src}
           alt={blog.title || "Blog Cover"}
@@ -59,7 +59,7 @@ export default function BlogCard({ blog }) {
         />
         {/* Category Badge */}
         {blog.category && (
-          <span className="absolute top-3 left-3 bg-blue-600 text-white text-xs font-medium px-3 py-1 rounded-full shadow">
+          <span className="absolute top-3 left-3 bg-primary text-primary-foreground text-xs font-medium px-3 py-1 rounded-full shadow">
             {blog.category}
           </span>
         )}
@@ -73,7 +73,7 @@ export default function BlogCard({ blog }) {
             {blog.tags.slice(0, 3).map((tag, i) => (
               <span
                 key={i}
-                className="px-2 py-0.5 rounded-full bg-blue-50 text-blue-600 text-xs font-medium"
+                className="px-2 py-0.5 rounded-full bg-accent text-accent-foreground text-xs font-medium"
               >
                 #{tag}
               </span>
@@ -85,14 +85,14 @@ export default function BlogCard({ blog }) {
         <h3 className="text-xl font-bold mb-2 line-clamp-2 leading-snug">
           <Link
             href={href}
-            className="hover:text-blue-600 transition-colors"
+            className="hover:text-primary transition-colors"
           >
             {blog.title}
           </Link>
         </h3>
 
         {/* Excerpt */}
-        <p className="text-gray-600 mb-4 line-clamp-3 text-sm">
+        <p className="text-muted-foreground mb-4 line-clamp-3 text-sm">
           {excerpt}
         </p>
 
@@ -114,7 +114,7 @@ export default function BlogCard({ blog }) {
                   className="rounded-full object-cover"
                 />
               ) : (
-                <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-xs font-semibold text-gray-600">
+                <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-xs font-semibold text-muted-foreground">
                   {authorName.charAt(0)}
                 </div>
               )}
@@ -124,12 +124,12 @@ export default function BlogCard({ blog }) {
               {/* Author Name - Clickable */}
               <Link
                 href={`/profile/${authorId}`}
-                className="font-medium text-gray-800 text-sm hover:text-blue-600 transition-colors"
+                className="font-medium text-sm hover:text-primary transition-colors"
                 title="View Profile"
               >
                 {authorName}
               </Link>
-              <time className="text-xs text-gray-500">
+              <time className="text-xs text-muted-foreground">
                 {new Date(blog.createdAt).toLocaleDateString("en-US", {
                   year: "numeric",
                   month: "short",
@@ -145,20 +145,20 @@ export default function BlogCard({ blog }) {
         </div>
 
         {/* Footer */}
-        <div className="mt-auto flex justify-between items-center text-sm text-gray-600 border-t pt-3">
+        <div className="mt-auto flex justify-between items-center text-sm text-muted-foreground border-t border-border pt-3">
           <div className="flex items-center gap-3">
             <LikeButton
               postId={blog._id || blog.id}
               initialLikes={blog.likes?.length || blog.likes || 0}
               initiallyLiked={false}
             />
-            <span className="flex items-center gap-1 hover:text-blue-600 transition">
+            <span className="flex items-center gap-1 hover:text-foreground transition">
               💬 {blog.comments?.length || 0}
             </span>
           </div>
           <Link
             href={href}
-            className="text-blue-600 font-medium hover:underline text-sm"
+            className="text-primary font-medium hover:underline text-sm"
           >
             Read More →
           </Link>

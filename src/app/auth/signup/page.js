@@ -48,7 +48,7 @@ function SignUpContent() {
         <div className="mb-4">
           <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Auth", href: "/auth/signup" }, { label: "Sign Up" }]} />
         </div>
-        <h2 className="text-2xl font-bold mb-4">Create an Account</h2>
+        <h2 className="text-2xl font-bold mb-4">Join Our Writing Community</h2>
         {error && <p className="text-red-600 mb-4">{error}</p>}
         <form onSubmit={handleSignUp} className="space-y-4">
           <input
@@ -71,10 +71,11 @@ function SignUpContent() {
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            placeholder="Password"
+            placeholder="Password (min 6 characters)"
             className="w-full p-3 border rounded"
             required
           />
+          <div className="text-xs text-gray-500">By joining, you agree to our terms and become part of our storytelling community.</div>
           <button disabled={loading} className="bg-blue-600 text-white w-full py-3 rounded">
             {loading ? "Signing up..." : "Sign Up"}
           </button>

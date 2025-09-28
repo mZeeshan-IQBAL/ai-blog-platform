@@ -8,60 +8,60 @@ const testimonials = [
   {
     id: 1,
     name: "Sarah Chen",
-    role: "AI Researcher",
-    company: "Stanford University",
+    role: "Creative Writer",
+    company: "Independent Author",
     avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face",
-    text: "This platform has revolutionized how I collaborate with fellow researchers. The AI-powered insights have accelerated my research significantly.",
+    text: "BlogSphere has completely transformed my writing journey. The AI writing assistant helps me overcome writer's block, and the community feedback is incredibly valuable.",
     rating: 5,
     featured: true
   },
   {
     id: 2,
     name: "James Rodriguez",
-    role: "Senior Full-Stack Developer",
-    company: "TechCorp Inc.",
+    role: "Lifestyle Blogger",
+    company: "Travel & Food Blog",
     avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
-    text: "The community here is incredibly knowledgeable. I've learned cutting-edge techniques that I now use in production. Game-changer for my career!",
+    text: "The community here is incredibly supportive and engaged. I've found my voice as a writer and built an amazing readership. This platform changed my life!",
     rating: 5,
     featured: false
   },
   {
     id: 3,
     name: "Dr. Priya Patel",
-    role: "Lead Data Scientist",
-    company: "DataVision Labs",
+    role: "Science Communicator",
+    company: "Popular Science Writer",
     avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face",
-    text: "Found amazing collaborators for my AI projects here. The quality of discussions and shared resources is unmatched in the industry.",
+    text: "As a science writer, I've found an incredible community of readers who are genuinely interested in learning. The engagement and discussions are top-notch.",
     rating: 5,
     featured: true
   },
   {
     id: 4,
     name: "Michael Thompson",
-    role: "ML Engineer",
-    company: "Google DeepMind",
+    role: "Fiction Writer",
+    company: "Published Novelist",
     avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
-    text: "The depth of knowledge shared here is incredible. It's like having access to the world's best AI minds 24/7.",
+    text: "The quality of writing and storytelling on this platform is extraordinary. I've discovered so many talented writers and made genuine connections with readers.",
     rating: 5,
     featured: false
   },
   {
     id: 5,
     name: "Emily Watson",
-    role: "Product Manager",
-    company: "Microsoft AI",
+    role: "Book Reviewer",
+    company: "Literary Magazine Editor",
     avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop&crop=face",
-    text: "As a PM working with AI teams, this platform helps me stay current with the latest developments and make informed decisions.",
+    text: "As someone who reviews books professionally, I'm amazed by the caliber of content here. Many stories rival traditionally published works.",
     rating: 5,
     featured: false
   },
   {
     id: 6,
     name: "Alex Kim",
-    role: "Startup Founder",
-    company: "NeuralTech Solutions",
+    role: "Poetry Enthusiast",
+    company: "Amateur Poet",
     avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
-    text: "This community helped me validate my AI startup idea and connect with potential co-founders. Invaluable resource for entrepreneurs.",
+    text: "I started sharing my poetry here as a complete beginner. The supportive community and constructive feedback helped me grow into a confident writer.",
     rating: 5,
     featured: true
   }
@@ -117,7 +117,7 @@ const TestimonialCard = ({ testimonial, index }) => {
       <div className={`relative overflow-hidden rounded-2xl p-8 transition-shadow duration-300 ${
         testimonial.featured 
           ? 'bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-200 shadow-lg' 
-          : 'bg-white border border-gray-200 shadow-lg'
+          : 'bg-card border border-border shadow-lg'
       }`}>
         
         {/* Featured badge */}
@@ -139,7 +139,7 @@ const TestimonialCard = ({ testimonial, index }) => {
           <StarRating rating={testimonial.rating} />
 
           {/* Testimonial text */}
-          <blockquote className="text-gray-600 text-lg leading-relaxed mb-6 italic font-medium">
+          <blockquote className="text-muted-foreground text-lg leading-relaxed mb-6 italic font-medium">
             "{testimonial.text}"
           </blockquote>
 
@@ -149,22 +149,22 @@ const TestimonialCard = ({ testimonial, index }) => {
               <img
                 src={testimonial.avatar}
                 alt={testimonial.name}
-                className="w-14 h-14 rounded-full object-cover border-3 border-white shadow-md"
+                className="w-14 h-14 rounded-full object-cover border-2 border-background shadow-md"
                 onError={(e) => {
                   e.target.src = `https://ui-avatars.com/api/?name=${testimonial.name}&background=3b82f6&color=ffffff&size=150`;
                 }}
               />
-              <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-400 rounded-full border-2 border-white"></div>
+              <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-400 rounded-full border-2 border-background"></div>
             </div>
             
             <div className="text-left">
-              <h4 className="font-semibold text-gray-900 text-lg">
+              <h4 className="font-semibold text-lg">
                 {testimonial.name}
               </h4>
-              <p className="text-blue-600 font-medium text-sm">
+              <p className="text-primary font-medium text-sm">
                 {testimonial.role}
               </p>
-              <p className="text-gray-500 text-xs">
+              <p className="text-muted-foreground text-xs">
                 {testimonial.company}
               </p>
             </div>
@@ -211,9 +211,9 @@ const TestimonialCarousel = ({ testimonials }) => {
       <div className="flex justify-center items-center gap-4 mt-6">
         <button 
           onClick={prevSlide}
-          className="p-2 rounded-full bg-white shadow-lg hover:bg-gray-50 transition-colors"
+          className="p-2 rounded-full bg-card border border-border shadow-lg hover:bg-accent transition-colors"
         >
-          <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-5 h-5 text-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
         </button>
@@ -224,7 +224,7 @@ const TestimonialCarousel = ({ testimonials }) => {
               key={index}
               onClick={() => setCurrentIndex(index)}
               className={`w-2 h-2 rounded-full transition-colors ${
-                index === currentIndex ? 'bg-blue-500' : 'bg-gray-300'
+                index === currentIndex ? 'bg-primary' : 'bg-muted'
               }`}
             />
           ))}
@@ -232,9 +232,9 @@ const TestimonialCarousel = ({ testimonials }) => {
 
         <button 
           onClick={nextSlide}
-          className="p-2 rounded-full bg-white shadow-lg hover:bg-gray-50 transition-colors"
+          className="p-2 rounded-full bg-card border border-border shadow-lg hover:bg-accent transition-colors"
         >
-          <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-5 h-5 text-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
         </button>
@@ -245,24 +245,24 @@ const TestimonialCarousel = ({ testimonials }) => {
 
 export default function Testimonials() {
   return (
-    <section className="py-20 lg:py-28 bg-gray-50">
+    <section className="py-20 lg:py-28 bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section header */}
         <div className="text-center mb-16">
-          <div className="inline-flex items-center gap-2 bg-blue-100 text-blue-700 px-4 py-2 rounded-full text-sm font-semibold mb-4">
+          <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-semibold mb-4">
             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M18 13V5a2 2 0 00-2-2H4a2 2 0 00-2 2v8a2 2 0 002 2h3l3 3 3-3h3a2 2 0 002-2zM5 7a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1zm1 3a1 1 0 100 2h3a1 1 0 100-2H6z" clipRule="evenodd" />
             </svg>
             Testimonials
           </div>
           
-          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-6 leading-tight">
-            Trusted by Innovation Leaders
+          <h2 className="text-3xl sm:text-4xl font-bold mb-6 leading-tight">
+            Loved by Writers and Readers
           </h2>
           
-          <p className="text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
-            Join thousands of researchers, developers, and AI enthusiasts who are already 
-            transforming their careers with our platform.
+          <p className="text-lg text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+            Join thousands of storytellers, bloggers, and readers who are already 
+            sharing amazing content and building meaningful connections on our platform.
           </p>
         </div>
 
@@ -285,20 +285,20 @@ export default function Testimonials() {
         {/* Bottom stats */}
         <div className="mt-20 grid grid-cols-2 lg:grid-cols-4 gap-8 text-center">
           <div>
-            <div className="text-2xl font-bold text-gray-900 mb-2">4.9/5</div>
-            <div className="text-gray-600 text-sm">Average Rating</div>
+            <div className="text-2xl font-bold mb-2">4.9/5</div>
+            <div className="text-muted-foreground text-sm">Average Rating</div>
           </div>
           <div>
-            <div className="text-2xl font-bold text-gray-900 mb-2">10K+</div>
-            <div className="text-gray-600 text-sm">Happy Users</div>
+            <div className="text-2xl font-bold mb-2">10K+</div>
+            <div className="text-muted-foreground text-sm">Happy Writers</div>
           </div>
           <div>
-            <div className="text-2xl font-bold text-gray-900 mb-2">99%</div>
-            <div className="text-gray-600 text-sm">Satisfaction Rate</div>
+            <div className="text-2xl font-bold mb-2">99%</div>
+            <div className="text-muted-foreground text-sm">Satisfaction Rate</div>
           </div>
           <div>
-            <div className="text-2xl font-bold text-gray-900 mb-2">24/7</div>
-            <div className="text-gray-600 text-sm">Community Support</div>
+            <div className="text-2xl font-bold mb-2">24/7</div>
+            <div className="text-muted-foreground text-sm">Community Support</div>
           </div>
         </div>
       </div>

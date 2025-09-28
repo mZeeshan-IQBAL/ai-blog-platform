@@ -6,8 +6,8 @@ import Testimonials from "@/components/homepage/Testimonials";
 import Trending from "@/components/homepage/Trending";
 
 export const metadata = {
-  title: "AI Knowledge Hub | Share & Discover AI Insights",
-  description: "Community-driven platform powered by AI to share knowledge.",
+  title: "BlogSphere | Write, Read & Share Amazing Stories",
+  description: "Join thousands of writers and readers sharing stories, insights, and ideas. Discover compelling content and connect with a vibrant community of storytellers.",
 };
 
 export default function HomePage() {

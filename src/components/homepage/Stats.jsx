@@ -63,13 +63,13 @@ const StatCard = ({ stat, index, inView }) => {
   const suffix = stat.value.replace(/[^\D]/g, '');
 
   return (
-    <div className="text-center p-6 bg-white rounded-lg border border-gray-200 hover:shadow-md transition-shadow">
+    <div className="text-center p-6 bg-card rounded-lg border border-border hover:shadow-md transition-shadow">
       <div className="mb-4">
-        <h3 className="text-3xl sm:text-4xl font-bold text-gray-900">
+        <h3 className="text-3xl sm:text-4xl font-bold">
           {inView ? `${count.toLocaleString()}${suffix}` : '0'}
         </h3>
       </div>
-      <p className="text-gray-600 font-medium">
+      <p className="text-muted-foreground font-medium">
         {stat.label}
       </p>
     </div>
@@ -80,22 +80,22 @@ export default function Stats() {
   const [ref, inView] = useInView(0.3);
 
   const stats = [
-    { label: "Active Members", value: "25k+" },
-    { label: "Posts Published", value: "120k+" },
-    { label: "Monthly Visitors", value: "500k+" },
+    { label: "Active Writers", value: "25k+" },
+    { label: "Stories Published", value: "120k+" },
+    { label: "Monthly Readers", value: "500k+" },
     { label: "Countries Reached", value: "80+" },
   ];
 
   return (
-    <section className="py-16 bg-gray-50">
+    <section className="py-16 bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section header */}
         <div className="text-center mb-12">
-          <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">
-            Trusted by developers worldwide
+          <h2 className="text-2xl sm:text-3xl font-bold mb-4">
+            Trusted by storytellers worldwide
           </h2>
-          <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-            Join thousands of developers, researchers, and AI enthusiasts sharing knowledge and driving innovation.
+          <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
+            Join thousands of writers, readers, and storytellers sharing compelling content and building meaningful connections.
           </p>
         </div>
 

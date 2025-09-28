@@ -5,6 +5,7 @@ import GitHubProvider from "next-auth/providers/github";
 import { getServerSession } from "next-auth";
 import { connectToDB } from "@/lib/db";
 import User from "@/models/User";
+import bcrypt from "bcryptjs";
 
 export const authOptions = {
   providers: [
@@ -17,18 +18,38 @@ export const authOptions = {
       },
       async authorize(credentials) {
         await connectToDB();
-        const { email, name } = credentials;
+        const { email, name, password } = credentials || {};
+        if (!email || !password) {
+          throw new Error("Email and password are required.");
+        }
 
         let user = await User.findOne({ email });
+
+        // Sign up path: create a new credentials user
         if (!user) {
           if (!name) throw new Error("Name is required for signup.");
+          const passwordHash = await bcrypt.hash(password, 10);
           user = await User.create({
             email,
             name,
             role: "USER",
             provider: "credentials",
             providerId: email, // stable ID for credentials
+            passwordHash,
           });
+        } else {
+          // Existing user: if password is set, verify it. If not set, set it now.
+          if (user.passwordHash) {
+            const ok = await bcrypt.compare(password, user.passwordHash);
+            if (!ok) throw new Error("Invalid email or password.");
+          } else {
+            // Allow setting password for an existing credentials-less account
+            const passwordHash = await bcrypt.hash(password, 10);
+            user.passwordHash = passwordHash;
+            if (!user.provider) user.provider = "credentials";
+            if (!user.providerId) user.providerId = email;
+            await user.save();
+          }
         }
 
         return {

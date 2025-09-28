@@ -1,37 +1,17 @@
 // components/homepage/Hero.jsx
 'use client';
-import Link from "next/link";
 import { useSession } from "next-auth/react";
-
-// Simple button component
-const Button = ({ href, variant = 'primary', children, className = '', ...props }) => {
-  const baseClasses = "px-6 py-3 rounded-lg font-medium transition-colors focus:ring-2 focus:ring-offset-2 focus:outline-none";
-  
-  const variants = {
-    primary: "bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500",
-    secondary: "border border-gray-300 text-gray-700 hover:bg-gray-50 focus:ring-gray-500"
-  };
-
-  return (
-    <Link 
-      href={href} 
-      className={`${baseClasses} ${variants[variant]} ${className}`}
-      {...props}
-    >
-      {children}
-    </Link>
-  );
-};
+import { Button } from "@/components/ui/Button";
 
 // Loading skeleton
 const HeroSkeleton = () => (
   <section className="text-center py-20">
     <div className="animate-pulse space-y-4">
-      <div className="h-12 bg-gray-200 rounded w-3/4 mx-auto"></div>
-      <div className="h-6 bg-gray-200 rounded w-1/2 mx-auto"></div>
+      <div className="h-12 bg-muted rounded w-3/4 mx-auto"></div>
+      <div className="h-6 bg-muted rounded w-1/2 mx-auto"></div>
       <div className="flex justify-center gap-4 mt-6">
-        <div className="h-12 bg-gray-200 rounded w-32"></div>
-        <div className="h-12 bg-gray-200 rounded w-32"></div>
+        <div className="h-12 bg-muted rounded w-32"></div>
+        <div className="h-12 bg-muted rounded w-32"></div>
       </div>
     </div>
   </section>
@@ -48,48 +28,33 @@ export default function Hero() {
     <section className="text-center py-16 sm:py-20 lg:py-24 px-4">
       <div className="max-w-4xl mx-auto">
         {/* Main heading - clean and simple */}
-        <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 leading-tight mb-6">
-          Welcome to{" "}
-          <span className="text-blue-600">
-            AI Knowledge Hub
-          </span>
+        <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight mb-6">
+          Welcome to <span className="text-primary">BlogSphere</span>
         </h1>
         
         {/* Subtitle */}
-        <p className="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed mb-8">
-          Share, discover, and innovate with AI-powered insights. Join our community of developers and AI enthusiasts.
+        <p className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed mb-8">
+          Share your content with AI help and connect with readers all over the world. Discover great content, meet other writers, and be part of a friendly community.
         </p>
         
         {/* Action buttons */}
         <div className="flex flex-col sm:flex-row justify-center gap-4 mb-12">
           {status === "authenticated" ? (
             <>
-              <Button 
-                href="/dashboard" 
-                variant="primary"
-              >
+              <Button as="link" href="/dashboard" variant="default">
                 Go to Dashboard
               </Button>
-              <Button 
-                href="/blog" 
-                variant="secondary"
-              >
-                Browse Articles
+              <Button as="link" href="/blog" variant="secondary">
+                Discover Blogs
               </Button>
             </>
           ) : (
             <>
-              <Button 
-                href="/auth/signin" 
-                variant="primary"
-              >
-                Get Started
+              <Button as="link" href="/auth/signin" variant="default">
+                Start Writing
               </Button>
-              <Button 
-                href="/blog" 
-                variant="secondary"
-              >
-                Browse Articles
+              <Button as="link" href="/blog" variant="secondary">
+                Discover Stories
               </Button>
             </>
           )}
@@ -98,10 +63,8 @@ export default function Hero() {
         {/* Simple trust indicators */}
         {status !== "authenticated" && (
           <div className="text-center">
-            <p className="text-sm text-gray-500 mb-4">
-              Trusted by developers worldwide
-            </p>
-            <div className="flex justify-center items-center gap-8 text-sm text-gray-600">
+            <p className="text-sm text-muted-foreground mb-4">Trusted by writers and readers worldwide</p>
+            <div className="flex justify-center items-center gap-8 text-sm text-muted-foreground">
               <span className="flex items-center gap-2">
                 <svg className="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
@@ -112,13 +75,13 @@ export default function Hero() {
                 <svg className="w-4 h-4 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                AI-Powered
+                AI-Enhanced Writing
               </span>
               <span className="flex items-center gap-2">
                 <svg className="w-4 h-4 text-purple-500" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z" />
                 </svg>
-                Community Driven
+                Vibrant Community
               </span>
             </div>
           </div>

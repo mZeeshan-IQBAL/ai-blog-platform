@@ -17,51 +17,50 @@ export default function PricingCard({ plan, isPopular, isHighlighted }) {
   return (
     <div
       className={`
-        relative flex flex-col h-full bg-white rounded-lg border p-6
-        ${isPopular ? "border-blue-500 shadow-sm" : "border-gray-200"}
-        ${isHighlighted ? "bg-gray-50" : ""}
+        relative flex flex-col h-full bg-card text-card-foreground rounded-lg border border-border p-6
+        ${isPopular ? "border-primary shadow-sm" : ""}
+        ${isHighlighted ? "bg-accent" : ""}
         transition-shadow hover:shadow-md
       `}
     >
       {/* Popular Label */}
       {isPopular && (
         <div className="absolute -top-3 left-6">
-          <span className="bg-blue-500 text-white text-xs font-medium px-3 py-1 rounded">
+          <span className="bg-primary text-primary-foreground text-xs font-medium px-3 py-1 rounded">
             Popular
           </span>
         </div>
       )}
 
       {/* Plan Name */}
-      <h3 className="text-xl font-semibold text-gray-900 mb-2 mt-2">
+      <h3 className="text-xl font-semibold mb-2 mt-2">
         {plan.name}
       </h3>
       
       {/* Description */}
-      <p className="text-sm text-gray-600 mb-6">
+      <p className="text-sm text-muted-foreground mb-6">
         {plan.description}
       </p>
 
       {/* Price */}
       <div className="mb-6">
         <div className="flex items-baseline gap-1">
-          <span className="text-3xl font-bold text-gray-900">
+          <span className="text-3xl font-bold">
             {plan.price}
           </span>
           {plan.period && (
-            <span className="text-sm text-gray-500">{plan.period}</span>
+            <span className="text-sm text-muted-foreground">{plan.period}</span>
           )}
         </div>
-        {/* Remove "billed annually" - not applicable for one-time payments */}
         {plan.price !== "Custom" && plan.slug !== "free" && (
-          <p className="text-xs text-gray-500 mt-1">one-time payment for 30 days</p>
+          <p className="text-xs text-muted-foreground mt-1">one-time payment for 30 days</p>
         )}
       </div>
 
       {/* Features */}
       <ul className="space-y-2.5 mb-8 flex-1">
         {plan.features.map((feature, index) => (
-          <li key={index} className="flex items-start text-sm text-gray-700">
+          <li key={index} className="flex items-start text-sm">
             <svg
               className="w-4 h-4 text-green-500 mt-0.5 mr-2 flex-shrink-0"
               fill="none"
@@ -85,13 +84,13 @@ export default function PricingCard({ plan, isPopular, isHighlighted }) {
         href={getHref()}
         className={`
           block w-full text-center py-2.5 px-4 rounded-md font-medium
-          transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2
+          transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background
           ${
             plan.slug === "enterprise"
-              ? "bg-gray-900 text-white hover:bg-gray-800 focus:ring-gray-500"
+              ? "bg-foreground text-background hover:bg-foreground/90"
               : plan.slug === "free"
-              ? "bg-white text-gray-900 border border-gray-300 hover:bg-gray-50 focus:ring-gray-500"
-              : "bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500"
+              ? "border border-input bg-background text-foreground hover:bg-accent"
+              : "bg-primary text-primary-foreground hover:bg-primary/90"
           }
         `}
       >

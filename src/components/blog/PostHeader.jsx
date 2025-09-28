@@ -16,7 +16,7 @@ export default function PostHeader({ blog }) {
   return (
     <header className="mb-8">
       {/* Title */}
-      <h1 className="text-3xl md:text-4xl font-bold mb-4 text-gray-900 leading-tight">
+      <h1 className="text-3xl md:text-4xl font-bold mb-4 leading-tight">
         {blog.title}
       </h1>
 
@@ -35,7 +35,7 @@ export default function PostHeader({ blog }) {
       )}
 
       {/* Meta Info */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between text-gray-600 text-sm gap-4 mb-6">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between text-muted-foreground text-sm gap-4 mb-6">
         <div className="flex items-center gap-3">
           {/* Author Avatar - Clickable */}
           <Link 
@@ -48,10 +48,10 @@ export default function PostHeader({ blog }) {
                 alt={authorName}
                 width={40}
                 height={40}
-                className="rounded-full border-2 border-gray-200"
+                className="rounded-full border-2 border-background"
               />
             ) : (
-              <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-semibold">
+              <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-muted-foreground font-semibold">
                 {authorName.charAt(0).toUpperCase()}
               </div>
             )}
@@ -61,11 +61,11 @@ export default function PostHeader({ blog }) {
             {/* Author Name - Clickable */}
             <Link 
               href={`/profile/${authorId}`}
-              className="font-medium text-gray-900 hover:text-blue-600 transition-colors"
+              className="font-medium hover:text-primary transition-colors"
             >
               {authorName}
             </Link>
-            <p className="text-gray-500">
+            <p className="text-muted-foreground">
               {new Date(blog.createdAt).toLocaleDateString("en-US", {
                 year: "numeric",
                 month: "long",
@@ -89,7 +89,7 @@ export default function PostHeader({ blog }) {
             <Link
               key={idx}
               href={`/tags/${encodeURIComponent(tag)}`}
-              className="bg-blue-50 text-blue-600 px-3 py-1 rounded-full text-xs font-medium hover:bg-blue-100 transition-colors"
+              className="bg-accent text-accent-foreground px-3 py-1 rounded-full text-xs font-medium hover:bg-accent/80 transition-colors"
             >
               #{tag}
             </Link>
@@ -98,8 +98,8 @@ export default function PostHeader({ blog }) {
       )}
 
       {/* Social Share */}
-      <div className="flex items-center gap-4 py-3 px-4 bg-gray-50 rounded-lg">
-        <span className="text-sm font-medium text-gray-700">Share:</span>
+      <div className="flex items-center gap-4 py-3 px-4 bg-card border border-border rounded-lg">
+        <span className="text-sm font-medium">Share:</span>
         <div className="flex gap-3">
           <a
             href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(blog.title)}&url=${encodeURIComponent(
@@ -107,7 +107,7 @@ export default function PostHeader({ blog }) {
             )}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-gray-500 hover:text-blue-500 transition-colors p-2 rounded-full hover:bg-blue-50"
+            className="text-muted-foreground hover:text-primary transition-colors p-2 rounded-full hover:bg-accent"
             aria-label="Share on Twitter"
           >
             <FaTwitter size={16} />
@@ -118,7 +118,7 @@ export default function PostHeader({ blog }) {
             )}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-gray-500 hover:text-blue-600 transition-colors p-2 rounded-full hover:bg-blue-50"
+            className="text-muted-foreground hover:text-primary transition-colors p-2 rounded-full hover:bg-accent"
             aria-label="Share on Facebook"
           >
             <FaFacebookF size={16} />
@@ -129,7 +129,7 @@ export default function PostHeader({ blog }) {
             )}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-gray-500 hover:text-blue-700 transition-colors p-2 rounded-full hover:bg-blue-50"
+            className="text-muted-foreground hover:text-primary transition-colors p-2 rounded-full hover:bg-accent"
             aria-label="Share on LinkedIn"
           >
             <FaLinkedinIn size={16} />

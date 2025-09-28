@@ -52,7 +52,7 @@ function SignInContent() {
             { label: "Sign In" }
           ]} />
         </div>
-        <h2 className="text-2xl font-bold mb-4">Sign In to Your Account</h2>
+        <h2 className="text-2xl font-bold mb-4">Welcome Back, Storyteller</h2>
         {error && <p className="text-red-600 mb-4">{error}</p>}
         
         <form onSubmit={handleSignIn} className="space-y-4">
@@ -72,6 +72,10 @@ function SignInContent() {
             className="w-full p-3 border rounded"
             required
           />
+          <div className="flex items-center justify-between text-sm">
+            <a href="/auth/forgot" className="text-blue-600 hover:underline">Forgot password?</a>
+            <a href="/admin/login" className="text-gray-500 hover:underline">Admin login</a>
+          </div>
           <button 
             type="submit"
             disabled={loading} 
@@ -98,9 +102,9 @@ function SignInContent() {
 
         <div className="mt-4 text-center">
           <p className="text-sm text-gray-600">
-            Don&apos;t have an account?{' '}
+            New to our community?{' '}
             <a href="/auth/signup" className="text-blue-600 hover:underline">
-              Sign up here
+              Join thousands of writers
             </a>
           </p>
         </div>

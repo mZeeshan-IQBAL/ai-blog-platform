@@ -5,6 +5,9 @@ import { useSession } from "next-auth/react";
 import Pusher from "pusher-js";
 import Image from "next/image";
 
+import { Button } from "@/components/ui/Button";
+import { Textarea } from "@/components/ui/Textarea";
+
 export default function CommentSection({ postId }) {
   const { data: session } = useSession();
   const [comments, setComments] = useState([]);
@@ -86,35 +89,32 @@ export default function CommentSection({ postId }) {
 
       {session ? (
         <form onSubmit={handleSubmit} className="mb-6 space-y-2">
-          <textarea
+          <Textarea
             value={newComment}
             onChange={(e) => setNewComment(e.target.value)}
-            className="w-full p-3 border rounded-lg focus:ring focus:ring-blue-300"
             placeholder="Write a comment..."
             rows={3}
           />
-          <button
+          <Button
             disabled={!newComment.trim() || submitting}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 
-                       transition disabled:opacity-50"
           >
             {submitting ? "Posting..." : "Post"}
-          </button>
+          </Button>
         </form>
       ) : (
-        <p className="mb-4 text-gray-600">Sign in to comment.</p>
+        <p className="mb-4 text-muted-foreground">Sign in to comment.</p>
       )}
 
       <div className="space-y-4">
         {loading ? (
           <p>Loading comments...</p>
         ) : comments.length === 0 ? (
-          <p className="text-gray-500">No comments yet. Be the first!</p>
+          <p className="text-muted-foreground">No comments yet. Be the first!</p>
         ) : (
           comments.map((c) => (
             <div
               key={c._id}
-              className="flex gap-3 border rounded-lg p-3 bg-gray-50"
+              className="flex gap-3 border border-border rounded-lg p-3 bg-card"
             >
               {c.author?.image ? (
                 <Image
@@ -125,7 +125,7 @@ export default function CommentSection({ postId }) {
                   className="rounded-full object-cover"
                 />
               ) : (
-                <div className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center text-gray-600 text-sm">
+                <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-muted-foreground text-sm">
                   {c.author?.name?.charAt(0) || "?"}
                 </div>
               )}
@@ -133,11 +133,11 @@ export default function CommentSection({ postId }) {
                 <p className="font-semibold text-sm">
                   {c.author?.name || "Anonymous"}
                   {c.optimistic && (
-                    <span className="text-xs text-gray-400 ml-2">(sending…)</span>
+                    <span className="text-xs text-muted-foreground ml-2">(sending…)</span>
                   )}
                 </p>
-                <p className="text-gray-800 text-sm">{c.content}</p>
-                <div className="mt-1 text-xs text-gray-400">
+                <p className="text-sm">{c.content}</p>
+                <div className="mt-1 text-xs text-muted-foreground">
                   {new Date(c.createdAt).toLocaleDateString("en-US", {
                     year: "numeric",
                     month: "short",

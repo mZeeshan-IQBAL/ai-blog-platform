@@ -7,11 +7,11 @@ export default function FeatureSection({ title, subtitle, features }) {
     <div className="py-16">
       {/* Section Header */}
       <div className="text-center mb-12">
-        <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">
+        <h2 className="text-2xl sm:text-3xl font-bold mb-4">
           {title}
         </h2>
         {subtitle && (
-          <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+          <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
             {subtitle}
           </p>
         )}

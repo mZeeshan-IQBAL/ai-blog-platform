@@ -50,6 +50,9 @@ const PostSchema = new Schema(
     // 🔹 Publishing
     published: { type: Boolean, default: true },
     scheduledAt: { type: Date },
+    // 🔹 Soft delete
+    deletedAt: { type: Date, default: null },
+    deletedBy: { type: String, default: "" },
     comments: [{ type: Schema.Types.ObjectId, ref: "Comment" }],
 
     // 🔹 SEO fields

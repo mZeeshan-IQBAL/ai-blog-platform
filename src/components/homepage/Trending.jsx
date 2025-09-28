@@ -6,14 +6,14 @@ import { getTrending } from "@/lib/trending";
 
 // Loading skeleton for trending section
 const TrendingSkeleton = () => (
-  <section className="py-16 bg-gray-50">
+  <section className="py-16 bg-background">
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       {/* Header skeleton */}
       <div className="text-center mb-12">
         <div className="animate-pulse">
-          <div className="h-4 bg-gray-200 rounded-full w-24 mx-auto mb-4"></div>
-          <div className="h-8 bg-gray-200 rounded-lg w-64 mx-auto mb-4"></div>
-          <div className="h-5 bg-gray-200 rounded-lg w-96 mx-auto"></div>
+          <div className="h-4 bg-muted rounded-full w-24 mx-auto mb-4"></div>
+          <div className="h-8 bg-muted rounded-lg w-64 mx-auto mb-4"></div>
+          <div className="h-5 bg-muted rounded-lg w-96 mx-auto"></div>
         </div>
       </div>
 
@@ -21,12 +21,12 @@ const TrendingSkeleton = () => (
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
         {[...Array(6)].map((_, i) => (
           <div key={i} className="animate-pulse">
-            <div className="bg-white rounded-lg p-6 border border-gray-200">
-              <div className="h-40 bg-gray-200 rounded-lg mb-4"></div>
+            <div className="bg-card rounded-lg p-6 border border-border">
+              <div className="h-40 bg-muted rounded-lg mb-4"></div>
               <div className="space-y-3">
-                <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-                <div className="h-16 bg-gray-200 rounded"></div>
+                <div className="h-4 bg-muted rounded w-3/4"></div>
+                <div className="h-4 bg-muted rounded w-1/2"></div>
+                <div className="h-16 bg-muted rounded"></div>
               </div>
             </div>
           </div>
@@ -38,35 +38,35 @@ const TrendingSkeleton = () => (
 
 // Empty state component
 const EmptyTrending = () => (
-  <section className="py-16 bg-gray-50">
+  <section className="py-16 bg-background">
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-      <div className="bg-white rounded-xl p-8 lg:p-12 border border-gray-200">
-        <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
-          <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div className="bg-card rounded-xl p-8 lg:p-12 border border-border">
+        <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-6">
+          <svg className="w-8 h-8 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
         </div>
         
-        <h3 className="text-xl font-semibold text-gray-900 mb-4">
-          No trending content yet
+        <h3 className="text-xl font-semibold mb-4">
+          No trending stories yet
         </h3>
-        <p className="text-gray-600 mb-8 max-w-lg mx-auto">
-          We're still gathering data on what's trending. Check back soon to discover 
-          the most popular content in our community.
+        <p className="text-muted-foreground mb-8 max-w-lg mx-auto">
+          We're still gathering data on the most popular stories. Check back soon to discover 
+          what readers are loving right now.
         </p>
         
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Link
             href="/blog"
-            className="bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            className="bg-primary text-primary-foreground px-6 py-3 rounded-lg font-medium hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
           >
-            Browse All Posts
+            Browse All Stories
           </Link>
           <Link
             href="/blog/create"
-            className="border border-gray-300 text-gray-700 px-6 py-3 rounded-lg font-medium hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
+            className="border border-input text-foreground px-6 py-3 rounded-lg font-medium hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
           >
-            Create Content
+            Share Your Story
           </Link>
         </div>
       </div>
@@ -85,7 +85,7 @@ const TrendingBlogCard = ({ blog, index }) => {
         </span>
       </div>
       
-      <div className="bg-white rounded-lg border border-gray-200 hover:shadow-md transition-shadow">
+      <div className="bg-card rounded-lg border border-border hover:shadow-md transition-shadow">
         <BlogCard blog={blog} />
       </div>
     </div>
@@ -116,7 +116,7 @@ const TrendingContent = async ({ limit = 6 }) => {
     }));
 
     return (
-      <section className="py-16 bg-gray-50">
+      <section className="py-16 bg-background">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Section header */}
           <div className="text-center mb-12">
@@ -127,12 +127,12 @@ const TrendingContent = async ({ limit = 6 }) => {
               Trending Now
             </div>
             
-            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">
-              What's trending today
+            <h2 className="text-2xl sm:text-3xl font-bold mb-4">
+              Stories readers love
             </h2>
             
-            <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-              Discover the most popular and engaging content from our community.
+            <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
+              Discover the most captivating and engaging stories from our vibrant community of writers.
             </p>
           </div>
 
@@ -148,21 +148,21 @@ const TrendingContent = async ({ limit = 6 }) => {
           </div>
           {/* Simple stats */}
           <div className="mt-12 grid grid-cols-2 lg:grid-cols-4 gap-6 text-center">
-            <div className="bg-white p-6 rounded-lg border border-gray-200">
-              <div className="text-2xl font-bold text-gray-900 mb-1">24H</div>
-              <div className="text-sm text-gray-600">Update Frequency</div>
+            <div className="bg-card p-6 rounded-lg border border-border">
+              <div className="text-2xl font-bold mb-1">24H</div>
+              <div className="text-sm text-muted-foreground">Update Frequency</div>
             </div>
-            <div className="bg-white p-6 rounded-lg border border-gray-200">
-              <div className="text-2xl font-bold text-gray-900 mb-1">{blogs.length}+</div>
-              <div className="text-sm text-gray-600">Trending Posts</div>
+            <div className="bg-card p-6 rounded-lg border border-border">
+              <div className="text-2xl font-bold mb-1">{blogs.length}+</div>
+              <div className="text-sm text-muted-foreground">Trending Stories</div>
             </div>
-            <div className="bg-white p-6 rounded-lg border border-gray-200">
-              <div className="text-2xl font-bold text-gray-900 mb-1">Live</div>
-              <div className="text-sm text-gray-600">Real-time Data</div>
+            <div className="bg-card p-6 rounded-lg border border-border">
+              <div className="text-2xl font-bold mb-1">Live</div>
+              <div className="text-sm text-muted-foreground">Real-time Data</div>
             </div>
-            <div className="bg-white p-6 rounded-lg border border-gray-200">
-              <div className="text-2xl font-bold text-gray-900 mb-1">AI</div>
-              <div className="text-sm text-gray-600">Powered</div>
+            <div className="bg-card p-6 rounded-lg border border-border">
+              <div className="text-2xl font-bold mb-1">AI</div>
+              <div className="text-sm text-muted-foreground">Powered</div>
             </div>
           </div>
         </div>

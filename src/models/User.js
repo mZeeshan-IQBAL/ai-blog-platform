@@ -53,9 +53,16 @@ const UserSchema = new mongoose.Schema({
   image: { type: String },
   role: { type: String, enum: ["USER", "ADMIN"], default: "USER" },
 
+  // Credentials
+  passwordHash: { type: String },
+
   // Provider Fields
   provider: { type: String, required: true, default: "credentials" },
   providerId: { type: String, required: true },
+
+  // Password reset
+  passwordResetToken: { type: String },
+  passwordResetExpires: { type: Date },
 }, 
 {
   timestamps: true,

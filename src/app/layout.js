@@ -4,10 +4,13 @@ import Providers from "./providers";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { auth } from "@/lib/auth";
+import { Inter } from "next/font/google";
+
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
 export const metadata = {
-  title: "AI Knowledge Hub",
-  description: "AI-powered community knowledge sharing platform.",
+  title: "BlogSphere",
+  description: "Where great stories come to life. Write, read, and connect with storytellers worldwide.",
 };
 
 export default async function RootLayout({ children }) {
@@ -15,11 +18,10 @@ export default async function RootLayout({ children }) {
 
   return (
     <html lang="en">
-      <body className="bg-gray-50">
-        {/* ✅ NO PAYPAL SCRIPT - removed completely */}
+      <body className={`${inter.variable} bg-background text-foreground min-h-screen`}>
         <Providers session={session}>
           <Navbar />
-          {children}
+          <main className="min-h-[calc(100vh-64px)]">{children}</main>
           <Footer />
         </Providers>
       </body>

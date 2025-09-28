@@ -179,7 +179,7 @@ export default function PostContent({ content }) {
 
       {/* Main Content */}
       <div
-        className="prose-headings:text-gray-900 prose-p:text-gray-700 prose-a:text-blue-600 prose-strong:text-gray-900 prose-code:bg-gray-100 prose-code:px-1 prose-code:rounded prose-pre:bg-gray-900 prose-pre:text-gray-100 prose-blockquote:border-l-4 prose-blockquote:border-blue-500 prose-blockquote:pl-4 prose-blockquote:italic prose-ul:list-disc prose-ol:list-decimal prose-li:my-1"
+        className="prose prose-slate max-w-none prose-a:text-primary hover:prose-a:underline prose-code:bg-muted prose-pre:bg-muted"
         dangerouslySetInnerHTML={{ __html: content }}
       />
     </article>

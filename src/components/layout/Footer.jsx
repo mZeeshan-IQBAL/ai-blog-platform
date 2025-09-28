@@ -2,6 +2,8 @@
 'use client';
 import { useState } from 'react';
 import Link from 'next/link';
+import { Input } from "@/components/ui/Input";
+import { Button } from "@/components/ui/Button";
 
 // Newsletter subscription component
 const NewsletterSignup = () => {
@@ -22,34 +24,28 @@ const NewsletterSignup = () => {
   };
 
   return (
-    <div className="bg-gray-800 p-6 rounded-xl">
-      <h3 className="text-lg font-semibold text-white mb-2">
-        Stay in the loop
-      </h3>
-      <p className="text-gray-400 text-sm mb-4">
-        Get the latest AI insights delivered to your inbox.
+    <div className="p-6 rounded-lg border border-gray-600 bg-gray-800">
+      <h3 className="text-lg font-semibold mb-2 text-white">Stay inspired</h3>
+      <p className="text-sm text-gray-300 mb-4">
+        Get the best stories and writing tips delivered to your inbox.
       </p>
       
       <form onSubmit={handleSubmit} className="flex gap-2">
-        <input
+        <Input
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="Enter your email"
-          className="flex-1 px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           required
+          className="flex-1"
         />
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="bg-blue-600 text-white px-6 py-2 rounded-lg font-medium text-sm hover:bg-blue-700 transition-colors disabled:opacity-50"
-        >
+        <Button type="submit" disabled={isSubmitting} size="md">
           {isSubmitting ? '...' : 'Subscribe'}
-        </button>
+        </Button>
       </form>
       
       {message && (
-        <p className="mt-3 text-green-400 text-sm">{message}</p>
+        <p className="mt-3 text-green-600 text-sm">{message}</p>
       )}
     </div>
   );
@@ -104,7 +100,7 @@ const SocialLinks = () => {
           href={social.href}
           target="_blank"
           rel="noopener noreferrer"
-          className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center text-gray-400 hover:text-white hover:bg-gray-700 transition-colors"
+          className="w-10 h-10 rounded-md border border-gray-600 flex items-center justify-center text-gray-300 hover:text-white hover:bg-gray-700 transition-colors"
           aria-label={social.name}
         >
           {social.icon}
@@ -131,7 +127,7 @@ export default function Footer() {
       title: 'Company',
       links: [
         { name: 'About', href: '/about' },
-        { name: 'Blog', href: '/blog' },
+        { name: 'Stories', href: '/blog' },
         { name: 'Careers', href: '/careers' },
         { name: 'Contact', href: '/contact' }
       ]
@@ -157,25 +153,25 @@ export default function Footer() {
   ];
 
   return (
-    <footer className="bg-gray-900 text-gray-300 mt-auto">
+    <footer className="bg-gray-900 text-white mt-auto border-t border-gray-700">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
         {/* Top section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-12">
           {/* Brand section */}
           <div>
             <Link href="/" className="inline-flex items-center gap-2 mb-6">
-              <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
-                <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+              <div className="w-10 h-10 bg-blue-600 rounded-md flex items-center justify-center text-white">
+                <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
                 </svg>
               </div>
               <span className="text-xl font-bold text-white">
-                AI Knowledge Hub
+                BlogSphere
               </span>
             </Link>
 
-            <p className="text-gray-400 mb-6 max-w-md">
-              Empowering developers and researchers to share knowledge and shape the future of AI.
+            <p className="text-gray-300 mb-6 max-w-md">
+              Empowering writers and readers to share amazing stories and connect through the power of storytelling.
             </p>
 
             <SocialLinks />
@@ -188,10 +184,10 @@ export default function Footer() {
         </div>
 
         {/* Links section */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 pb-8 border-b border-gray-800">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 pb-8 border-b border-gray-700">
           {footerSections.map((section) => (
             <div key={section.title}>
-              <h3 className="text-sm font-semibold text-white uppercase tracking-wider mb-4">
+              <h3 className="text-sm font-semibold uppercase tracking-wider mb-4 text-white">
                 {section.title}
               </h3>
               <ul className="space-y-3">
@@ -199,7 +195,7 @@ export default function Footer() {
                   <li key={link.name}>
                     <Link 
                       href={link.href}
-                      className="text-sm text-gray-400 hover:text-white transition-colors"
+                      className="text-sm text-gray-300 hover:text-white transition-colors"
                     >
                       {link.name}
                     </Link>
@@ -213,18 +209,18 @@ export default function Footer() {
         {/* Bottom section */}
         <div className="pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="text-sm text-gray-400">
-            © {currentYear} AI Knowledge Hub. All rights reserved.
+            © {currentYear} BlogSphere. All rights reserved.
           </div>
           
-                    <div className="flex items-center gap-6 text-sm text-gray-400">
+          <div className="flex items-center gap-6 text-sm text-gray-400">
             <span className="flex items-center gap-2">
-              <svg className="w-4 h-4 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+              <svg className="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
               </svg>
               SOC2 Compliant
             </span>
             <span className="flex items-center gap-2">
-              <svg className="w-4 h-4 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+              <svg className="w-4 h-4 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
               </svg>
               GDPR Ready

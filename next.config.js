@@ -1,4 +1,6 @@
 /** @type {import('next').NextConfig} */
+const path = require('path');
+
 const nextConfig = {
   images: {
     remotePatterns: [
@@ -25,8 +27,10 @@ const nextConfig = {
 
   // Alias for `@` → src/
   webpack: (config) => {
+    config.resolve = config.resolve || {};
     config.resolve.alias = {
-      '@': require('path').resolve(__dirname, 'src'),
+      ...(config.resolve.alias || {}),
+      '@': path.resolve(__dirname, 'src'),
     };
     return config;
   },

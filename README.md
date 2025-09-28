@@ -1,7 +1,7 @@
-# 🚀 AI Knowledge Hub Blog Platform
+# 🚀 BlogSphere - Storytelling Platform
 
-A **full-stack AI-powered blogging platform** built with **Next.js 13 (App Router)**, **MongoDB**, **NextAuth.js**, and **TailwindCSS**.  
-Includes rich text editing, real-time comments & likes with **Pusher**, file uploads with **Cloudinary**, AI-powered summaries & tags, and analytics dashboard with **Chart.js**.
+A **full-stack AI-enhanced storytelling platform** built with **Next.js 13 (App Router)**, **MongoDB**, **NextAuth.js**, and **TailwindCSS**.  
+Includes rich text editing, real-time engagement with **Pusher**, file uploads with **Cloudinary**, AI writing assistance, and comprehensive analytics dashboard.
 
 ---
 
@@ -13,11 +13,11 @@ Includes rich text editing, real-time comments & likes with **Pusher**, file upl
   - GitHub OAuth
   - Email Magic Links (Resend)
 
-- 📝 **Blog System**
-  - Create/Post articles with **TipTap rich editor**
-  - Markdown rendering
-  - Cover image (via Cloudinary)
-  - Categories/tags (AI suggested)
+- 📝 **Story Publishing**
+  - Create/Post stories with **TipTap rich editor**
+  - Beautiful typography and formatting
+  - Cover images (via Cloudinary)
+  - Smart categorization and tagging
 
 - 💬 **Realtime Engagement**
   - Likes 👍
@@ -30,8 +30,9 @@ Includes rich text editing, real-time comments & likes with **Pusher**, file upl
   - Total posts, users, comments
   - Chart visualization (React-ChartJS-2)
 
-- 🔍 **Search**
-  - Full-text search powered by **MongoDB Atlas Search**
+- 🔍 **Story Discovery**
+  - Smart content search powered by **MongoDB Atlas Search**
+  - Genre and author filtering
 
 - ⚡ **Optimized**
   - Server-side rendering

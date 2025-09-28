@@ -16,7 +16,10 @@ export async function getAllTags() {
   if (cached) return JSON.parse(cached);
 
   await connectToDB();
-  const tags = await Post.distinct("tags", { published: true });
+  const tags = await Post.distinct("tags", { 
+    published: true,
+    $or: [{ deletedAt: null }, { deletedAt: { $exists: false } }]
+  });
   const clean = (tags || []).filter(Boolean).sort();
   await cacheSet(key, JSON.stringify(clean), 300);
   return clean;
@@ -42,6 +45,7 @@ export async function getAllBlogs() {
     const posts = await Post.find({
       published: true,
       $or: [{ scheduledAt: null }, { scheduledAt: { $lte: now } }],
+      $and: [{ $or: [{ deletedAt: null }, { deletedAt: { $exists: false } }] }]
     })
       .sort({ createdAt: -1 })
       .lean();
@@ -95,6 +99,7 @@ export async function getBlog(idOrSlug) {
 
     const post = await Post.findOne(query).lean();
     if (!post) return null;
+    if (post.deletedAt) return null;
 
     const words = String(post.content || "").trim().split(/\s+/).length;
     const readTimeMins = Math.max(1, Math.ceil(words / 200));
@@ -142,6 +147,7 @@ export async function getPostsByTag(tag) {
       published: true,
       $or: [{ scheduledAt: null }, { scheduledAt: { $lte: now } }],
       tags: tag,
+      $and: [{ $or: [{ deletedAt: null }, { deletedAt: { $exists: false } }] }]
     })
       .sort({ createdAt: -1 })
       .lean();
