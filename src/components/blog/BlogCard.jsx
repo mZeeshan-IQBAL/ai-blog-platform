@@ -22,6 +22,9 @@ function stripHtmlTags(html) {
 }
 
 export default function BlogCard({ blog }) {
+  if (!blog) {
+    return null;
+  }
   const src = blog.coverImage || "/images/placeholder.jpg";
   const href = `/blog/${blog.slug || blog._id}`;
 

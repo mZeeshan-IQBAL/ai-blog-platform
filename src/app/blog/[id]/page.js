@@ -34,6 +34,15 @@ export default async function BlogPostPage({ params }) {
   // ✅ Track views in MongoDB
   await incrementViews(blog.id);
 
+  // Related posts (best-effort)
+  let related = [];
+  try {
+    const { getRelatedPosts } = await import("@/lib/api");
+    related = await getRelatedPosts(id, 6);
+  } catch (e) {
+    related = [];
+  }
+
   return (
     <div className="max-w-4xl mx-auto py-12 px-6">
       <div className="mb-6 flex items-center justify-between gap-3">
@@ -88,6 +97,20 @@ export default async function BlogPostPage({ params }) {
 
       {/* Comments Section */}
       <CommentSection postId={blog.id} />
+
+      {related?.length ? (
+        <div className="mt-12">
+          <h3 className="text-xl font-semibold mb-4">Related posts</h3>
+          <div className="grid gap-6 sm:grid-cols-2">
+            {related.map((p) => (
+              <div key={p.id} className="border rounded p-4">
+                <a href={`/blog/${p.slug}`} className="font-medium hover:underline">{p.title}</a>
+                <p className="text-sm text-gray-600 mt-1">{p.excerpt}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

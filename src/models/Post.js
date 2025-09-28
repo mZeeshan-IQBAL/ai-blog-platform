@@ -26,12 +26,15 @@ const PostSchema = new Schema(
     content: { type: String, required: true },
     summary: { type: String, default: "" },
 
+    // 🔹 Editor & publishing status
+    status: { type: String, enum: ["draft", "published", "archived"], default: "published", index: true },
+
     // 🔹 Engagement
     tags: [{ type: String, lowercase: true, trim: true }],
     category: { type: String, trim: true, default: "General" },
 
     // 🔹 Author info (snapshot for UI speed)
-    authorId: { type: String, required: true }, // OAuth/Google ID
+    authorId: { type: String, required: true }, // internal user id string
     authorName: { type: String, required: true },
     authorImage: { type: String, default: "" },
 
@@ -48,7 +51,7 @@ const PostSchema = new Schema(
     shares: { type: Number, default: 0 },
 
     // 🔹 Publishing
-    published: { type: Boolean, default: true },
+    published: { type: Boolean, default: true }, // kept for backward compatibility
     scheduledAt: { type: Date },
     // 🔹 Soft delete
     deletedAt: { type: Date, default: null },
@@ -87,6 +90,23 @@ PostSchema.pre("save", async function (next) {
     candidate = `${base}-${i++}`;
   }
   this.slug = candidate;
+  next();
+});
+
+// Keep published boolean consistent with status/schedule
+PostSchema.pre("save", function (next) {
+  const now = new Date();
+  if (this.status === "draft" || this.status === "archived") {
+    this.published = false;
+  } else if (this.status === "published") {
+    // If scheduled in the future, mark unpublished until due
+    if (this.scheduledAt && new Date(this.scheduledAt) > now) {
+      this.published = false;
+    } else {
+      this.published = true;
+    }
+  }
+  this.updatedAt = now;
   next();
 });
 

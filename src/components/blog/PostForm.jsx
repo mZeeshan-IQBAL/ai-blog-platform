@@ -283,8 +283,47 @@ export default function PostForm() {
         </div>
       )}
 
+      {/* Scheduling */}
+      <div className="grid sm:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium mb-1">Schedule publish (optional)</label>
+          <input type="datetime-local" className="w-full p-2 border rounded" onChange={(e) => (window.__scheduledAt = e.target.value)} />
+          <p className="text-xs text-gray-500 mt-1">If set in the future, the post will publish automatically at that time.</p>
+        </div>
+      </div>
+
       {/* Actions */}
       <div className="flex gap-4">
+        <button
+          type="button"
+          disabled={loading}
+          onClick={async () => {
+            setError("");
+            setLoading(true);
+            try {
+              const formData = new FormData();
+              formData.append("title", title);
+              formData.append("content", content);
+              formData.append("category", category);
+              formData.append("tags", JSON.stringify(tags));
+              if (imageFile) formData.append("image", imageFile);
+              formData.append("status", "draft");
+              const res = await fetch("/api/blogs", { method: "POST", body: formData });
+              const data = await res.json();
+              if (!res.ok) throw new Error(data.error || "Failed to save draft");
+              setTitle(""); setCategory("General"); setTags([]); setTagInput(""); setImageFile(null); setPreviewUrl(""); setContent("");
+              router.push(`/blog/${data.slug}`);
+            } catch (err) {
+              setError(err.message || "Failed to save draft");
+            } finally {
+              setLoading(false);
+            }
+          }}
+          className="px-4 py-2 bg-gray-600 text-white rounded disabled:opacity-50"
+        >
+          {loading ? "Saving..." : "Save Draft"}
+        </button>
+
         <button
           type="submit"
           disabled={loading}
@@ -292,6 +331,38 @@ export default function PostForm() {
         >
           {loading ? "Publishing..." : "Publish"}
         </button>
+
+        <button
+          type="button"
+          disabled={loading}
+          onClick={async () => {
+            setError("");
+            setLoading(true);
+            try {
+              const formData = new FormData();
+              formData.append("title", title);
+              formData.append("content", content);
+              formData.append("category", category);
+              formData.append("tags", JSON.stringify(tags));
+              if (imageFile) formData.append("image", imageFile);
+              if (window.__scheduledAt) formData.append("scheduledAt", window.__scheduledAt);
+              formData.append("status", "published");
+              const res = await fetch("/api/blogs", { method: "POST", body: formData });
+              const data = await res.json();
+              if (!res.ok) throw new Error(data.error || "Failed to schedule post");
+              setTitle(""); setCategory("General"); setTags([]); setTagInput(""); setImageFile(null); setPreviewUrl(""); setContent("");
+              router.push(`/blog/${data.slug}`);
+            } catch (err) {
+              setError(err.message || "Failed to schedule post");
+            } finally {
+              setLoading(false);
+            }
+          }}
+          className="px-4 py-2 bg-indigo-600 text-white rounded disabled:opacity-50"
+        >
+          {loading ? "Scheduling..." : "Schedule"}
+        </button>
+
         <button
           type="button"
           onClick={() => setShowPreview(!showPreview)}

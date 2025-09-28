@@ -4,6 +4,7 @@ import Features from "@/components/homepage/Features";
 import Stats from "@/components/homepage/Stats";
 import Testimonials from "@/components/homepage/Testimonials";
 import Trending from "@/components/homepage/Trending";
+import ForYou from "@/components/homepage/ForYou";
 
 export const metadata = {
   title: "BlogSphere | Write, Read & Share Amazing Stories",
@@ -15,6 +16,9 @@ export default function HomePage() {
     <main className="pt-16">
       <Hero />
       <Features />
+      {/* Personalized feed for signed-in users (falls back silently) */}
+      {/* @ts-expect-error Async Server Component */}
+      <ForYou />
       <Stats />
       <Testimonials />
       <Trending />

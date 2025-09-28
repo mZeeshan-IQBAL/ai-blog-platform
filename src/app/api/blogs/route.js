@@ -2,15 +2,18 @@
 export const dynamic = "force-dynamic";
 import { connectToDB } from "@/lib/db";
 import Post from "@/models/Post";
+import PostVersion from "@/models/PostVersion";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { uploadImage } from "@/lib/cloudinary";
+import { cacheDel } from "@/lib/redis";
+import { revalidatePath } from "next/cache";
 
 // ✅ Use nodejs runtime because we're using mongoose/DB
 export const runtime = "nodejs";
 
 /**
- * Handles POST request to create a new blog
+ * Handles POST request to create a new blog (supports drafts and scheduling)
  */
 export async function POST(req) {
   await connectToDB();
@@ -31,6 +34,9 @@ export async function POST(req) {
     const category = formData.get("category") || "General";
     const tags = formData.get("tags") ? JSON.parse(formData.get("tags")) : [];
     const file = formData.get("image");
+    const status = (formData.get("status") || "published").toString();
+    const scheduledAtRaw = formData.get("scheduledAt");
+    const scheduledAt = scheduledAtRaw ? new Date(scheduledAtRaw.toString()) : null;
 
     if (!title || !content) {
       return new Response(
@@ -57,10 +63,28 @@ export async function POST(req) {
       authorId: session.user.id,
       authorName: session.user.name,
       authorImage: session.user.image || "",
-      published: true,
+      status: status === "draft" ? "draft" : "published",
+      scheduledAt: scheduledAt || null,
     });
 
     await newPost.save();
+
+    // Create initial version
+    await PostVersion.create({
+      postId: newPost._id,
+      version: 1,
+      title: newPost.title,
+      content: newPost.content,
+      summary: newPost.summary || "",
+      tags: newPost.tags || [],
+      category: newPost.category || "General",
+      coverImage: newPost.coverImage || "",
+      authorId: newPost.authorId,
+    });
+
+    await cacheDel("posts:all");
+    await cacheDel(`post:${newPost.slug}`);
+    revalidatePath("/blog");
 
     return new Response(JSON.stringify(newPost), {
       status: 201,

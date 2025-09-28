@@ -7,6 +7,12 @@ function isObjectIdLike(val) {
   return /^[a-f\d]{24}$/i.test(String(val));
 }
 
+function stripHtml(input) {
+  if (!input) return "";
+  // Remove HTML tags and collapse whitespace
+  return String(input).replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim();
+}
+
 /**
  * Get all unique tags (cached)
  */
@@ -26,9 +32,10 @@ export async function getAllTags() {
 }
 
 function toSummary(content, summary) {
-  if (summary) return summary;
-  if (!content) return "";
-  return content.slice(0, 150) + (content.length > 150 ? "..." : "");
+  const s = stripHtml(summary || "");
+  if (s) return s.length > 150 ? s.slice(0, 150) + "..." : s;
+  const c = stripHtml(content || "");
+  return c.slice(0, 150) + (c.length > 150 ? "..." : "");
 }
 
 /**
@@ -129,6 +136,51 @@ export async function getBlog(idOrSlug) {
   } catch (error) {
     console.error("❌ Failed to fetch blog:", error);
     return null;
+  }
+}
+
+/**
+ * Get related posts based on shared tags/category (excludes the current post)
+ */
+export async function getRelatedPosts(idOrSlug, limit = 6) {
+  try {
+    await connectToDB();
+    const query = isObjectIdLike(idOrSlug) ? { _id: idOrSlug } : { slug: idOrSlug };
+    const base = await Post.findOne(query).lean();
+    if (!base) return [];
+
+    const now = new Date();
+    const related = await Post.find({
+      _id: { $ne: base._id },
+      published: true,
+      $or: [{ scheduledAt: null }, { scheduledAt: { $lte: now } }],
+      $and: [{ $or: [{ deletedAt: null }, { deletedAt: { $exists: false } }] }],
+      $or: [
+        { tags: { $in: base.tags || [] } },
+        { category: base.category || "General" },
+      ],
+    })
+      .sort({ createdAt: -1 })
+      .limit(limit)
+      .lean();
+
+    return related.map((post) => ({
+      id: post._id.toString(),
+      slug: post.slug,
+      title: post.title,
+      excerpt: toSummary(post.content, post.summary),
+      author: {
+        id: post.authorId,
+        name: post.authorName || "Anonymous",
+        image: post.authorImage || "/images/placeholder.jpg",
+      },
+      tags: post.tags || [],
+      createdAt: post.createdAt,
+      coverImage: post.coverImage || "/images/placeholder.jpg",
+    }));
+  } catch (e) {
+    console.error("❌ getRelatedPosts failed:", e);
+    return [];
   }
 }
 

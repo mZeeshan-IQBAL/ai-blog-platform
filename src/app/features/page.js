@@ -133,7 +133,7 @@ export default function FeaturesPage() {
               </div>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">1. Start Writing</h3>
               <p className="text-gray-600">
-                Open our beautiful editor and start crafting your story - whether it's fiction, personal essays, poetry, or any creative writing that speaks to you.
+                Open our beautiful editor and start crafting your story - whether it&apos;s fiction, personal essays, poetry, or any creative writing that speaks to you.
               </p>
             </div>
 
@@ -143,7 +143,7 @@ export default function FeaturesPage() {
               </div>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">2. Get AI Guidance</h3>
               <p className="text-gray-600">
-                Our AI provides helpful suggestions for better phrasing, story structure, creative prompts, and helps you overcome writer's block when inspiration runs low.
+                Our AI provides helpful suggestions for better phrasing, story structure, creative prompts, and helps you overcome writer&apos;s block when inspiration runs low.
               </p>
             </div>
 
