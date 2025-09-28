@@ -30,6 +30,19 @@ export async function GET(request) {
 }
 
 export async function POST(request) {
+  // Blocked users cannot react
+  try {
+    const { getServerSession } = await import('next-auth');
+    const { authOptions } = await import('@/lib/auth');
+    const { connectToDB } = await import('@/lib/db');
+    const User = (await import('@/models/User')).default;
+    const session = await getServerSession(authOptions);
+    if (session?.user?.providerId) {
+      await connectToDB();
+      const u = await User.findOne({ providerId: session.user.providerId });
+      if (u?.blocked) return Response.json({ error: 'User is blocked' }, { status: 403 });
+    }
+  } catch (_) {}
   const session = await getServerSession(authOptions);
   if (!session) return Response.json({ error: "Unauthorized" }, { status: 401 });
   const { targetType, targetId, reaction } = await request.json();

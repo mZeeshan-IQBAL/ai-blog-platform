@@ -80,15 +80,35 @@ export async function POST(request) {
   }
 
 
+  // Content rules: banned words + link limits (basic)
+  try {
+    const { validatePost } = await import("@/lib/contentRules");
+    const check = validatePost({ title, content, summary: formData.get("summary") || "" }, { maxLinks: 10 });
+    if (!check.ok) {
+      return new Response(
+        JSON.stringify({ error: "Post violates content rules", reasons: check.reasons }),
+        { status: 422, headers: { "Content-Type": "application/json" } }
+      );
+    }
+  } catch (_) {}
+
   // 💾 Save to database
   try {
+    const tags = (formData.get("tags") || "").toString().split(",").map((t) => t.trim()).filter(Boolean);
+    const summary = formData.get("summary") || "";
+    const published = formData.get("published") === "true";
+    const scheduledAtRaw = formData.get("scheduledAt");
+    const scheduledAt = scheduledAtRaw ? new Date(scheduledAtRaw) : null;
+
     const post = new Post({
       title,
       content,
       summary,
       tags,
       coverImage: coverImageUrl,
-      author: session.user.id,
+      authorId: session.user.id,
+      authorName: session.user.name,
+      authorImage: session.user.image,
       published: published && (!scheduledAt || scheduledAt <= new Date()),
       scheduledAt: scheduledAt || null,
     });

@@ -49,7 +49,14 @@ const subscriptionSchema = new mongoose.Schema(
 const UserSchema = new mongoose.Schema({
   // Basic Info
   name: { type: String, required: true },
-  email: { type: String, required: true, unique: true },
+  email: {
+    type: String,
+    required: [true, "Email is required"],
+    unique: true,
+    trim: true,
+    lowercase: true,
+    match: [/^[^\s@]+@[^\s@]+\.[^\s@]+$/, "Invalid email address"],
+  },
   image: { type: String },
   role: { type: String, enum: ["USER", "ADMIN"], default: "USER" },
 
@@ -70,6 +77,7 @@ const UserSchema = new mongoose.Schema({
 
 // Enforce uniqueness
 UserSchema.index({ provider: 1, providerId: 1 }, { unique: true });
+UserSchema.index({ email: 1 }, { unique: true });
 
 // =======================
 // Social relationships
@@ -91,7 +99,12 @@ UserSchema.add({
 UserSchema.add({
   verified: { type: Boolean, default: false },
   active: { type: Boolean, default: true },
+  blocked: { type: Boolean, default: false },
+  blockReason: { type: String, default: "" },
+  blockedAt: { type: Date },
 });
+
+UserSchema.index({ blocked: 1, active: 1 });
 
 // Email preferences
 UserSchema.add({

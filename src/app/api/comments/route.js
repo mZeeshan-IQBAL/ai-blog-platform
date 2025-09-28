@@ -41,6 +41,16 @@ export async function POST(request) {
 
     const user = await User.findOne({ providerId });
     if (!user) return Response.json({ error: "User not found" }, { status: 404 });
+    if (user.blocked) return Response.json({ error: "User is blocked" }, { status: 403 });
+
+    // Content rules: banned words + link limits
+    try {
+      const { validateComment } = await import("@/lib/contentRules");
+      const check = validateComment({ content }, { maxLinks: 3 });
+      if (!check.ok) {
+        return Response.json({ error: "Comment violates content rules", reasons: check.reasons }, { status: 422 });
+      }
+    } catch (_) {}
 
     const comment = new Comment({ content, author: user._id, post: postId });
     await comment.save();

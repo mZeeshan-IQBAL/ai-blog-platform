@@ -4,6 +4,8 @@ import { useState, useEffect, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import Pusher from "pusher-js";
 import Image from "next/image";
+import dynamic from "next/dynamic";
+const ReportButton = dynamic(() => import("@/components/moderation/ReportButton"), { ssr: false });
 
 import { Button } from "@/components/ui/Button";
 import { Textarea } from "@/components/ui/Textarea";
@@ -137,14 +139,18 @@ export default function CommentSection({ postId }) {
                   )}
                 </p>
                 <p className="text-sm">{c.content}</p>
-                <div className="mt-1 text-xs text-muted-foreground">
-                  {new Date(c.createdAt).toLocaleDateString("en-US", {
-                    year: "numeric",
-                    month: "short",
-                    day: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
+                <div className="mt-2 flex items-center gap-3">
+                  <span className="text-xs text-muted-foreground">
+                    {new Date(c.createdAt).toLocaleDateString("en-US", {
+                      year: "numeric",
+                      month: "short",
+                      day: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </span>
+                  <span className="text-xs text-muted-foreground">•</span>
+                  <ReportButton targetType="comment" targetId={c._id} />
                 </div>
               </div>
             </div>

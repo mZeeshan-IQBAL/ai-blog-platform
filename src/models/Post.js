@@ -25,6 +25,10 @@ const PostSchema = new Schema(
     slug: { type: String, unique: true, index: true },
     content: { type: String, required: true },
     summary: { type: String, default: "" },
+    moderation: {
+      status: { type: String, enum: ["ok", "flagged", "removed"], default: "ok", index: true },
+      flags: [{ type: String }],
+    },
 
     // 🔹 Editor & publishing status
     status: { type: String, enum: ["draft", "published", "archived"], default: "published", index: true },

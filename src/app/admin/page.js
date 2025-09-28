@@ -4,6 +4,7 @@ import { connectToDB } from "@/lib/db";
 import Post from "@/models/Post";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import Link from "next/link";
 
 export const metadata = {
   title: "Admin | AI Knowledge Hub",
@@ -108,6 +109,21 @@ export default async function AdminPage() {
       <div className="mb-8">
         <h1 className="text-2xl font-semibold">Admin Dashboard</h1>
         <p className="text-sm text-gray-500">Manage blog posts. This page is hidden from navigation and not indexed.</p>
+      </div>
+
+      <div className="mb-6 flex flex-wrap gap-3">
+        <Link
+          href="/admin/users"
+          className="inline-flex items-center rounded-md bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          Manage Users
+        </Link>
+        <Link
+          href="/admin/reports"
+          className="inline-flex items-center rounded-md bg-purple-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500"
+        >
+          Review Reports
+        </Link>
       </div>
 
       {posts.length === 0 ? (

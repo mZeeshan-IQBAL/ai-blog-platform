@@ -3,6 +3,8 @@ import Image from "next/image";
 import Link from "next/link";
 import FollowButton from "@/components/engagement/FollowButton";
 import { FaFacebookF, FaTwitter, FaLinkedinIn } from "react-icons/fa";
+import dynamic from "next/dynamic";
+const ReportButton = dynamic(() => import("@/components/moderation/ReportButton"), { ssr: false });
 
 export default function PostHeader({ blog }) {
   // Simple reading time estimation (200 words/minute)
@@ -134,6 +136,9 @@ export default function PostHeader({ blog }) {
           >
             <FaLinkedinIn size={16} />
           </a>
+        </div>
+        <div className="ml-auto">
+          <ReportButton targetType="post" targetId={blog.id || blog._id || blog.slug} />
         </div>
       </div>
     </header>

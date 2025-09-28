@@ -18,9 +18,29 @@ export async function generateMetadata({ params }) {
   const blog = await getBlog(id);
   if (!blog) return { title: "Post Not Found" };
 
+  const base = (process.env.NEXT_PUBLIC_APP_URL || process.env.VERCEL_URL || "").startsWith("http")
+    ? (process.env.NEXT_PUBLIC_APP_URL || process.env.VERCEL_URL)
+    : (process.env.NEXT_PUBLIC_APP_URL || process.env.VERCEL_URL ? `https://${process.env.NEXT_PUBLIC_APP_URL || process.env.VERCEL_URL}` : "http://localhost:3000");
+  const url = `${base}/blog/${blog.slug || id}`;
+  const ogImage = blog.coverImage || `${base}/og.png`;
+
   return {
     title: `${blog.title} | AI Knowledge Hub`,
     description: blog.excerpt || blog.summary || "",
+    alternates: { canonical: url },
+    openGraph: {
+      type: "article",
+      url,
+      title: `${blog.title} | AI Knowledge Hub`,
+      description: blog.excerpt || blog.summary || "",
+      images: ogImage ? [{ url: ogImage, width: 1200, height: 630, alt: blog.title }] : [],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${blog.title} | AI Knowledge Hub`,
+      description: blog.excerpt || blog.summary || "",
+      images: ogImage ? [ogImage] : [],
+    },
   };
 }
 

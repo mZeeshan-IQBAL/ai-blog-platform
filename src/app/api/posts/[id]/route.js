@@ -49,6 +49,12 @@ export async function PATCH(request, { params }) {
   const post = await Post.findByIdAndUpdate(id, update, { new: true });
   if (!post) return Response.json({ error: "Not found" }, { status: 404 });
 
+  // If post is removed by moderation, ensure published=false
+  if (post.moderation?.status === 'removed' && post.published) {
+    post.published = false;
+    await post.save();
+  }
+
   // Create a new version entry if content/title/summary/tags changed
   const changed = ["title", "content", "summary", "tags"].some((k) => update[k] !== undefined);
   if (changed) {

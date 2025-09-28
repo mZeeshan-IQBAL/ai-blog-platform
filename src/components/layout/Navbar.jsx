@@ -22,6 +22,7 @@ const UserDropdown = ({ user, onSignOut }) => {
     { name: "Dashboard", href: "/dashboard", icon: "📊" },
     { name: "My Posts", href: "/my-posts", icon: "📝" },
     { name: "Settings", href: "/settings", icon: "⚙️" },
+    ...(user?.role === "ADMIN" ? [{ name: "Admin", href: "/admin", icon: "🛠️" }] : []),
   ];
 
   return (
