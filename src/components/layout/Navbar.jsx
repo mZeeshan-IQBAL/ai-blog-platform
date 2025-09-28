@@ -9,7 +9,7 @@ import { getPusherClient } from "@/lib/pusherClient";
 import { Button } from "@/components/ui/Button";
 
 // Lazy-load the portal on client only
-const ChatbotPortal = dynamic(() => import("@/components/chat/ChatbotPortal"), {
+const ChatbotPortal = dynamic(() => import("@/components/chat/ChatBotPortal"), {
   ssr: false,
 });
 
