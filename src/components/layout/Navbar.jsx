@@ -153,8 +153,8 @@ export default function Navbar() {
   }, [session?.user?.providerId, status]);
 
   return (
-    <nav className="w-full sticky top-0 z-40 backdrop-blur bg-background/80 supports-[backdrop-filter]:bg-background/60 border-b border-border">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <nav className="w-full sticky top-0 z-40 bg-background/95 backdrop-blur-md supports-[backdrop-filter]:bg-background/80 border-b border-border shadow-sm">
+      <div className="max-w-7xl mx-auto container-mobile">
         <div className="flex h-16 justify-between items-center">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3">
@@ -220,8 +220,8 @@ export default function Navbar() {
               </div>
             )}
 
-            {/* Chat toggle */}
-            <div className="hidden sm:flex items-center gap-2">
+            {/* Chat toggle - Show on medium+ screens */}
+            <div className="hidden md:flex items-center gap-2">
               <Button
                 onClick={() => setChatOpen(!chatOpen)}
                 size="sm"
@@ -241,10 +241,10 @@ export default function Navbar() {
               <UserDropdown user={session.user} onSignOut={signOut} />
             ) : (
               <>
-                <Button onClick={() => signIn()} variant="ghost" size="sm">
+                <Button onClick={() => signIn()} variant="ghost" size="sm" className="hidden sm:inline-flex">
                   Sign In
                 </Button>
-                <Button as="link" href="/auth/signup" className="hidden lg:inline-flex">
+                <Button as="link" href="/auth/signup" className="hidden md:inline-flex">
                   Get Started
                 </Button>
               </>
@@ -252,73 +252,127 @@ export default function Navbar() {
 
             {/* Mobile Menu Toggle */}
             <button
-              onClick={() => setMobileOpen(!mobileOpen)}
-              className="md:hidden inline-flex h-10 w-10 items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-accent"
+              onClick={() => {
+                console.log('Mobile menu clicked, current state:', mobileOpen);
+                setMobileOpen(!mobileOpen);
+              }}
+              className="md:hidden inline-flex h-11 w-11 items-center justify-center rounded-lg text-foreground hover:text-primary hover:bg-accent transition-all duration-200 relative border-2 border-primary/20 bg-background shadow-lg"
               aria-label="Toggle navigation"
+              aria-expanded={mobileOpen}
             >
-              {mobileOpen ? "✖" : "☰"}
+              <div className="relative w-6 h-6">
+                <span 
+                  className={`absolute block h-0.5 w-6 bg-current rounded-sm transition-all duration-300 ease-in-out transform ${
+                    mobileOpen ? 'rotate-45 translate-y-2' : 'translate-y-0'
+                  }`}
+                />
+                <span 
+                  className={`absolute block h-0.5 w-6 bg-current rounded-sm transition-all duration-300 ease-in-out transform translate-y-2 ${
+                    mobileOpen ? 'opacity-0' : 'opacity-100'
+                  }`}
+                />
+                <span 
+                  className={`absolute block h-0.5 w-6 bg-current rounded-sm transition-all duration-300 ease-in-out transform translate-y-4 ${
+                    mobileOpen ? '-rotate-45 -translate-y-2' : 'translate-y-0'
+                  }`}
+                />
+              </div>
             </button>
           </div>
         </div>
       </div>
 
       {/* Mobile menu */}
-      {mobileOpen && (
-        <div className="md:hidden border-t border-border">
-          <div className="px-4 py-3 space-y-2 bg-background">
-            <div className="flex flex-col gap-2">
-              <Link
-                href="/"
-                className="w-full text-left px-4 py-2 rounded-md border border-border hover:bg-accent"
-                onClick={() => setMobileOpen(false)}
-              >
-                Home
-              </Link>
-              <Link
-                href="/blog"
-                className="w-full text-left px-4 py-2 rounded-md border border-border hover:bg-accent"
-                onClick={() => setMobileOpen(false)}
-              >
-                Stories
-              </Link>
-              <Link
-                href="/features"
-                className="w-full text-left px-4 py-2 rounded-md border border-border hover:bg-accent"
-                onClick={() => setMobileOpen(false)}
-              >
-                Features
-              </Link>
-              <Link
-                href="/pricing"
-                className="w-full text-left px-4 py-2 rounded-md border border-border hover:bg-accent"
-                onClick={() => setMobileOpen(false)}
-              >
-                Pricing
-              </Link>
+      <div className={`md:hidden transition-all duration-300 ease-in-out border-t border-border ${
+        mobileOpen ? 'block' : 'hidden'
+      }`}>
+        <div className="bg-background shadow-lg">
+          <div className="container-mobile py-6 space-y-4">
+            {/* Navigation Links */}
+            <div className="space-y-1">
+              {[
+                { name: "Home", href: "/", icon: "🏠" },
+                { name: "Dashboard", href: "/dashboard", icon: "📊" },
+                { name: "Stories", href: "/blog", icon: "📚" },
+                { name: "Features", href: "/features", icon: "⭐" },
+                { name: "Pricing", href: "/pricing", icon: "💰" }
+              ].map((item, index) => {
+                const isActive = typeof window !== 'undefined' && window.location.pathname === item.href;
+                return (
+                  <Link
+                    key={item.name}
+                    href={item.href}
+                    className={`flex items-center gap-3 w-full text-left px-4 py-3 rounded-lg transition-colors animate-fade-in ${
+                      isActive 
+                        ? "bg-primary text-primary-foreground" 
+                        : "hover:bg-accent hover:text-accent-foreground"
+                    }`}
+                    onClick={() => setMobileOpen(false)}
+                    style={{ animationDelay: `${index * 50}ms` }}
+                  >
+                    <span className="text-lg">{item.icon}</span>
+                    <span className="font-medium">{item.name}</span>
+                  </Link>
+                );
+              })}
             </div>
-            <div className="flex items-center justify-end pt-2">
+            
+            {/* AI Assistant Toggle */}
+            <div className="border-t border-border/50 pt-4">
               <Button
-                size="sm"
-                variant={chatOpen ? "default" : "secondary"}
-                onClick={() => setChatOpen(!chatOpen)}
-                className={chatOpen ? "bg-primary text-primary-foreground" : ""}
+                size="md"
+                variant={chatOpen ? "default" : "outline"}
+                onClick={() => {
+                  setChatOpen(!chatOpen);
+                  setMobileOpen(false);
+                }}
+                className="w-full justify-start gap-2 animate-fade-in"
+                style={{ animationDelay: '250ms' }}
                 aria-expanded={chatOpen}
                 aria-controls="ai-assistant"
               >
-                💬 AI Assistant {chatOpen ? "(Open)" : ""}
+                <span className="text-lg">💬</span>
+                AI Assistant {chatOpen ? "(Open)" : ""}
               </Button>
             </div>
-            <div className="pt-2">
+            
+            {/* Auth Actions */}
+            <div className="border-t border-border/50 pt-4">
               {status === "authenticated" ? (
-                <Button className="w-full" variant="destructive" onClick={() => signOut()}>
+                <Button 
+                  className="w-full justify-start gap-2 animate-fade-in" 
+                  variant="ghost" 
+                  onClick={() => {
+                    signOut();
+                    setMobileOpen(false);
+                  }}
+                  style={{ animationDelay: '300ms' }}
+                >
+                  <span className="text-lg">🚪</span>
                   Sign Out
                 </Button>
               ) : (
-                <div className="flex gap-2">
-                  <Button className="flex-1" variant="outline" onClick={() => signIn()}>
+                <div className="space-y-2">
+                  <Button 
+                    className="w-full justify-start gap-2 animate-fade-in" 
+                    variant="outline" 
+                    onClick={() => {
+                      signIn();
+                      setMobileOpen(false);
+                    }}
+                    style={{ animationDelay: '300ms' }}
+                  >
+                    <span className="text-lg">👋</span>
                     Sign In
                   </Button>
-                  <Button as="link" href="/auth/signup" className="flex-1">
+                  <Button 
+                    as="link" 
+                    href="/auth/signup" 
+                    className="w-full justify-start gap-2 animate-fade-in"
+                    onClick={() => setMobileOpen(false)}
+                    style={{ animationDelay: '350ms' }}
+                  >
+                    <span className="text-lg">🚀</span>
                     Get Started
                   </Button>
                 </div>
@@ -326,7 +380,7 @@ export default function Navbar() {
             </div>
           </div>
         </div>
-      )}
+      </div>
 
       {/* Floating Chatbot via Portal (outside Navbar DOM) */}
       <ChatbotPortal open={chatOpen} onClose={() => setChatOpen(false)} />

@@ -127,6 +127,13 @@ export async function POST(request) {
               html: emailData.html
             });
           }
+          
+          // ✅ Trigger profile stats update for the target user (new follower)
+          await pusherServer.trigger(
+            `private-user-${targetUser.providerId}`,
+            "new-follower",
+            { followerId: session.user.id }
+          );
         } else {
           console.log(`❌ Could not send follow notification. Target user: ${targetUser?.name}, providerId: ${targetUser?.providerId}`);
         }
@@ -170,6 +177,16 @@ export async function DELETE(request) {
     // ✅ Remove from follows array
     user.follows = user.follows.filter(id => id.toString() !== targetUserId.toString());
     await user.save();
+
+    // ✅ Trigger profile stats update for the target user (lost follower)
+    const targetUser = await User.findById(targetUserId);
+    if (targetUser?.providerId) {
+      await pusherServer.trigger(
+        `private-user-${targetUser.providerId}`,
+        "profile-stats-update",
+        { type: "unfollow", unfollowerId: session.user.id }
+      );
+    }
 
     return NextResponse.json({ success: true, following: false });
   } catch (error) {

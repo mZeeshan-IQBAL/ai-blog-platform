@@ -42,7 +42,8 @@ function toSummary(content, summary) {
  * Fetch all published blogs (cached)
  */
 export async function getAllBlogs() {
-  const cacheKey = "posts:all";
+  // Bump the cache key version to avoid stale values that had missing author info
+  const cacheKey = "posts:all:v2";
   const cached = await cacheGet(cacheKey);
   if (cached) return JSON.parse(cached);
 
@@ -57,6 +58,25 @@ export async function getAllBlogs() {
       .sort({ createdAt: -1 })
       .lean();
 
+    // Backfill missing author name/image from User collection
+    try {
+      const { default: User } = await import("@/models/User");
+      const authorIds = Array.from(new Set(posts.map(p => String(p.authorId)).filter(Boolean)));
+      if (authorIds.length) {
+        const users = await User.find({ _id: { $in: authorIds } }).select("name image").lean();
+        const userMap = new Map(users.map(u => [String(u._id), u]));
+        for (const p of posts) {
+          if ((!p.authorName || p.authorName === "") && p.authorId && userMap.has(String(p.authorId))) {
+            const u = userMap.get(String(p.authorId));
+            p.authorName = u?.name || p.authorName || "Anonymous";
+            p.authorImage = u?.image || p.authorImage || "/images/placeholder.jpg";
+          }
+        }
+      }
+    } catch (e) {
+      console.warn("⚠ Could not backfill author info in getAllBlogs:", e?.message || e);
+    }
+
     const data = posts.map((post) => {
       const words = String(post.content || "").trim().split(/\s+/).length;
       const readTimeMins = Math.max(1, Math.ceil(words / 200));
@@ -69,7 +89,7 @@ export async function getAllBlogs() {
         author: {
           id: post.authorId,
           name: post.authorName || "Anonymous",
-          image: post.authorImage || "/images/placeholder.jpg", // ✅ fixed
+          image: post.authorImage || "/images/placeholder.jpg",
         },
         tags: post.tags || [],
         likes: Array.isArray(post.likes) ? post.likes.length : post.likes || 0,
@@ -78,7 +98,7 @@ export async function getAllBlogs() {
         createdAt: post.createdAt,
         views: post.views || 0,
         readTimeMins,
-        coverImage: post.coverImage || "/images/placeholder.jpg", // ✅ fixed
+        coverImage: post.coverImage || "/images/placeholder.jpg",
       };
     });
 

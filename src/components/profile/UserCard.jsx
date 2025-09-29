@@ -1,22 +1,25 @@
 // components/profile/UserCard.jsx
 "use client";
 
-import Image from "next/image";
 import FollowButton from "@/components/engagement/FollowButton";
+import Link from "next/link";
+import Avatar, { AvatarSizes } from "@/components/ui/Avatar";
 
 export default function UserCard({ user }) {
   return (
     <div className="bg-card rounded-xl p-6 border border-border hover:shadow-lg transition-all duration-300">
       <div className="flex items-center gap-4 mb-4">
-        <Image
-          src={user.image || "/images/placeholder.jpg"}
+        <Avatar
+          src={user.image}
           alt={user.name}
-          width={48}
-          height={48}
-          className="rounded-full border-2 border-background"
+          size={AvatarSizes.lg}
+          userId={user.id || user._id}
+          className="border-2 border-background"
         />
         <div className="flex-1 min-w-0">
-          <h3 className="font-semibold truncate">{user.name}</h3>
+          <Link href={`/profile/${user.id || user._id}`} className="font-semibold truncate hover:text-primary transition-colors" title="View Profile">
+            {user.name}
+          </Link>
           <p className="text-sm text-muted-foreground truncate">{user.email}</p>
         </div>
       </div>
@@ -27,9 +30,9 @@ export default function UserCard({ user }) {
       
       <div className="flex items-center justify-between">
         <div className="text-xs text-muted-foreground">
-          {user.postsCount || 0} posts
+          {user.postsCount ?? 0} posts
         </div>
-        <FollowButton authorId={user.providerId || user.id} />
+        <FollowButton authorId={user.id || user._id} />
       </div>
     </div>
   );

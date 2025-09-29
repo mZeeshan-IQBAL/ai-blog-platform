@@ -105,14 +105,18 @@ const TrendingContent = async ({ limit = 6 }) => {
       id: p._id?.toString?.() || p.id,
       slug: p.slug,
       title: p.title,
-      coverImage: p.coverImage,
+      coverImage: p.coverImage || "/images/placeholder.jpg",
       createdAt: p.createdAt,
       excerpt: p.summary || p.excerpt || "",
       category: p.category,
-      author: p.author,
+      author: {
+        id: p.authorId,
+        name: p.authorName || "Anonymous",
+        image: p.authorImage || "/images/placeholder.jpg",
+      },
       readTime: p.readTime,
-      views: p.views,
-      likes: p.likes,
+      views: p.views || 0,
+      likes: Array.isArray(p.likes) ? p.likes.length : p.likes || 0,
     }));
 
     return (

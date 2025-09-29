@@ -14,7 +14,7 @@ export async function GET() {
 
     await connectToDB();
 
-    const user = await User.findOne({ providerId: session.user.id });
+    const user = await User.findById(session.user.id);
     if (!user) {
       return Response.json({ error: "User not found" }, { status: 404 });
     }
@@ -37,16 +37,16 @@ export async function PUT(request) {
 
     await connectToDB();
 
-    const updatedUser = await User.findOneAndUpdate(
-      { providerId: session.user.id },
+    const updatedUser = await User.findByIdAndUpdate(
+      session.user.id,
       {
         name,
         bio,
         website,
         location,
-        updatedAt: new Date()
+        updatedAt: new Date(),
       },
-      { new: true, upsert: true }
+      { new: true }
     );
 
     return Response.json(updatedUser);

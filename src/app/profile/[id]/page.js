@@ -5,10 +5,19 @@ import User from "@/models/User";
 import Post from "@/models/Post";
 import PublicProfileClient from "@/components/profile/PublicProfileClient";
 
+function isObjectIdLike(val) {
+  return /^[a-f\d]{24}$/i.test(String(val));
+}
+
 export async function generateMetadata({ params }) {
   const { id } = await params;
   await connectToDB();
-  const user = await User.findOne({ providerId: id }).lean();
+  let user;
+  if (isObjectIdLike(id)) {
+    user = await User.findById(id).lean();
+  } else {
+    user = await User.findOne({ providerId: id }).lean();
+  }
   if (!user) return { title: "User Not Found" };
   return {
     title: `${user.name} | AI Knowledge Hub`,
@@ -24,19 +33,25 @@ export default async function PublicProfilePage({ params }) {
 
   await connectToDB();
 
-  const userDoc = await User.findOne({ providerId: id }).lean();
+  let userDoc;
+  if (isObjectIdLike(id)) {
+    userDoc = await User.findById(id).lean();
+  } else {
+    userDoc = await User.findOne({ providerId: id }).lean();
+  }
   if (!userDoc) notFound();
 
   // IMPORTANT: Select minimal fields (do NOT include content)
+  const authorId = String(userDoc._id);
   const postDocs = await Post.find(
-    { authorId: id, published: true },
+    { authorId, published: true },
     "slug title summary coverImage category tags authorId authorName authorImage likes comments views createdAt"
   )
     .sort({ createdAt: -1 })
     .lean();
 
   const user = {
-    id: userDoc.providerId,
+    id: authorId,
     name: userDoc.name || "Anonymous",
     email: userDoc.email || "",
     image: userDoc.image || "",
@@ -69,7 +84,7 @@ export default async function PublicProfilePage({ params }) {
 
   const stats = {
     posts: posts.length,
-    followers: Array.isArray(userDoc.followers) ? userDoc.followers.length : 0,
+    followers: await User.countDocuments({ follows: userDoc._id }),
     following: Array.isArray(userDoc.follows) ? userDoc.follows.length : 0,
     totalLikes: postDocs.reduce((sum, p) => sum + (Array.isArray(p.likes) ? p.likes.length : 0), 0),
     totalViews: postDocs.reduce((sum, p) => sum + (p.views || 0), 0),

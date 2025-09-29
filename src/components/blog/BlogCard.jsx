@@ -28,9 +28,9 @@ export default function BlogCard({ blog }) {
   const src = blog.coverImage || "/images/placeholder.jpg";
   const href = `/blog/${blog.slug || blog._id}`;
 
-  // Author info fallback
-  const authorName = blog.authorName || "Anonymous";
-  const authorImage = blog.authorImage || null;
+  // Author info fallback - support both flat and nested author structures
+  const authorName = blog.authorName || blog.author?.name || "Anonymous";
+  const authorImage = blog.authorImage || blog.author?.image || null;
   const authorId = blog.authorId || blog.author?.id;
 
   // ✅ Get clean text excerpt

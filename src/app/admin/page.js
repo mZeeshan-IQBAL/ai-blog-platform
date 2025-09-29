@@ -50,6 +50,7 @@ async function fetchRecentPosts(limit = 50) {
     authorName: p.authorName,
     createdAt: p.createdAt ? new Date(p.createdAt).toISOString() : null,
     published: !!p.published,
+    trending: p.trending !== false, // default true if missing
     deletedAt: p.deletedAt ? new Date(p.deletedAt).toISOString() : null,
   }));
 }
@@ -100,6 +101,20 @@ export async function restorePost(formData) {
   revalidatePath("/admin");
 }
 
+export async function toggleTrending(formData) {
+  "use server";
+  await requireAdmin();
+  const postId = formData.get("postId");
+  const value = formData.get("value"); // "on" | "off"
+  if (!postId) return;
+  await connectToDB();
+  const setTo = value === "on";
+  await Post.findByIdAndUpdate(postId, { trending: setTo });
+  // Revalidate home/trending and admin
+  revalidatePath("/");
+  revalidatePath("/admin");
+}
+
 export default async function AdminPage() {
   await requireAdmin();
   const posts = await fetchRecentPosts(50);
@@ -136,6 +151,7 @@ export default async function AdminPage() {
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Author</th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Trending</th>
                 <th className="px-4 py-3" />
                 <th className="px-4 py-3" />
                 <th className="px-4 py-3" />
@@ -150,6 +166,19 @@ export default async function AdminPage() {
                   </td>
                   <td className="px-4 py-3 text-sm text-gray-700">{post.authorName || "—"}</td>
                   <td className="px-4 py-3 text-sm text-gray-500">{post.createdAt?.slice(0, 10) || "—"}</td>
+                  <td className="px-4 py-3 text-sm">
+                    <form action={toggleTrending} className="inline">
+                      <input type="hidden" name="postId" value={post.id} />
+                      <input type="hidden" name="value" value={post.trending ? "off" : "on"} />
+                      <button
+                        type="submit"
+                        className={`inline-flex items-center rounded-md px-3 py-1.5 text-xs font-medium text-white focus:outline-none focus:ring-2 ${post.trending ? "bg-orange-600 hover:bg-orange-700 focus:ring-orange-500" : "bg-gray-500 hover:bg-gray-600 focus:ring-gray-500"}`}
+                        title={post.trending ? "Click to remove from Trending" : "Click to promote to Trending"}
+                      >
+                        {post.trending ? "Trending: On" : "Trending: Off"}
+                      </button>
+                    </form>
+                  </td>
                   <td className="px-4 py-3 text-right space-x-2 whitespace-nowrap">
                     {post.published ? (
                       <form className="inline" action={unpublishPost}>

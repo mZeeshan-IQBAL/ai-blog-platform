@@ -37,6 +37,9 @@ const PostSchema = new Schema(
     tags: [{ type: String, lowercase: true, trim: true }],
     category: { type: String, trim: true, default: "General" },
 
+    // 🔹 Manual trending toggle (admin)
+    trending: { type: Boolean, default: true },
+
     // 🔹 Author info (snapshot for UI speed)
     authorId: { type: String, required: true }, // internal user id string
     authorName: { type: String, required: true },

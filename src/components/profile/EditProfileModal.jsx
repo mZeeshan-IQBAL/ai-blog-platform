@@ -1,9 +1,11 @@
 // components/profile/EditProfileModal.jsx
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { motion } from "framer-motion";
 import { useSession } from "next-auth/react";
+import AvatarCropper from "@/components/profile/AvatarCropper";
+import Avatar, { AvatarSizes } from "@/components/ui/Avatar";
 
 export default function EditProfileModal({ profile, onClose, onUpdate }) {
   const { data: session } = useSession();
@@ -15,6 +17,10 @@ export default function EditProfileModal({ profile, onClose, onUpdate }) {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(profile?.image || session?.user?.image || "");
+  const [showCropper, setShowCropper] = useState(false);
+  const fileInputRef = useRef(null);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -22,6 +28,18 @@ export default function EditProfileModal({ profile, onClose, onUpdate }) {
     setError("");
 
     try {
+      // 1) Upload avatar if selected
+      if (imageFile) {
+        const form = new FormData();
+        form.append("image", imageFile);
+        const avatarRes = await fetch("/api/profile/avatar", { method: "POST", body: form });
+        if (!avatarRes.ok) {
+          const er = await avatarRes.json().catch(() => ({}));
+          throw new Error(er.error || "Avatar upload failed");
+        }
+      }
+
+      // 2) Update basic profile fields
       const res = await fetch("/api/profile", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -36,7 +54,7 @@ export default function EditProfileModal({ profile, onClose, onUpdate }) {
         setError(errorData.error || "Failed to update profile");
       }
     } catch (err) {
-      setError("Something went wrong. Please try again.");
+      setError(err.message || "Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -65,6 +83,54 @@ export default function EditProfileModal({ profile, onClose, onUpdate }) {
               {error}
             </div>
           )}
+
+          {/* Avatar uploader */}
+          <div className="flex items-center gap-4">
+            <Avatar
+              src={imagePreview}
+              alt="Avatar preview"
+              size={AvatarSizes.xl}
+              fallbackText={profile?.name?.charAt(0) || session?.user?.name?.charAt(0) || "U"}
+              className="border"
+            />
+            <div className="space-x-2">
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="px-3 py-2 border rounded-lg text-sm hover:bg-gray-50"
+              >
+                {imagePreview ? "Change Photo" : "Add Photo"}
+              </button>
+              {imageFile && (
+                <button
+                  type="button"
+                  onClick={() => setShowCropper(true)}
+                  className="px-3 py-2 border rounded-lg text-sm hover:bg-gray-50"
+                >
+                  Crop
+                </button>
+              )}
+              {imagePreview && (
+                <button
+                  type="button"
+                  onClick={() => { setImageFile(null); setImagePreview(""); }}
+                  className="px-3 py-2 border rounded-lg text-sm text-red-600 hover:bg-red-50"
+                >
+                  Remove
+                </button>
+              )}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  if (f) { setImageFile(f); setImagePreview(URL.createObjectURL(f)); setShowCropper(true); }
+                }}
+              />
+            </div>
+          </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -136,6 +202,19 @@ export default function EditProfileModal({ profile, onClose, onUpdate }) {
           </div>
         </form>
       </motion.div>
+
+      {showCropper && imageFile && (
+        <AvatarCropper
+          file={imageFile}
+          initialUrl={imagePreview}
+          onCancel={() => setShowCropper(false)}
+          onCropped={(cropped, dataUrl) => {
+            setImageFile(cropped);
+            setImagePreview(dataUrl);
+            setShowCropper(false);
+          }}
+        />
+      )}
     </div>
   );
 }

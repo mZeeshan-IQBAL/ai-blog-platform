@@ -69,23 +69,23 @@ const featuresData = [
 const FeatureCard = ({ feature, isExpanded, onToggle }) => {
   return (
     <div 
-      className={`bg-card text-card-foreground rounded-lg border border-border overflow-hidden transition-all duration-300 cursor-pointer ${
-        isExpanded ? 'shadow-lg' : 'hover:shadow-md'
+      className={`bg-card text-card-foreground rounded-xl border border-border overflow-hidden transition-all duration-300 cursor-pointer transform hover:scale-[1.02] active:scale-[0.98] ${
+        isExpanded ? 'shadow-xl border-primary/20 ring-1 ring-primary/10' : 'hover:shadow-lg hover:border-accent-foreground/20'
       }`}
       onClick={() => onToggle(feature.id)}
     >
-      <div className="p-6">
+      <div className="card-mobile">
         {/* Header */}
         <div className="flex items-start gap-4 mb-4">
-          <div className={`w-12 h-12 ${feature.color} rounded-lg flex items-center justify-center text-xl flex-shrink-0`}>
+          <div className={`w-12 h-12 ${feature.color} rounded-xl flex items-center justify-center text-xl flex-shrink-0 shadow-md`}>
             {feature.icon}
           </div>
-          <div className="flex-1">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-start justify-between gap-2">
+              <h3 className="text-lg font-semibold leading-tight">
                 {feature.title}
               </h3>
-              <span className="text-xs text-primary font-medium">
+              <span className="text-xs text-primary font-medium bg-primary/10 px-2 py-1 rounded-full whitespace-nowrap">
                 {feature.stats}
               </span>
             </div>
@@ -118,19 +118,21 @@ const FeatureCard = ({ feature, isExpanded, onToggle }) => {
 
         {/* Expand indicator */}
         <div className="flex items-center justify-between mt-4 pt-4 border-t border-border">
-          <span className="text-xs text-muted-foreground">
-            {isExpanded ? 'Click to collapse' : 'Click to learn more'}
+          <span className="text-xs sm:text-sm text-muted-foreground font-medium">
+            {isExpanded ? 'Tap to collapse' : 'Tap to learn more'}
           </span>
-          <svg 
-            className={`w-4 h-4 text-muted-foreground transition-transform duration-200 ${
-              isExpanded ? 'rotate-180' : ''
-            }`} 
-            fill="none" 
-            stroke="currentColor" 
-            viewBox="0 0 24 24"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-          </svg>
+          <div className={`w-8 h-8 rounded-full bg-accent flex items-center justify-center transition-all duration-300 ${
+            isExpanded ? 'bg-primary text-primary-foreground rotate-180' : 'hover:bg-accent/80'
+          }`}>
+            <svg 
+              className="w-4 h-4 transition-transform duration-300" 
+              fill="none" 
+              stroke="currentColor" 
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </div>
         </div>
       </div>
     </div>
@@ -145,27 +147,32 @@ export default function Features() {
   };
 
   return (
-    <section className="py-16 bg-background">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="py-12 sm:py-16 lg:py-20 bg-background animate-fade-in">
+      <div className="max-w-6xl mx-auto container-mobile">
         {/* Section Header */}
-        <div className="text-center mb-12">
-          <h2 className="text-2xl sm:text-3xl font-bold mb-4">
+        <div className="text-center mb-8 sm:mb-12 animate-slide-up">
+          <h2 className="heading-responsive font-bold mb-4 sm:mb-6">
             Everything writers and readers need
           </h2>
-          <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
+          <p className="text-responsive text-muted-foreground max-w-3xl mx-auto leading-relaxed">
             Powerful tools for writing, discovering, and sharing amazing content with a global community of storytellers.
           </p>
         </div>
 
-        {/* Features Grid - 2x2 Layout */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
-          {featuresData.map((feature) => (
-            <FeatureCard
+        {/* Features Grid - Responsive Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
+          {featuresData.map((feature, index) => (
+            <div 
               key={feature.id}
-              feature={feature}
-              isExpanded={expandedCard === feature.id}
-              onToggle={handleToggle}
-            />
+              className="animate-slide-up"
+              style={{ animationDelay: `${index * 150}ms` }}
+            >
+              <FeatureCard
+                feature={feature}
+                isExpanded={expandedCard === feature.id}
+                onToggle={handleToggle}
+              />
+            </div>
           ))}
         </div>
       </div>

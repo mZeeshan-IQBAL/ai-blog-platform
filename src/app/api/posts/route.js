@@ -7,6 +7,7 @@ import Post from "@/models/Post";
 import { uploadImage } from "@/lib/cloudinary";
 import { cacheDel } from "@/lib/redis";
 import { revalidatePath } from "next/cache";
+import { pusherServer } from "@/lib/pusherServer";
 import { z } from "zod";
 
 /**
@@ -124,6 +125,21 @@ export async function POST(request) {
     revalidatePath("/blog");
     revalidatePath(`/blog/${savedPost.slug}`);
 
+    // ✅ Trigger profile stats update for new post
+    try {
+      await pusherServer.trigger(
+        `private-user-${session.user.id}`,
+        "new-post",
+        { 
+          postId: savedPost._id,
+          title: savedPost.title,
+          published: savedPost.published 
+        }
+      );
+    } catch (pusherError) {
+      console.error("❌ Pusher notification failed:", pusherError);
+    }
+
     return new Response(
       JSON.stringify(savedPost),
       { status: 201, headers: { "Content-Type": "application/json" } }
@@ -145,10 +161,29 @@ export async function GET() {
   try {
     await connectToDB();
 
+    // Fetch posts
     const posts = await Post.find()
-      .populate("author", "name image")
       .sort({ createdAt: -1 })
-      .lean(); // Use lean() for better performance
+      .lean(); // Use lean() for performance
+
+    // Backfill authorName/authorImage when missing by joining with User collection
+    try {
+      const { default: User } = await import("@/models/User");
+      const authorIds = Array.from(new Set(posts.map(p => String(p.authorId)).filter(Boolean)));
+      if (authorIds.length) {
+        const users = await User.find({ _id: { $in: authorIds } }).select("name image").lean();
+        const userMap = new Map(users.map(u => [String(u._id), u]));
+        for (const p of posts) {
+          if ((!p.authorName || p.authorName === "") && p.authorId && userMap.has(String(p.authorId))) {
+            const u = userMap.get(String(p.authorId));
+            p.authorName = u?.name || p.authorName || "Anonymous";
+            p.authorImage = u?.image || p.authorImage || null;
+          }
+        }
+      }
+    } catch (e) {
+      console.warn("⚠ Could not backfill author info:", e?.message || e);
+    }
 
     return new Response(
       JSON.stringify(posts),

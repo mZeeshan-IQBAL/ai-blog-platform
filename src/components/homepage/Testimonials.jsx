@@ -175,9 +175,12 @@ const TestimonialCard = ({ testimonial, index }) => {
   );
 };
 
-// Carousel for mobile view
+// Enhanced carousel for mobile view with swipe support
 const TestimonialCarousel = ({ testimonials }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isAutoPlay, setIsAutoPlay] = useState(true);
+  const [touchStart, setTouchStart] = useState(null);
+  const [touchEnd, setTouchEnd] = useState(null);
 
   const nextSlide = () => {
     setCurrentIndex((prev) => (prev + 1) % testimonials.length);
@@ -187,52 +190,104 @@ const TestimonialCarousel = ({ testimonials }) => {
     setCurrentIndex((prev) => (prev - 1 + testimonials.length) % testimonials.length);
   };
 
+  const goToSlide = (index) => {
+    setCurrentIndex(index);
+    setIsAutoPlay(false);
+    setTimeout(() => setIsAutoPlay(true), 3000);
+  };
+
+  // Touch handlers for swipe gestures
+  const onTouchStart = (e) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+    setIsAutoPlay(false);
+  };
+
+  const onTouchMove = (e) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    
+    const distance = touchStart - touchEnd;
+    const minSwipeDistance = 50;
+    
+    if (distance > minSwipeDistance) {
+      nextSlide();
+    } else if (distance < -minSwipeDistance) {
+      prevSlide();
+    }
+    
+    setTimeout(() => setIsAutoPlay(true), 3000);
+  };
+
   useEffect(() => {
+    if (!isAutoPlay) return;
     const interval = setInterval(nextSlide, 5000);
     return () => clearInterval(interval);
-  }, []);
+  }, [isAutoPlay]);
 
   return (
     <div className="relative">
-      <div className="overflow-hidden">
+      <div 
+        className="overflow-hidden rounded-xl"
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+      >
         <div 
-          className="flex transition-transform duration-500"
+          className="flex transition-transform duration-500 ease-out"
           style={{ transform: `translateX(-${currentIndex * 100}%)` }}
         >
           {testimonials.map((testimonial, index) => (
-            <div key={testimonial.id} className="w-full flex-shrink-0 px-4">
+            <div key={testimonial.id} className="w-full flex-shrink-0 px-2">
               <TestimonialCard testimonial={testimonial} index={index} />
             </div>
           ))}
         </div>
       </div>
 
-      {/* Carousel controls */}
+      {/* Enhanced carousel controls */}
       <div className="flex justify-center items-center gap-4 mt-6">
         <button 
-          onClick={prevSlide}
-          className="p-2 rounded-full bg-card border border-border shadow-lg hover:bg-accent transition-colors"
+          onClick={() => {
+            prevSlide();
+            setIsAutoPlay(false);
+            setTimeout(() => setIsAutoPlay(true), 3000);
+          }}
+          className="p-3 rounded-full bg-card border border-border shadow-lg hover:bg-accent hover:scale-105 active:scale-95 transition-all duration-200 min-w-[44px] min-h-[44px]"
+          aria-label="Previous testimonial"
         >
           <svg className="w-5 h-5 text-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
         </button>
 
+        {/* Enhanced dot indicators */}
         <div className="flex gap-2">
           {testimonials.map((_, index) => (
             <button
               key={index}
-              onClick={() => setCurrentIndex(index)}
-              className={`w-2 h-2 rounded-full transition-colors ${
-                index === currentIndex ? 'bg-primary' : 'bg-muted'
+              onClick={() => goToSlide(index)}
+              className={`min-w-[44px] min-h-[44px] flex items-center justify-center transition-all duration-300 ${
+                index === currentIndex 
+                  ? 'w-8 h-3 bg-primary rounded-full' 
+                  : 'w-3 h-3 bg-muted rounded-full hover:bg-muted-foreground/50'
               }`}
+              aria-label={`Go to testimonial ${index + 1}`}
             />
           ))}
         </div>
 
         <button 
-          onClick={nextSlide}
-          className="p-2 rounded-full bg-card border border-border shadow-lg hover:bg-accent transition-colors"
+          onClick={() => {
+            nextSlide();
+            setIsAutoPlay(false);
+            setTimeout(() => setIsAutoPlay(true), 3000);
+          }}
+          className="p-3 rounded-full bg-card border border-border shadow-lg hover:bg-accent hover:scale-105 active:scale-95 transition-all duration-200 min-w-[44px] min-h-[44px]"
+          aria-label="Next testimonial"
         >
           <svg className="w-5 h-5 text-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -245,40 +300,45 @@ const TestimonialCarousel = ({ testimonials }) => {
 
 export default function Testimonials() {
   return (
-    <section className="py-20 lg:py-28 bg-background">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="py-12 sm:py-16 lg:py-20 xl:py-24 bg-background animate-fade-in">
+      <div className="max-w-7xl mx-auto container-mobile">
         {/* Section header */}
-        <div className="text-center mb-16">
-          <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-semibold mb-4">
+        <div className="text-center mb-10 sm:mb-16 animate-slide-up">
+          <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-semibold mb-4 sm:mb-6 border border-primary/20">
             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M18 13V5a2 2 0 00-2-2H4a2 2 0 00-2 2v8a2 2 0 002 2h3l3 3 3-3h3a2 2 0 002-2zM5 7a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1zm1 3a1 1 0 100 2h3a1 1 0 100-2H6z" clipRule="evenodd" />
             </svg>
             Testimonials
           </div>
           
-          <h2 className="text-3xl sm:text-4xl font-bold mb-6 leading-tight">
+          <h2 className="heading-responsive font-bold mb-4 sm:mb-6 leading-tight">
             Loved by Writers and Readers
           </h2>
           
-          <p className="text-lg text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+          <p className="text-responsive text-muted-foreground max-w-3xl mx-auto leading-relaxed">
             Join thousands of storytellers, bloggers, and readers who are already 
             sharing amazing content and building meaningful connections on our platform.
           </p>
         </div>
 
         {/* Mobile carousel */}
-        <div className="block sm:hidden">
+        <div className="block sm:hidden mb-8">
           <TestimonialCarousel testimonials={testimonials} />
         </div>
 
         {/* Desktop grid */}
-        <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-10">
+        <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 lg:gap-10">
           {testimonials.map((testimonial, index) => (
-            <TestimonialCard 
-              key={testimonial.id} 
-              testimonial={testimonial} 
-              index={index}
-            />
+            <div 
+              key={testimonial.id}
+              className="animate-slide-up"
+              style={{ animationDelay: `${index * 100}ms` }}
+            >
+              <TestimonialCard 
+                testimonial={testimonial} 
+                index={0}
+              />
+            </div>
           ))}
         </div>
 

@@ -37,3 +37,33 @@ export async function uploadImage(file) {
       .end(bytes);
   });
 }
+
+export async function uploadAvatar(file) {
+  const buffer = await file.arrayBuffer();
+  const bytes = Buffer.from(buffer);
+
+  return new Promise((resolve, reject) => {
+    cloudinary.uploader
+      .upload_stream(
+        {
+          folder: "ai-blog-avatars",
+          transformation: [
+            { width: 512, height: 512, crop: "fill", gravity: "face" },
+            { quality: "auto", fetch_format: "auto" }
+          ],
+          // Add format validation for avatars
+          allowed_formats: ["jpg", "jpeg", "png", "webp"],
+        },
+        (error, result) => {
+          if (error) {
+            console.error("❌ Avatar Cloudinary Upload Error:", error);
+            reject(error);
+          } else {
+            console.log("✅ Avatar Upload Success:", result.secure_url);
+            resolve(result);
+          }
+        }
+      )
+      .end(bytes);
+  });
+}

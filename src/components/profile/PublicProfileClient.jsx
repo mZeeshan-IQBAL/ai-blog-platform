@@ -4,8 +4,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import { useSession } from "next-auth/react";
-import Image from "next/image";
 import Link from "next/link";
+import Avatar, { AvatarSizes } from "@/components/ui/Avatar";
 import FollowButton from "@/components/engagement/FollowButton";
 import BlogCard from "@/components/blog/BlogCard";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
@@ -52,12 +52,11 @@ export default function PublicProfileClient({ user, stats, initialPosts }) {
         <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm border border-white/50 p-8 mb-8">
           <div className="flex flex-col lg:flex-row lg:items-center gap-8">
             <div className="flex items-center gap-6">
-              <Image
-                src={user?.image || "/images/placeholder.jpg"}
+              <Avatar
+                src={user?.image}
                 alt={user?.name || "User"}
-                width={120}
-                height={120}
-                className="rounded-full border-4 border-white shadow-lg"
+                size={AvatarSizes.profile}
+                className="border-4 border-white shadow-lg"
               />
               <div>
                 <h1 className="text-3xl font-bold text-gray-900">

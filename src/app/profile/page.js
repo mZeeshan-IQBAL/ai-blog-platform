@@ -3,6 +3,8 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import ProfileClient from "@/components/profile/ProfileClient";
+// Temporary simple version for debugging:
+// import ProfileClient from "@/components/profile/ProfileClientSimple";
 
 export const metadata = {
   title: "Profile | AI Knowledge Hub",

@@ -135,6 +135,13 @@ export async function POST(request) {
             html: emailData.html
           });
         }
+        
+        // ✅ Trigger profile stats update for the post author
+        await pusherServer.trigger(
+          `private-user-${author.providerId}`,
+          "profile-stats-update",
+          { type: "like", postId: targetId }
+        );
       } else {
         console.log(`❌ Could not find author for notification. Post authorId: ${post.authorId}`);
       }

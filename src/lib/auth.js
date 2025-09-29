@@ -162,7 +162,23 @@ export const authOptions = {
     },
 
     async session({ session, token }) {
-      // 💡 Always build full session.user object from token
+      // 💡 Keep session in sync with DB (ensures latest avatar shows everywhere)
+      try {
+        if (token?.id) {
+          await connectToDB();
+          const dbUser = await User.findById(token.id).select("name email image role providerId");
+          if (dbUser) {
+            token.name = dbUser.name || token.name;
+            token.email = dbUser.email || token.email;
+            token.image = dbUser.image || token.image;
+            token.role = dbUser.role || token.role;
+            token.providerId = dbUser.providerId || token.providerId;
+          }
+        }
+      } catch (e) {
+        console.warn("session callback DB sync failed:", e?.message || e);
+      }
+
       session.user = {
         id: token.id || null,
         providerId: token.providerId || null,

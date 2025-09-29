@@ -1,18 +1,21 @@
 // components/profile/ProfileClient.jsx
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import { motion } from "framer-motion";
-import Image from "next/image";
 import Link from "next/link";
+import Avatar, { AvatarSizes } from "@/components/ui/Avatar";
+import { getPusherClient } from "@/lib/pusherClient";
 import ProfileStats from "./ProfileStats";
 import ProfileTabs from "./ProfileTabs";
 import EditProfileModal from "./EditProfileModal";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
 
 export default function ProfileClient() {
+  console.log('ProfileClient rendering...');
   const { data: session } = useSession();
+  console.log('Session in ProfileClient:', session);
   const [profile, setProfile] = useState(null);
   const [stats, setStats] = useState({
     followers: 0,
@@ -24,47 +27,152 @@ export default function ProfileClient() {
   const [loading, setLoading] = useState(true);
   const [showEditModal, setShowEditModal] = useState(false);
   const [activeTab, setActiveTab] = useState("posts");
+  const [lastUpdated, setLastUpdated] = useState(Date.now());
 
-  useEffect(() => {
-    if (session?.user?.id) {
-      fetchProfile();
-      fetchStats();
+  const fetchStats = useCallback(async (showLoading = false) => {
+    try {
+      if (showLoading) setLoading(true);
+      
+      const res = await fetch("/api/profile/stats", {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache'
+        }
+      });
+      
+      if (res.ok) {
+        const data = await res.json();
+        setStats(prevStats => {
+          // Only update if stats have actually changed
+          const hasChanged = JSON.stringify(prevStats) !== JSON.stringify(data);
+          if (hasChanged) {
+            console.log('Stats updated:', { old: prevStats, new: data });
+          }
+          return data;
+        });
+      } else {
+        console.error('Failed to fetch stats:', res.status, res.statusText);
+      }
+    } catch (error) {
+      console.error("Error fetching stats:", error);
+    } finally {
+      if (showLoading) setLoading(false);
     }
-  }, [session]);
+  }, []);
 
-  const fetchProfile = async () => {
+  const fetchProfile = useCallback(async () => {
     try {
       const res = await fetch("/api/profile");
       if (res.ok) {
         const data = await res.json();
         setProfile(data);
+      } else {
+        console.error('Failed to fetch profile:', res.status, res.statusText);
       }
     } catch (error) {
       console.error("Error fetching profile:", error);
     }
-  };
+  }, []);
 
-  const fetchStats = async () => {
-    try {
-      const res = await fetch("/api/profile/stats");
-      if (res.ok) {
-        const data = await res.json();
-        setStats(data);
-      }
-    } catch (error) {
-      console.error("Error fetching stats:", error);
-    } finally {
-      setLoading(false);
+  useEffect(() => {
+    if (session?.user?.id) {
+      fetchProfile();
+      fetchStats(true); // Show loading on initial fetch
     }
-  };
+  }, [session, fetchProfile, fetchStats]);
+
+  // Auto-refresh stats every 30 seconds when page is visible
+  useEffect(() => {
+    if (!session?.user?.id) return;
+
+    const refreshStats = () => {
+      if (document.visibilityState === 'visible') {
+        fetchStats();
+        setLastUpdated(Date.now());
+      }
+    };
+
+    // Set up periodic refresh
+    const interval = setInterval(refreshStats, 30000); // 30 seconds
+
+    // Refresh when page becomes visible
+    document.addEventListener('visibilitychange', refreshStats);
+
+    // Refresh when user focuses on the window
+    window.addEventListener('focus', refreshStats);
+
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener('visibilitychange', refreshStats);
+      window.removeEventListener('focus', refreshStats);
+    };
+  }, [session?.user?.id, fetchStats]);
+
+  // Real-time updates via Pusher
+  useEffect(() => {
+    if (!session?.user?.id) return;
+
+    const pusher = getPusherClient();
+    if (!pusher) return;
+
+    const channelName = `private-user-${session.user.id}`;
+    const channel = pusher.subscribe(channelName);
+    
+    // Listen for profile stats updates
+    channel.bind('profile-stats-update', (data) => {
+      console.log('Real-time profile stats update received:', data);
+      fetchStats(); // Refresh stats when update received
+    });
+
+    // Listen for likes on user's posts
+    channel.bind('post-liked', () => {
+      fetchStats();
+    });
+
+    // Listen for new followers
+    channel.bind('new-follower', () => {
+      fetchStats();
+    });
+
+    // Listen for new posts
+    channel.bind('new-post', () => {
+      fetchStats();
+    });
+
+    return () => {
+      channel.unbind_all();
+      channel.unsubscribe();
+    };
+  }, [session?.user?.id, fetchStats]);
+
+  // Function to manually refresh stats (for use by child components)
+  const refreshStats = useCallback(() => {
+    fetchStats();
+    setLastUpdated(Date.now());
+  }, [fetchStats]);
 
   const handleProfileUpdate = (updatedProfile) => {
     setProfile(updatedProfile);
     setShowEditModal(false);
   };
 
+  console.log('ProfileClient state:', { loading, profile, stats, session });
+
   if (loading) {
+    console.log('Showing loading skeleton...');
     return <ProfileSkeleton />;
+  }
+
+  if (!session) {
+    console.log('No session found in ProfileClient');
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold mb-4">Authentication Required</h1>
+          <p className="text-muted-foreground">Please sign in to view your profile.</p>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -89,18 +197,13 @@ export default function ProfileClient() {
           <div className="flex flex-col lg:flex-row lg:items-center gap-8">
             {/* Avatar and Basic Info */}
             <div className="flex flex-col sm:flex-row items-center gap-6">
-              <div className="relative">
-                <Image
-                  src={session?.user?.image || "/images/placeholder.jpg"}
-                  alt={session?.user?.name || "User"}
-                  width={120}
-                  height={120}
-                  className="rounded-full border-4 border-white shadow-lg"
-                />
-                <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-green-500 rounded-full border-4 border-white flex items-center justify-center">
-                  <div className="w-3 h-3 bg-white rounded-full"></div>
-                </div>
-              </div>
+              <Avatar
+                src={session?.user?.image}
+                alt={session?.user?.name || "User"}
+                size={AvatarSizes.profile}
+                className="border-4 border-white shadow-lg"
+                showOnlineIndicator={true}
+              />
               
               <div className="text-center sm:text-left">
                 <h1 className="text-3xl font-bold text-gray-900 mb-2">
@@ -157,7 +260,11 @@ export default function ProfileClient() {
         </motion.div>
 
         {/* Stats */}
-        <ProfileStats stats={stats} />
+        <ProfileStats 
+          stats={stats} 
+          lastUpdated={lastUpdated}
+          onRefresh={refreshStats}
+        />
 
         {/* Content Tabs */}
         <ProfileTabs 
@@ -165,6 +272,7 @@ export default function ProfileClient() {
           setActiveTab={setActiveTab}
           userId={session?.user?.id}
           stats={stats}
+          onStatsUpdate={refreshStats}
         />
 
         {/* Edit Profile Modal */}

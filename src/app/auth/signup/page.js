@@ -2,8 +2,10 @@
 export const dynamic = "force-dynamic";
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState, Suspense } from "react";
+import { useState, Suspense, useRef } from "react";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
+import AvatarCropper from "@/components/profile/AvatarCropper";
+import Avatar, { AvatarSizes } from "@/components/ui/Avatar";
 
 function SignUpContent() {
   const router = useRouter();
@@ -13,6 +15,10 @@ function SignUpContent() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [imageFile, setImageFile] = useState(null);
+  const [preview, setPreview] = useState('');
+  const fileInputRef = useRef(null);
+  const [showCropper, setShowCropper] = useState(false);
 
   const redirectUrl = searchParams.get('redirect');
 
@@ -33,6 +39,15 @@ function SignUpContent() {
       setError(result.error);
       setLoading(false);
     } else {
+      try {
+        if (imageFile) {
+          const form = new FormData();
+          form.append('image', imageFile);
+          // upload avatar (user is authenticated after signIn)
+          await fetch('/api/profile/avatar', { method: 'POST', body: form });
+        }
+      } catch (_) {}
+
       if (redirectUrl && redirectUrl.includes('/pricing/')) {
         const planSlug = redirectUrl.split('/').pop();
         router.push(`/billing?plan=${planSlug}`);
@@ -51,6 +66,28 @@ function SignUpContent() {
         <h2 className="text-2xl font-bold mb-4">Join Our Writing Community</h2>
         {error && <p className="text-red-600 mb-4">{error}</p>}
         <form onSubmit={handleSignUp} className="space-y-4">
+          {/* Optional profile picture */}
+          <div>
+            <div className="flex items-center gap-3 mb-2">
+              <Avatar
+                src={preview}
+                alt="Profile preview"
+                size={AvatarSizes.md}
+                fallbackText={name.charAt(0) || "U"}
+                className="border"
+              />
+              <button type="button" className="px-3 py-2 border rounded text-sm" onClick={() => fileInputRef.current?.click()}>
+                {preview ? 'Change photo' : 'Add photo (optional)'}
+              </button>
+              {preview && (
+                <button type="button" className="px-3 py-2 border rounded text-sm text-red-600" onClick={() => { setImageFile(null); setPreview(''); }}>
+                  Remove
+                </button>
+              )}
+            </div>
+            <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) { setImageFile(f); setPreview(URL.createObjectURL(f)); setShowCropper(true);} }} />
+          </div>
+
           <input
             type="text"
             value={name}
@@ -89,6 +126,15 @@ function SignUpContent() {
           </button>
         </div>
       </div>
+
+      {showCropper && imageFile && (
+        <AvatarCropper
+          file={imageFile}
+          initialUrl={preview}
+          onCancel={() => setShowCropper(false)}
+          onCropped={(cropped, dataUrl) => { setImageFile(cropped); setPreview(dataUrl); setShowCropper(false); }}
+        />
+      )}
     </div>
   );
 }
