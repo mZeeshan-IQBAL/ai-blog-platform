@@ -1,14 +1,25 @@
 // src/components/homepage/ForYou.jsx
 import Link from "next/link";
 import BlogCard from "@/components/blog/BlogCard";
+import { connectToDB } from "@/lib/db";
+import Post from "@/models/Post";
 
 export default async function ForYou() {
   try {
-    // Use a relative URL so it works regardless of the dev port (3000/3001/etc.)
-    const res = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/feed`, { cache: 'no-store' });
-    if (!res.ok) return null;
-
-    const posts = await res.json();
+    // Direct database fetch instead of HTTP request to avoid build issues
+    await connectToDB();
+    
+    const posts = await Post.find({ 
+      published: true, 
+      $or: [
+        { scheduledAt: null }, 
+        { scheduledAt: { $lte: new Date() } }
+      ] 
+    })
+    .sort({ createdAt: -1 })
+    .limit(6)
+    .lean();
+    
     if (!Array.isArray(posts) || posts.length === 0) return null;
 
     return (
@@ -19,7 +30,7 @@ export default async function ForYou() {
             <Link href="/blog" className="text-blue-600 hover:underline">See all</Link>
           </div>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {posts.slice(0, 6).map((post) => (
+            {posts.map((post) => (
               <BlogCard key={post._id || post.id} post={{
                 id: String(post._id || post.id),
                 slug: post.slug,
