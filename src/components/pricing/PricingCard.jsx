@@ -1,6 +1,7 @@
 // components/pricing/PricingCard.jsx
 import React from "react";
 import Link from "next/link";
+import { Button } from "@/components/ui/Button";
 
 export default function PricingCard({ plan, isPopular, isHighlighted }) {
   // Determine the correct href based on plan type
@@ -17,10 +18,10 @@ export default function PricingCard({ plan, isPopular, isHighlighted }) {
   return (
     <div
       className={`
-        relative flex flex-col h-full bg-card text-card-foreground rounded-lg border border-border p-6
-        ${isPopular ? "border-primary shadow-sm" : ""}
-        ${isHighlighted ? "bg-accent" : ""}
-        transition-shadow hover:shadow-md
+        relative flex flex-col h-full bg-card text-card-foreground rounded-2xl border border-border p-6
+        ${isPopular ? "border-primary/60 shadow-glow" : ""}
+        ${isHighlighted ? "bg-accent/40" : ""}
+        transition-all hover:shadow-lg hover:-translate-y-0.5
       `}
     >
       {/* Popular Label */}
@@ -80,22 +81,15 @@ export default function PricingCard({ plan, isPopular, isHighlighted }) {
       </ul>
 
       {/* CTA Button */}
-      <Link
+      <Button
+        as="link"
         href={getHref()}
-        className={`
-          block w-full text-center py-2.5 px-4 rounded-md font-medium
-          transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background
-          ${
-            plan.slug === "enterprise"
-              ? "bg-foreground text-background hover:bg-foreground/90"
-              : plan.slug === "free"
-              ? "border border-input bg-background text-foreground hover:bg-accent"
-              : "bg-primary text-primary-foreground hover:bg-primary/90"
-          }
-        `}
+        variant={plan.slug === "enterprise" ? "secondary" : plan.slug === "free" ? "outline" : "gradient"}
+        size="lg"
+        className="w-full"
       >
         {plan.cta}
-      </Link>
+      </Button>
     </div>
   );
 }

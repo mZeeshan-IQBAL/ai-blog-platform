@@ -7,6 +7,8 @@ import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { getPusherClient } from "@/lib/pusherClient";
 import { Button } from "@/components/ui/Button";
+import Avatar, { AvatarSizes } from "@/components/ui/Avatar";
+import ThemeToggle from "@/components/layout/ThemeToggle";
 
 // Lazy-load the portal on client only
 const ChatbotPortal = dynamic(() => import("@/components/chat/ChatBotPortal"), {
@@ -30,11 +32,19 @@ const UserDropdown = ({ user, onSignOut }) => {
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center gap-2 p-2 rounded-md hover:bg-accent transition-colors"
+        aria-haspopup="menu"
+        aria-expanded={isOpen}
       >
-        <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-md flex items-center justify-center text-white text-sm font-semibold">
-          {user?.name?.charAt(0) || user?.email?.charAt(0) || "U"}
-        </div>
-        <span className="hidden sm:block text-foreground font-medium">{user?.name || "User"}</span>
+        <Avatar
+          src={user?.image}
+          alt={user?.name || user?.email || "User"}
+          size={AvatarSizes.sm}
+          fallbackText={user?.name?.charAt(0) || user?.email?.charAt(0) || "U"}
+          className="ring-1 ring-border"
+        />
+        <span className="hidden sm:block text-foreground font-medium max-w-[12ch] truncate">
+          {user?.name || "User"}
+        </span>
         <svg
           className={`w-4 h-4 text-muted-foreground transition-transform ${isOpen ? "rotate-180" : ""}`}
           fill="none"
@@ -82,30 +92,29 @@ const UserDropdown = ({ user, onSignOut }) => {
   );
 };
 
-/* -------------------- Nav Links -------------------- */
+/* -------------------- Nav Links - Mintlify style -------------------- */
 const NavLinks = () => {
   const pathname = usePathname();
 
   const navItems = [
-    { name: "Home", href: "/" },
-    { name: "Dashboard", href: "/dashboard" },
-    { name: "View Blogs", href: "/blog" },
-    { name: "Features", href: "/features" },
+    { name: "Resources", href: "/resources" },
+    { name: "Documentation", href: "/docs" },
+    { name: "Blog", href: "/blog" },
     { name: "Pricing", href: "/pricing" },
   ];
 
   return (
-    <div className="hidden md:flex items-center gap-1">
+    <div className="hidden md:flex items-center gap-8">
       {navItems.map((item) => {
-        const isActive = pathname === item.href;
+        const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
         return (
           <Link
             key={item.name}
             href={item.href}
-            className={`px-4 py-2 rounded-md font-medium ${
+            className={`text-xs font-medium transition-colors hover:text-gray-900 ${
               isActive
-                ? "bg-accent text-accent-foreground"
-                : "text-muted-foreground hover:text-foreground hover:bg-accent"
+                ? "text-gray-900 pb-1 border-b border-primary"
+                : "text-gray-600"
             }`}
           >
             {item.name}
@@ -153,100 +162,66 @@ export default function Navbar() {
   }, [session?.user?.providerId, status]);
 
   return (
-    <nav className="w-full sticky top-0 z-40 bg-background/95 backdrop-blur-md supports-[backdrop-filter]:bg-background/80 border-b border-border shadow-sm">
-      <div className="max-w-7xl mx-auto container-mobile">
+    <nav className="w-full sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 justify-between items-center">
-          {/* Logo */}
+          {/* Logo - Mintlify style */}
           <Link href="/" className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-md flex items-center justify-center text-white text-lg font-bold">
-              BS
+            <div className="w-8 h-8 bg-gradient-to-br from-teal-500 to-emerald-600 rounded-lg flex items-center justify-center text-white">
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+              </svg>
             </div>
-            <span className="text-xl font-bold">BlogSphere With AI</span>
+            <span className="font-medium text-primary text-sm">BlogSphere</span>
           </Link>
 
-          {/* Nav Links */}
-          <NavLinks />
+          {/* Nav Links - Removed */}
 
+          {/* Right side - Mintlify style */}
           <div className="flex items-center gap-3">
-            {/* Notifications */}
-            {session && status === "authenticated" && (
-              <div className="relative notification-dropdown">
-                <button
-                  onClick={() => setNotifOpen(!notifOpen)}
-                  className="relative inline-flex h-10 w-10 items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
-                  aria-label="Open notifications"
-                >
-                  🔔
-                  {notifications.length > 0 && (
-                    <span className="absolute -top-1 -right-1 w-5 h-5 bg-destructive text-destructive-foreground text-xs rounded-full flex items-center justify-center font-bold">
-                      {notifications.length > 9 ? "9+" : notifications.length}
-                    </span>
-                  )}
-                </button>
-
-                {notifOpen && (
-                  <div className="absolute right-0 mt-2 w-80 bg-popover text-popover-foreground shadow-xl rounded-lg border border-border z-30">
-                    <div className="flex items-center justify-between p-4 border-b border-border">
-                      <h3 className="text-sm font-semibold">
-                        Notifications ({notifications.length})
-                      </h3>
-                      {notifications.length > 0 && (
-                        <button
-                          onClick={() => setNotifications([])}
-                          className="text-xs text-primary hover:underline font-medium"
-                        >
-                          Clear all
-                        </button>
-                      )}
-                    </div>
-                    <div className="max-h-80 overflow-y-auto">
-                      {notifications.length === 0 ? (
-                        <div className="p-6 text-center text-muted-foreground text-sm">
-                          No notifications yet
-                        </div>
-                      ) : (
-                        notifications.map((n, i) => (
-                          <div
-                            key={i}
-                            className="p-3 border-b border-border last:border-none hover:bg-accent"
-                          >
-                            {n.fromUser?.name} {n.type}
-                          </div>
-                        ))
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Chat toggle - Show on medium+ screens */}
-            <div className="hidden md:flex items-center gap-2">
-              <Button
-                onClick={() => setChatOpen(!chatOpen)}
-                size="sm"
-                variant={chatOpen ? "default" : "secondary"}
-                className={chatOpen ? "bg-primary text-primary-foreground" : ""}
-                aria-expanded={chatOpen}
-                aria-controls="ai-assistant"
-              >
-                💬 Talk to AI {chatOpen ? "(Open)" : ""}
-              </Button>
+            {/* Search bar */}
+            <div className="hidden md:flex items-center gap-2 px-3 py-2 bg-gray-100 rounded-lg">
+              <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              <input 
+                type="text" 
+                placeholder="Search or ask" 
+                className="bg-transparent border-none outline-none text-xs text-gray-600 placeholder-gray-500 w-28"
+              />
+              <kbd className="px-2 py-0.5 text-xs bg-gray-200 rounded text-gray-600">⌘K</kbd>
             </div>
+            
+            {/* AI Chat Button */}
+            <button 
+              onClick={() => setChatOpen(!chatOpen)}
+              className="hidden md:flex items-center gap-2 px-3 py-2 bg-primary text-white rounded-lg text-xs font-medium hover:bg-primary/90 transition-colors"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+              Ask AI
+            </button>
 
-            {/* Auth */}
+            {/* Contact Sales / Auth */}
             {status === "loading" ? (
-              <span className="text-sm text-muted-foreground">Loading...</span>
+              <span className="text-xs text-gray-500">Loading...</span>
             ) : session ? (
               <UserDropdown user={session.user} onSignOut={signOut} />
             ) : (
               <>
-                <Button onClick={() => signIn()} variant="ghost" size="sm" className="hidden sm:inline-flex">
-                  Sign In
-                </Button>
-                <Button as="link" href="/auth/signup" className="hidden md:inline-flex">
-                  Get Started
-                </Button>
+                <button 
+                  onClick={() => signIn()}
+                  className="hidden sm:inline-flex text-xs font-medium text-gray-600 hover:text-gray-900 transition-colors"
+                >
+                  Contact sales
+                </button>
+                <button 
+                  onClick={() => signIn()}
+                  className="bg-white text-gray-900 border border-gray-300 px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-gray-50 transition-colors"
+                >
+                  Start for free
+                </button>
               </>
             )}
 

@@ -80,27 +80,37 @@ export default function FeaturesPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <div className="border-b border-gray-200">
-        <div className="py-16 sm:py-24 px-4 sm:px-6 lg:px-8">
+      <div className="relative overflow-hidden border-b border-border">
+        {/* Sky background */}
+        <div className="absolute inset-0 bg-mint-sky" />
+        {/* Decorative clouds/streaks */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          <div className="cloud-blob" style={{ bottom: '-120px', left: '-60px', width: '520px', height: '360px', transform: 'rotate(-8deg)' }} />
+          <div className="cloud-blob" style={{ bottom: '-80px', right: '-40px', width: '480px', height: '300px', transform: 'rotate(6deg)' }} />
+          <div className="cloud-blob" style={{ bottom: '120px', left: '10%', width: '300px', height: '200px', opacity: 0.7 }} />
+          <div className="streak" style={{ top: '22%', right: '-30%', transform: 'rotate(20deg)' }} />
+          <div className="streak" style={{ top: '37%', left: '-20%', transform: 'rotate(12deg)' }} />
+        </div>
+        <div className="relative py-16 sm:py-24 px-4 sm:px-6 lg:px-8">
           <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+            <h1 className="heading-hero text-white mb-4">
               Every story deserves to be told
             </h1>
-            <p className="text-lg text-gray-600 mb-8 max-w-3xl mx-auto">
-              Whether it&apos;s fiction, non-fiction, poetry, or personal essays - share your unique voice with the world. Our platform helps you craft compelling content and connect with readers who love your stories.
+            <p className="subheading-hero text-white/85 mb-8 max-w-3xl mx-auto">
+              Whether it&apos;s fiction, non-fiction, poetry, or personal essays — share your unique voice with the world. Our platform helps you craft compelling content and connect with readers who love your stories.
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-4">
               <Link
                 href="/blog/create"
-                className="bg-blue-600 text-white px-8 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                className="inline-flex items-center justify-center px-8 py-3 rounded-lg font-medium brand-gradient text-white shadow-glow hover:brightness-110"
               >
                 Start Writing Today
               </Link>
               <Link
                 href="/blog"
-                className="border border-gray-300 text-gray-700 px-8 py-3 rounded-lg font-medium hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
+                className="inline-flex items-center justify-center px-8 py-3 rounded-lg font-medium border border-white/30 text-white hover:bg-white/10"
               >
                 Discover Amazing Stories
               </Link>

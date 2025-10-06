@@ -4,7 +4,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 
 export default async function PlanPage({ params }) {
-  const { slug } = params;
+  const { slug } = await params;
 
   // Validate plan slug
   const validPlans = ["free", "starter", "pro", "business", "enterprise"];

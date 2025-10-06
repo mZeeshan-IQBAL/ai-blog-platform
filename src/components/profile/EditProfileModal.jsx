@@ -8,7 +8,7 @@ import AvatarCropper from "@/components/profile/AvatarCropper";
 import Avatar, { AvatarSizes } from "@/components/ui/Avatar";
 
 export default function EditProfileModal({ profile, onClose, onUpdate }) {
-  const { data: session } = useSession();
+  const { data: session, update } = useSession();
   const [formData, setFormData] = useState({
     name: profile?.name || session?.user?.name || "",
     bio: profile?.bio || "",
@@ -28,6 +28,7 @@ export default function EditProfileModal({ profile, onClose, onUpdate }) {
     setError("");
 
     try {
+      let newAvatarUrl = null;
       // 1) Upload avatar if selected
       if (imageFile) {
         const form = new FormData();
@@ -36,6 +37,11 @@ export default function EditProfileModal({ profile, onClose, onUpdate }) {
         if (!avatarRes.ok) {
           const er = await avatarRes.json().catch(() => ({}));
           throw new Error(er.error || "Avatar upload failed");
+        }
+        const avatarJson = await avatarRes.json().catch(() => ({}));
+        if (avatarJson?.image) {
+          newAvatarUrl = avatarJson.image;
+          setImagePreview(newAvatarUrl);
         }
       }
 
@@ -49,6 +55,16 @@ export default function EditProfileModal({ profile, onClose, onUpdate }) {
       if (res.ok) {
         const updatedProfile = await res.json();
         onUpdate(updatedProfile);
+        // 3) Ensure navbar/session reflects latest name/avatar
+        try {
+          await update({
+            image: newAvatarUrl ?? session?.user?.image ?? undefined,
+            name: formData?.name ?? session?.user?.name ?? undefined,
+          });
+        } catch (_) {
+          // Fallback: trigger a generic refresh
+          await update();
+        }
       } else {
         const errorData = await res.json();
         setError(errorData.error || "Failed to update profile");

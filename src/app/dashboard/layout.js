@@ -28,7 +28,7 @@ export default async function DashboardLayout({ children }) {
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
-      <h1 className="text-2xl font-bold mb-6">Dashboard</h1>
+      <h1 className="text-xl sm:text-2xl font-bold mb-6">Dashboard</h1>
       {children}
     </div>
   );

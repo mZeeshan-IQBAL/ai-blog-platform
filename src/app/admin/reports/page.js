@@ -8,6 +8,9 @@ import User from "@/models/User";
 import { logAudit } from "@/lib/audit";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { Card } from "@/components/ui/Card";
+import { Button } from "@/components/ui/Button";
+import { Badge } from "@/components/ui/Badge";
 
 export const metadata = { title: "Admin | Reports", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
@@ -75,31 +78,31 @@ export default async function ReportsPage() {
       <h1 className="text-2xl font-semibold mb-6">Reports</h1>
       <div className="space-y-4">
         {reports.length === 0 ? (
-          <div className="text-sm text-gray-600">No reports.</div>
+          <div className="text-sm text-muted-foreground">No reports.</div>
         ) : reports.map(r => (
-          <div key={r._id} className="border rounded p-4">
-            <div className="text-sm text-gray-500">{new Date(r.createdAt).toLocaleString()}</div>
+          <Card key={r._id} className="p-4">
+            <div className="text-sm text-muted-foreground">{new Date(r.createdAt).toLocaleString()}</div>
             <div className="font-medium">{r.targetType} • {r.reason}</div>
             <div className="text-sm">Target: {r.targetId}</div>
-            {r.details && <div className="text-sm text-gray-700 mt-1">{r.details}</div>}
-            <div className="mt-3 text-xs">Status: <span className="font-medium">{r.status}</span></div>
+            {r.details && <div className="text-sm text-muted-foreground mt-1">{r.details}</div>}
+            <div className="mt-3 text-xs">Status: <Badge variant={r.status === 'resolved' ? 'success' : (r.status === 'dismissed' ? 'outline' : 'warning')} className="ml-1">{r.status}</Badge></div>
             <div className="mt-3 flex flex-wrap gap-2">
               <form action={resolveReport} method="post">
                 <input type="hidden" name="id" value={String(r._id)} />
                 <input type="hidden" name="status" value="resolved" />
-                <button type="submit" className="px-3 py-1.5 text-xs rounded bg-green-600 text-white">Resolve</button>
+                <Button type="submit" size="xs">Resolve</Button>
               </form>
               <form action={resolveReport} method="post">
                 <input type="hidden" name="id" value={String(r._id)} />
                 <input type="hidden" name="status" value="dismissed" />
-                <button type="submit" className="px-3 py-1.5 text-xs rounded bg-gray-600 text-white">Dismiss</button>
+                <Button type="submit" size="xs" variant="secondary">Dismiss</Button>
               </form>
               {r.targetType === 'user' && (
                 <form action={blockUserAction} method="post" className="flex items-center gap-2">
                   <input type="hidden" name="userId" value={r.targetId} />
                   <input type="hidden" name="block" value="true" />
                   <input className="border px-2 py-1 text-xs" name="reason" placeholder="Reason" />
-                  <button type="submit" className="px-3 py-1.5 text-xs rounded bg-red-600 text-white">Block User</button>
+                  <Button type="submit" size="xs" variant="destructive">Block User</Button>
                 </form>
               )}
               {r.targetType === 'post' && (
@@ -111,11 +114,11 @@ export default async function ReportsPage() {
                     <option value="removed">removed</option>
                   </select>
                   <input className="border px-2 py-1 text-xs" name="flags" placeholder="flags,comma,separated" />
-                  <button type="submit" className="px-3 py-1.5 text-xs rounded bg-yellow-600 text-white">Update Post</button>
+                  <Button type="submit" size="xs" variant="secondary">Update Post</Button>
                 </form>
               )}
             </div>
-          </div>
+          </Card>
         ))}
       </div>
     </div>

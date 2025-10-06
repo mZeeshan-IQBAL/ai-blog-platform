@@ -5,6 +5,7 @@ import Stats from "@/components/homepage/Stats";
 import Testimonials from "@/components/homepage/Testimonials";
 import Trending from "@/components/homepage/Trending";
 import ForYou from "@/components/homepage/ForYou";
+import CTA from "@/components/homepage/CTA";
 
 export const metadata = {
   title: "BlogSphere | Write, Read & Share Amazing Stories",
@@ -21,6 +22,7 @@ export default function HomePage() {
       <ForYou />
       <Stats />
       <Testimonials />
+      <CTA />
       <Trending />
     </main>
   );

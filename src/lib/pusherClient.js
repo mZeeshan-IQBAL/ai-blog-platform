@@ -2,6 +2,7 @@
 import Pusher from "pusher-js";
 
 let pusherClient = null;
+let warned = false;
 
 export const getPusherClient = () => {
   // Only run on client-side
@@ -9,18 +10,34 @@ export const getPusherClient = () => {
     return null;
   }
 
+  // Ensure env vars exist
+  const key = process.env.NEXT_PUBLIC_PUSHER_KEY;
+  const cluster = process.env.NEXT_PUBLIC_PUSHER_CLUSTER;
+  if (!key || !cluster) {
+    if (!warned && process.env.NODE_ENV === "development") {
+      console.warn(
+        "[pusher] Missing NEXT_PUBLIC_PUSHER_KEY or NEXT_PUBLIC_PUSHER_CLUSTER. Client will be disabled."
+      );
+      warned = true;
+    }
+    return null;
+  }
+
   // Create singleton instance
   if (!pusherClient) {
-    pusherClient = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY, {
-      cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER,
+    if (process.env.NODE_ENV === "development") {
+      // Verbose logs in dev to surface connection/auth errors
+      Pusher.logToConsole = true;
+    }
+
+    pusherClient = new Pusher(key, {
+      cluster,
       forceTLS: true,
       authEndpoint: "/api/pusher/auth",
-      auth: { 
-        withCredentials: true 
+      auth: {
+        withCredentials: true,
       },
-      // Add debug mode for development
-      enabledTransports: ['ws', 'wss'],
-      disabledTransports: ['sockjs']
+      // Use defaults for transports; Pusher will negotiate the best option.
     });
 
     // Optional: Log connection events for debugging
@@ -32,8 +49,14 @@ export const getPusherClient = () => {
       console.log("❌ Pusher disconnected");
     });
 
-    pusherClient.connection.bind("error", (err) => {
-      console.error("🚨 Pusher error:", err);
+    pusherClient.connection.bind("state_change", (states) => {
+      // states = { previous: string, current: string }
+      console.log("ℹ️ Pusher state:", states);
+    });
+
+    pusherClient.connection.bind("error", (evt) => {
+      const { type, error } = evt || {};
+      console.error("🚨 Pusher error:", type || evt, error || evt);
     });
   }
 

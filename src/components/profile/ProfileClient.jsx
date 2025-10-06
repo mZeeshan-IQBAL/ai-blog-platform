@@ -192,7 +192,7 @@ export default function ProfileClient() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm border border-white/50 p-8 mb-8"
+          className="card card-padding card-hover mb-8"
         >
           <div className="flex flex-col lg:flex-row lg:items-center gap-8">
             {/* Avatar and Basic Info */}
@@ -206,25 +206,25 @@ export default function ProfileClient() {
               />
               
               <div className="text-center sm:text-left">
-                <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-2">
                   {profile?.name || session?.user?.name}
                 </h1>
                 <p className="text-gray-600 mb-1">{profile?.email || session?.user?.email}</p>
                 {profile?.bio && (
-                  <p className="text-gray-700 max-w-md">{profile.bio}</p>
+                  <p className="text-muted-foreground max-w-md">{profile.bio}</p>
                 )}
                 {profile?.website && (
                   <a 
                     href={profile.website}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-blue-600 hover:underline text-sm"
+                    className="text-primary hover:underline text-sm"
                   >
                     🌐 {profile.website}
                   </a>
                 )}
                 {profile?.location && (
-                  <p className="text-gray-500 text-sm mt-1">
+                  <p className="text-muted-foreground text-sm mt-1">
                     📍 {profile.location}
                   </p>
                 )}
@@ -235,13 +235,13 @@ export default function ProfileClient() {
             <div className="lg:ml-auto flex flex-col sm:flex-row gap-3">
               <button
                 onClick={() => setShowEditModal(true)}
-                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                className="px-6 py-2 rounded-lg font-medium text-white brand-gradient hover:brightness-110"
               >
                 Edit Profile
               </button>
               <Link
                 href="/dashboard"
-                className="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium text-center"
+                className="px-6 py-2 rounded-lg font-medium text-center bg-secondary text-foreground hover:bg-accent/20"
               >
                 Dashboard
               </Link>
@@ -249,7 +249,7 @@ export default function ProfileClient() {
           </div>
 
           {/* Join Date */}
-          <div className="mt-6 pt-6 border-t border-gray-200">
+          <div className="mt-6 pt-6 border-t border-border">
             <p className="text-sm text-gray-500">
               📅 Joined {new Date(profile?.createdAt || session?.user?.createdAt || Date.now()).toLocaleDateString('en-US', {
                 year: 'numeric',

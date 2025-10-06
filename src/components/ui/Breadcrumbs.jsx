@@ -1,5 +1,5 @@
-//src/components/ui/Breadcrumbs.jsx
 "use client";
+//src/components/ui/Breadcrumbs.jsx
 
 import Link from "next/link";
 import { Home } from "lucide-react";

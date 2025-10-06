@@ -3,8 +3,8 @@ import Image from "next/image";
 import Link from "next/link";
 import FollowButton from "@/components/engagement/FollowButton";
 import { FaFacebookF, FaTwitter, FaLinkedinIn } from "react-icons/fa";
-import dynamic from "next/dynamic";
-const ReportButton = dynamic(() => import("@/components/moderation/ReportButton"), { ssr: false });
+import ClientReportButton from "./ClientReportButton";
+import Avatar, { AvatarSizes } from "@/components/ui/Avatar";
 
 export default function PostHeader({ blog }) {
   // Simple reading time estimation (200 words/minute)
@@ -39,25 +39,14 @@ export default function PostHeader({ blog }) {
       {/* Meta Info */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between text-muted-foreground text-sm gap-4 mb-6">
         <div className="flex items-center gap-3">
-          {/* Author Avatar - Clickable */}
-          <Link 
-            href={`/profile/${authorId}`}
-            className="flex-shrink-0 hover:opacity-80 transition-opacity"
-          >
-            {authorImage ? (
-              <Image
-                src={authorImage}
-                alt={authorName}
-                width={40}
-                height={40}
-                className="rounded-full border-2 border-background"
-              />
-            ) : (
-              <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-muted-foreground font-semibold">
-                {authorName.charAt(0).toUpperCase()}
-              </div>
-            )}
-          </Link>
+          {/* Author Avatar - Clickable with fallback */}
+          <Avatar
+            src={authorImage}
+            alt={authorName}
+            size={AvatarSizes.sm}
+            userId={authorId}
+            className="ring-2 ring-background"
+          />
           
           <div>
             {/* Author Name - Clickable */}
@@ -138,7 +127,7 @@ export default function PostHeader({ blog }) {
           </a>
         </div>
         <div className="ml-auto">
-          <ReportButton targetType="post" targetId={blog.id || blog._id || blog.slug} />
+<ClientReportButton targetType="post" targetId={blog.id || blog._id || blog.slug} />
         </div>
       </div>
     </header>

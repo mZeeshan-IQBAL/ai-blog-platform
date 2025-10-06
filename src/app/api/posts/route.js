@@ -166,18 +166,24 @@ export async function GET() {
       .sort({ createdAt: -1 })
       .lean(); // Use lean() for performance
 
-    // Backfill authorName/authorImage when missing by joining with User collection
+    // Backfill/sanitize author info by joining with User collection
     try {
       const { default: User } = await import("@/models/User");
       const authorIds = Array.from(new Set(posts.map(p => String(p.authorId)).filter(Boolean)));
       if (authorIds.length) {
         const users = await User.find({ _id: { $in: authorIds } }).select("name image").lean();
         const userMap = new Map(users.map(u => [String(u._id), u]));
+        const isValidUrl = (url) => typeof url === 'string' && /^https?:\/\//.test(url);
         for (const p of posts) {
-          if ((!p.authorName || p.authorName === "") && p.authorId && userMap.has(String(p.authorId))) {
+          if (p.authorId && userMap.has(String(p.authorId))) {
             const u = userMap.get(String(p.authorId));
-            p.authorName = u?.name || p.authorName || "Anonymous";
-            p.authorImage = u?.image || p.authorImage || null;
+            if (!p.authorName || p.authorName === "") {
+              p.authorName = u?.name || p.authorName || "Anonymous";
+            }
+            // If authorImage is missing or not a proper URL (e.g., "600x600"), replace with user's profile image
+            if (!p.authorImage || !isValidUrl(p.authorImage)) {
+              p.authorImage = u?.image || null;
+            }
           }
         }
       }

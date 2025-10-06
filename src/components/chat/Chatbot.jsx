@@ -147,15 +147,15 @@ export default function Chatbot({ onClose }) {
       <div className="fixed bottom-4 right-4 z-[100]">
         <button
           onClick={() => setIsMinimized(false)}
-          className="w-16 h-16 bg-gradient-to-br from-gray-800 to-black rounded-full shadow-2xl flex items-center justify-center text-white hover:scale-105 transition-all duration-300 relative"
+          className="w-16 h-16 brand-gradient rounded-full shadow-glow flex items-center justify-center text-white hover:brightness-110 active:brightness-95 transition-all duration-300 relative"
           aria-label="Open AI Assistant"
         >
           <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
           </svg>
           {connectionStatus === "error" && (
-            <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center">
-              <span className="text-white text-xs">!</span>
+            <div className="absolute -top-1 -right-1 w-4 h-4 bg-destructive rounded-full flex items-center justify-center">
+              <span className="text-destructive-foreground text-xs">!</span>
             </div>
           )}
         </button>
@@ -164,17 +164,17 @@ export default function Chatbot({ onClose }) {
   }
 
   return (
-    <div className="fixed bottom-6 right-4 top-24 w-96 bg-white shadow-2xl rounded-2xl border border-gray-200 z-[100] flex flex-col">
+    <div className="fixed bottom-6 right-4 top-24 w-96 card shadow-2xl z-[100] flex flex-col">
       {/* Header */}
-      <div className="relative bg-gradient-to-br from-gray-800 via-gray-900 to-black text-white p-4 flex-shrink-0 rounded-t-2xl">
-        <div className="absolute inset-0 opacity-10 rounded-t-2xl">
+      <div className="relative brand-gradient text-white card-padding flex-shrink-0 rounded-t-2xl">
+        <div className="absolute inset-0 opacity-10 rounded-t-2xl bg-radial-fade">
           <div className="absolute top-2 right-2 w-20 h-20 border border-white/20 rounded-full"></div>
           <div className="absolute bottom-2 left-2 w-12 h-12 border border-white/20 rounded-full"></div>
         </div>
 
         <div className="relative flex justify-between items-center">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-white/20 to-white/10 backdrop-blur-sm rounded-xl flex items-center justify-center border border-white/20">
+            <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center border border-white/30">
               <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
@@ -185,10 +185,10 @@ export default function Chatbot({ onClose }) {
                 <div
                   className={`w-2 h-2 rounded-full ${
                     connectionStatus === "connected"
-                      ? "bg-green-400"
+                      ? "bg-success"
                       : connectionStatus === "error"
-                      ? "bg-red-400"
-                      : "bg-yellow-400"
+                      ? "bg-destructive"
+                      : "bg-warning"
                   }`}
                 />
                 <p className="text-xs text-white/80">
@@ -238,20 +238,20 @@ export default function Chatbot({ onClose }) {
       </div>
 
       {/* Chat messages */}
-      <div className="flex-1 p-4 overflow-y-auto space-y-4 bg-gradient-to-b from-gray-50 to-white">
+      <div className="flex-1 p-3 overflow-y-auto space-y-3 bg-background">
         {messages.map((msg) => (
           <div key={msg.id} className={`flex ${msg.role === "assistant" ? "justify-start" : "justify-end"}`}>
             <div className={`max-w-[85%] ${msg.role === "assistant" ? "order-2" : ""}`}>
               {msg.role === "assistant" && (
                 <div className="flex items-center gap-2 mb-1">
-                  <div className="w-6 h-6 bg-gradient-to-br from-gray-700 to-black rounded-full flex items-center justify-center">
-                    <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="w-5 h-5 brand-gradient rounded-full flex items-center justify-center">
+                    <svg className="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                     </svg>
                   </div>
-                  <span className="text-xs text-gray-500 font-medium">AI Assistant</span>
+                  <span className="text-[10px] text-muted-foreground font-medium">AI Assistant</span>
                   {msg.isError && (
-                    <button onClick={retryLastMessage} className="text-xs text-red-500 hover:text-red-700 ml-2">
+                    <button onClick={retryLastMessage} className="text-[10px] text-destructive hover:text-destructive/80 ml-2">
                       Retry
                     </button>
                   )}
@@ -259,29 +259,29 @@ export default function Chatbot({ onClose }) {
               )}
 
               <div
-                className={`p-3 rounded-2xl relative transition-all duration-200 ${
+                className={`p-2 rounded-2xl relative transition-all duration-200 ${
                   msg.role === "assistant"
-                    ? `bg-white border ${msg.isError ? "border-red-200" : "border-gray-200"} text-gray-800 shadow-sm hover:shadow-md`
-                    : "bg-gradient-to-br from-gray-800 to-black text-white shadow-md hover:shadow-lg"
+                    ? `bg-card border ${msg.isError ? "border-destructive/20" : "border-border"} text-card-foreground shadow-sm hover:shadow-md`
+                    : "brand-gradient text-white shadow-md hover:shadow-lg"
                 }`}
               >
                 {msg.role === "assistant" && (
-                  <div className={`absolute -left-2 top-4 w-0 h-0 border-t-8 border-t-transparent border-b-8 border-b-transparent border-r-8 ${msg.isError ? "border-r-red-200" : "border-r-gray-200"}`}></div>
+                  <div className={`absolute -left-2 top-4 w-0 h-0 border-t-8 border-t-transparent border-b-8 border-b-transparent border-r-8 ${msg.isError ? "border-r-destructive/20" : "border-r-border"}`}></div>
                 )}
                 {msg.role === "user" && (
-                  <div className="absolute -right-2 top-4 w-0 h-0 border-t-8 border-t-transparent border-b-8 border-b-transparent border-l-8 border-l-gray-800"></div>
+                  <div className="absolute -right-2 top-4 w-0 h-0 border-t-8 border-t-transparent border-b-8 border-b-transparent border-l-8 border-l-primary"></div>
                 )}
 
-                <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</p>
-                <p className={`text-xs mt-2 ${msg.role === "assistant" ? "text-gray-400" : "text-white/60"}`}>
+                <p className="text-xs leading-relaxed whitespace-pre-wrap">{msg.content}</p>
+                <p className={`text-[10px] mt-1 ${msg.role === "assistant" ? "text-muted-foreground" : "text-white/70"}`}>
                   {msg.timestamp}
                 </p>
               </div>
 
               {msg.role === "user" && (
                 <div className="flex items-center gap-2 mt-1 justify-end">
-                  <span className="text-xs text-gray-500 font-medium">You</span>
-                  <div className="w-6 h-6 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
+                  <span className="text-[10px] text-muted-foreground font-medium">You</span>
+                  <div className="w-5 h-5 brand-gradient rounded-full flex items-center justify-center text-white text-[10px] font-bold">
                     U
                   </div>
                 </div>
@@ -293,16 +293,16 @@ export default function Chatbot({ onClose }) {
         {(loading || isTyping) && (
           <div className="flex justify-start">
             <div className="flex items-center gap-2">
-              <div className="w-6 h-6 bg-gradient-to-br from-gray-700 to-black rounded-full flex items-center justify-center">
+              <div className="w-6 h-6 brand-gradient rounded-full flex items-center justify-center">
                 <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
               </div>
-              <div className="bg-white border border-gray-200 rounded-2xl p-3 shadow-sm">
+              <div className="bg-card border border-border rounded-2xl p-3 shadow-sm">
                 <div className="flex gap-1">
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "0.1s" }}></div>
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "0.2s" }}></div>
+                  <div className="w-2 h-2 bg-primary/60 rounded-full animate-bounce"></div>
+                  <div className="w-2 h-2 bg-primary/60 rounded-full animate-bounce" style={{ animationDelay: "0.1s" }}></div>
+                  <div className="w-2 h-2 bg-primary/60 rounded-full animate-bounce" style={{ animationDelay: "0.2s" }}></div>
                 </div>
               </div>
             </div>
@@ -312,13 +312,13 @@ export default function Chatbot({ onClose }) {
       </div>
 
       {/* Quick Actions */}
-      <div className="px-4 py-2 bg-gray-50 border-t flex-shrink-0">
-        <div className="flex gap-2 flex-wrap">
+      <div className="p-2 bg-muted border-t border-border flex-shrink-0">
+        <div className="flex gap-1 flex-wrap">
           {quickActions.map((action, index) => (
             <button
               key={index}
               onClick={action.action}
-              className="px-3 py-1 bg-white border border-gray-200 rounded-full text-xs text-gray-600 hover:bg-gray-100 transition-colors"
+              className="px-2 py-1 bg-background border border-border rounded-full text-[10px] text-muted-foreground hover:bg-card hover:text-foreground transition-colors"
             >
               {action.text}
             </button>
@@ -327,7 +327,7 @@ export default function Chatbot({ onClose }) {
       </div>
 
       {/* Input */}
-      <div className="p-4 border-t bg-white flex-shrink-0 rounded-b-2xl">
+      <div className="p-3 border-t border-border bg-card flex-shrink-0 rounded-b-2xl">
         <div className="flex gap-3 items-end">
           <div className="flex-1 relative">
             <textarea
@@ -339,11 +339,11 @@ export default function Chatbot({ onClose }) {
               rows="1"
               maxLength={500}
               aria-label="Your message"
-              className="w-full px-4 py-3 border border-gray-200 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-gray-800 focus:border-transparent resize-none bg-gray-50 hover:bg-white transition-colors"
+              className="w-full px-4 py-3 border border-input rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent resize-none bg-background hover:bg-card transition-colors text-foreground placeholder:text-muted-foreground"
               style={{ minHeight: "44px", maxHeight: "100px" }}
               disabled={loading}
             />
-            <div className="absolute right-2 bottom-2 text-xs text-gray-400">
+            <div className="absolute right-2 bottom-2 text-xs text-muted-foreground">
               {input.length > 0 && `${input.length}/500`}
               <span className="ml-2">Press Enter to send</span>
             </div>
@@ -351,7 +351,7 @@ export default function Chatbot({ onClose }) {
           <button
             onClick={() => sendMessage()}
             disabled={loading || !input.trim()}
-            className="w-11 h-11 bg-gradient-to-br from-gray-800 to-black text-white rounded-2xl hover:from-gray-900 hover:to-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center shadow-md hover:shadow-lg"
+            className="w-11 h-11 brand-gradient text-white rounded-2xl hover:brightness-110 active:brightness-95 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center shadow-md hover:shadow-lg"
             aria-label="Send message"
           >
             {loading ? (
@@ -363,7 +363,7 @@ export default function Chatbot({ onClose }) {
             )}
           </button>
         </div>
-        <p className="text-xs text-gray-400 mt-2 text-center">
+        <p className="text-[10px] text-muted-foreground mt-1 text-center">
           AI responses may vary. Always verify important information.
         </p>
       </div>

@@ -11,17 +11,20 @@ export async function getTrending(limit = 10) {
     $or: [ { trending: true }, { trending: { $exists: false } } ] // treat missing as true for backward compatibility
   }).lean();
 
-  // Backfill author info if missing
+  // Backfill/sanitize author info
   try {
     const authorIds = Array.from(new Set(posts.map((p) => String(p.authorId)).filter(Boolean)));
     if (authorIds.length) {
       const users = await User.find({ _id: { $in: authorIds } }).select("name image").lean();
       const userMap = new Map(users.map((u) => [String(u._id), u]));
+      const isValidUrl = (url) => typeof url === 'string' && /^https?:\/\//.test(url);
       for (const p of posts) {
-        if ((!p.authorName || p.authorName === "") && p.authorId && userMap.has(String(p.authorId))) {
-          const u = userMap.get(String(p.authorId));
+        const u = userMap.get(String(p.authorId));
+        if (!p.authorName || p.authorName === "") {
           p.authorName = u?.name || p.authorName || "Anonymous";
-          p.authorImage = u?.image || p.authorImage || "/images/placeholder.jpg";
+        }
+        if (!isValidUrl(p.authorImage)) {
+          p.authorImage = isValidUrl(u?.image) ? u.image : "";
         }
       }
     }

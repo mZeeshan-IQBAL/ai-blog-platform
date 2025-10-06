@@ -1,8 +1,9 @@
 // src/app/layout.js
 import "./globals.css";
 import Providers from "./providers";
-import Navbar from "@/components/layout/Navbar";
+import Navbar from "@/components/layout/NavbarPro";
 import Footer from "@/components/layout/Footer";
+import FloatingAssistant from "@/components/chat/FloatingAssistant";
 import { auth } from "@/lib/auth";
 import { Inter } from "next/font/google";
 
@@ -39,6 +40,7 @@ export default async function RootLayout({ children }) {
           <Navbar />
           <main className="min-h-[calc(100vh-64px)]">{children}</main>
           <Footer />
+          <FloatingAssistant />
         </Providers>
       </body>
     </html>

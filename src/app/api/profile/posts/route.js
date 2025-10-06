@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { connectToDB } from "@/lib/db";
 import Post from "@/models/Post";
+import User from "@/models/User";
 
 export async function GET() {
   try {
@@ -18,6 +19,12 @@ export async function GET() {
       .sort({ createdAt: -1 })
       .lean();
 
+    // Backfill author fields from current user profile to avoid stale/empty post.authorImage
+    let userProfile = null;
+    try {
+      userProfile = await User.findById(session.user.id).select("name image").lean();
+    } catch (_) {}
+
     // Format posts for BlogCard component
     const formattedPosts = posts.map(post => ({
       id: post._id.toString(),
@@ -28,13 +35,13 @@ export async function GET() {
       excerpt: post.summary || (post.content ? post.content.substring(0, 150) + "..." : ""),
       category: post.category,
       tags: post.tags,
-      coverImage: post.coverImage,
-      authorName: post.authorName,
-      authorImage: post.authorImage,
+      coverImage: post.coverImage || "/images/placeholder.jpg",
+      authorName: post.authorName || userProfile?.name || session.user.name || "Anonymous",
+      authorImage: post.authorImage || userProfile?.image || session.user.image || "/images/placeholder.jpg",
       authorId: post.authorId,
-      likes: post.likes,
-      comments: post.comments,
-      views: post.views,
+      likes: Array.isArray(post.likes) ? post.likes.length : post.likes || 0,
+      comments: Array.isArray(post.comments) ? post.comments.length : 0,
+      views: post.views || 0,
       createdAt: post.createdAt
     }));
 

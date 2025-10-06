@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { connectToDB } from "@/lib/db";
 import User from "@/models/User";
+import { cacheDel } from "@/lib/redis";
 
 export async function GET() {
   try {
@@ -48,6 +49,9 @@ export async function PUT(request) {
       },
       { new: true }
     );
+
+    // Invalidate cached blog lists so updated name/image reflect in cards
+    try { await cacheDel("posts:all:v2"); } catch (_) {}
 
     return Response.json(updatedUser);
   } catch (error) {

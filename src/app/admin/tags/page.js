@@ -3,6 +3,8 @@ import { auth } from "@/lib/auth";
 import { connectToDB } from "@/lib/db";
 import Post from "@/models/Post";
 import Link from "next/link";
+import { Card } from "@/components/ui/Card";
+import { Button } from "@/components/ui/Button";
 import { redirect } from "next/navigation";
 
 export const metadata = { title: "Admin | Tags", robots: { index: false, follow: false } };
@@ -44,30 +46,30 @@ export default async function AdminTagsPage() {
       {items.length === 0 ? (
         <div className="text-sm text-gray-600">No tags.</div>
       ) : (
-        <div className="overflow-hidden rounded-lg border border-gray-200">
+        <Card className="overflow-hidden">
           <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+            <thead className="bg-muted">
               <tr>
                 <th className="px-4 py-3 text-left text-xs font-medium">Tag</th>
                 <th className="px-4 py-3 text-left text-xs font-medium">Count</th>
                 <th className="px-4 py-3" />
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="divide-y divide-border">
               {items.map(it => (
                 <tr key={it.tag}>
                   <td className="px-4 py-3 text-sm font-medium">#{it.tag}</td>
                   <td className="px-4 py-3 text-sm text-gray-600">{it.count}</td>
                   <td className="px-4 py-3 text-right">
-                    <Link className="text-xs text-blue-600 hover:underline" href={`/tags/${encodeURIComponent(it.tag)}`}>
+                    <Button as="link" href={`/tags/${encodeURIComponent(it.tag)}`} variant="link" size="xs">
                       View public page
-                    </Link>
+                    </Button>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
-        </div>
+        </Card>
       )}
       <p className="text-xs text-gray-500 mt-3">Tip: We can add rename/merge tools later.</p>
     </div>

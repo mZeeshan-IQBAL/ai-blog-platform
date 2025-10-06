@@ -1,5 +1,5 @@
-// src/app/providers.js
 'use client';
+// src/app/providers.js
 import { SessionProvider } from "next-auth/react";
 import { Toaster } from 'react-hot-toast';
 

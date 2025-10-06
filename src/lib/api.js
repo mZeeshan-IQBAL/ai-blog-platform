@@ -13,6 +13,10 @@ function stripHtml(input) {
   return String(input).replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim();
 }
 
+function isValidUrl(url) {
+  return typeof url === "string" && /^https?:\/\//.test(url);
+}
+
 /**
  * Get all unique tags (cached)
  */
@@ -31,6 +35,29 @@ export async function getAllTags() {
   return clean;
 }
 
+/**
+ * Get all unique categories used by posts (cached)
+ */
+export async function getAllCategories() {
+  const key = "categories:all";
+  const cached = await cacheGet(key);
+  if (cached) return JSON.parse(cached);
+
+  await connectToDB();
+  const categories = await Post.distinct("category", {
+    published: true,
+    $or: [{ scheduledAt: null }, { scheduledAt: { $lte: new Date() } }],
+    $and: [{ $or: [{ deletedAt: null }, { deletedAt: { $exists: false } }] }],
+  });
+  const clean = (categories || [])
+    .map((c) => (c || "").toString().trim())
+    .filter(Boolean)
+    .filter((c) => c.toLowerCase() !== "")
+    .sort((a, b) => a.localeCompare(b));
+  await cacheSet(key, JSON.stringify(clean), 300);
+  return clean;
+}
+
 function toSummary(content, summary) {
   const s = stripHtml(summary || "");
   if (s) return s.length > 150 ? s.slice(0, 150) + "..." : s;
@@ -43,7 +70,7 @@ function toSummary(content, summary) {
  */
 export async function getAllBlogs() {
   // Bump the cache key version to avoid stale values that had missing author info
-  const cacheKey = "posts:all:v2";
+  const cacheKey = "posts:all:v3";
   const cached = await cacheGet(cacheKey);
   if (cached) return JSON.parse(cached);
 
@@ -58,7 +85,7 @@ export async function getAllBlogs() {
       .sort({ createdAt: -1 })
       .lean();
 
-    // Backfill missing author name/image from User collection
+    // Backfill/sanitize author info from User collection
     try {
       const { default: User } = await import("@/models/User");
       const authorIds = Array.from(new Set(posts.map(p => String(p.authorId)).filter(Boolean)));
@@ -66,10 +93,13 @@ export async function getAllBlogs() {
         const users = await User.find({ _id: { $in: authorIds } }).select("name image").lean();
         const userMap = new Map(users.map(u => [String(u._id), u]));
         for (const p of posts) {
-          if ((!p.authorName || p.authorName === "") && p.authorId && userMap.has(String(p.authorId))) {
-            const u = userMap.get(String(p.authorId));
+          const u = p.authorId ? userMap.get(String(p.authorId)) : null;
+          if (!p.authorName || p.authorName === "") {
             p.authorName = u?.name || p.authorName || "Anonymous";
-            p.authorImage = u?.image || p.authorImage || "/images/placeholder.jpg";
+          }
+          if (!isValidUrl(p.authorImage)) {
+            // Replace non-URL or empty values with the actual user image if available
+            p.authorImage = isValidUrl(u?.image) ? u.image : "";
           }
         }
       }
@@ -89,7 +119,7 @@ export async function getAllBlogs() {
         author: {
           id: post.authorId,
           name: post.authorName || "Anonymous",
-          image: post.authorImage || "/images/placeholder.jpg",
+          image: isValidUrl(post.authorImage) ? post.authorImage : undefined,
         },
         tags: post.tags || [],
         likes: Array.isArray(post.likes) ? post.likes.length : post.likes || 0,
@@ -128,6 +158,18 @@ export async function getBlog(idOrSlug) {
     if (!post) return null;
     if (post.deletedAt) return null;
 
+    // Backfill/sanitize author image for this single post
+    try {
+      if (!isValidUrl(post.authorImage) && post.authorId) {
+        const { default: User } = await import("@/models/User");
+        const u = await User.findById(post.authorId).select("image name").lean();
+        if (u) {
+          if (!post.authorName || post.authorName === "") post.authorName = u.name || post.authorName || "Anonymous";
+          post.authorImage = isValidUrl(u?.image) ? u.image : "";
+        }
+      }
+    } catch (_) {}
+
     const words = String(post.content || "").trim().split(/\s+/).length;
     const readTimeMins = Math.max(1, Math.ceil(words / 200));
 
@@ -140,7 +182,7 @@ export async function getBlog(idOrSlug) {
       author: {
         id: post.authorId,
         name: post.authorName || "Anonymous",
-        image: post.authorImage || "/images/placeholder.jpg", // ✅ fixed
+        image: isValidUrl(post.authorImage) ? post.authorImage : undefined, // sanitize
       },
       tags: post.tags || [],
       likes: Array.isArray(post.likes) ? post.likes.length : post.likes || 0,
@@ -224,6 +266,19 @@ export async function getPostsByTag(tag) {
       .sort({ createdAt: -1 })
       .lean();
 
+    // Backfill/sanitize author images
+    try {
+      const { default: User } = await import("@/models/User");
+      const authorIds = Array.from(new Set(posts.map(p => String(p.authorId)).filter(Boolean)));
+      const users = await User.find({ _id: { $in: authorIds } }).select("name image").lean();
+      const userMap = new Map(users.map(u => [String(u._id), u]));
+      for (const p of posts) {
+        const u = userMap.get(String(p.authorId));
+        if (!p.authorName || p.authorName === "") p.authorName = u?.name || p.authorName || "Anonymous";
+        if (!isValidUrl(p.authorImage)) p.authorImage = isValidUrl(u?.image) ? u.image : "";
+      }
+    } catch (_) {}
+
     const data = posts.map((post) => ({
       id: post._id.toString(),
       slug: post.slug,
@@ -232,7 +287,7 @@ export async function getPostsByTag(tag) {
       author: {
         id: post.authorId,
         name: post.authorName || "Anonymous",
-        image: post.authorImage || "/images/placeholder.jpg", // ✅ fixed
+        image: isValidUrl(post.authorImage) ? post.authorImage : undefined, // sanitize
       },
       tags: post.tags || [],
       createdAt: post.createdAt,
@@ -242,6 +297,62 @@ export async function getPostsByTag(tag) {
     return data;
   } catch (e) {
     console.error("❌ getPostsByTag failed:", e);
+    return [];
+  }
+}
+
+/**
+ * Fetch posts filtered by category (cached)
+ */
+export async function getPostsByCategory(category) {
+  const key = `posts:category:${category}`;
+  const cached = await cacheGet(key);
+  if (cached) return JSON.parse(cached);
+
+  await connectToDB();
+  try {
+    const now = new Date();
+    const posts = await Post.find({
+      published: true,
+      $or: [{ scheduledAt: null }, { scheduledAt: { $lte: now } }],
+      category,
+      $and: [{ $or: [{ deletedAt: null }, { deletedAt: { $exists: false } }] }]
+    })
+      .sort({ createdAt: -1 })
+      .lean();
+
+    // Backfill/sanitize author images
+    try {
+      const { default: User } = await import("@/models/User");
+      const authorIds = Array.from(new Set(posts.map(p => String(p.authorId)).filter(Boolean)));
+      const users = await User.find({ _id: { $in: authorIds } }).select("name image").lean();
+      const userMap = new Map(users.map(u => [String(u._id), u]));
+      for (const p of posts) {
+        const u = userMap.get(String(p.authorId));
+        if (!p.authorName || p.authorName === "") p.authorName = u?.name || p.authorName || "Anonymous";
+        if (!isValidUrl(p.authorImage)) p.authorImage = isValidUrl(u?.image) ? u.image : "";
+      }
+    } catch (_) {}
+
+    const data = posts.map((post) => ({
+      id: post._id.toString(),
+      slug: post.slug,
+      title: post.title,
+      excerpt: toSummary(post.content, post.summary),
+      author: {
+        id: post.authorId,
+        name: post.authorName || "Anonymous",
+        image: isValidUrl(post.authorImage) ? post.authorImage : undefined,
+      },
+      tags: post.tags || [],
+      createdAt: post.createdAt,
+      coverImage: post.coverImage || "/images/placeholder.jpg",
+    }));
+
+    await cacheSet(key, JSON.stringify(data), 60);
+    return data;
+  } catch (e) {
+    console.error("❌ getPostsByCategory failed:", e);
     return [];
   }
 }

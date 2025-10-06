@@ -7,6 +7,9 @@ import { logAudit } from "@/lib/audit";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import { Card } from "@/components/ui/Card";
+import { Button } from "@/components/ui/Button";
+import { Badge } from "@/components/ui/Badge";
 
 export const metadata = { title: "Admin | Comments", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
@@ -76,9 +79,9 @@ export default async function AdminCommentsPage() {
       {rows.length === 0 ? (
         <div className="text-sm text-gray-600">No comments.</div>
       ) : (
-        <div className="overflow-hidden rounded-lg border border-gray-200">
+        <Card className="overflow-hidden">
           <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+            <thead className="bg-muted">
               <tr>
                 <th className="px-4 py-3 text-left text-xs font-medium">Comment</th>
                 <th className="px-4 py-3 text-left text-xs font-medium">Author</th>
@@ -87,7 +90,7 @@ export default async function AdminCommentsPage() {
                 <th className="px-4 py-3" />
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="divide-y divide-border">
               {rows.map((r) => (
                 <tr key={r.id}>
                   <td className="px-4 py-3 text-sm max-w-md">
@@ -100,28 +103,32 @@ export default async function AdminCommentsPage() {
                       <Link className="text-blue-600 hover:underline" href={`/blog/${r.post.slug}`}>{r.post.title || r.post.slug}</Link>
                     ) : '—'}
                   </td>
-                  <td className="px-4 py-3 text-sm">{r.status}</td>
+                  <td className="px-4 py-3 text-sm">
+                    <Badge variant={r.status === 'approved' ? 'success' : (r.status === 'flagged' ? 'warning' : 'info')}>
+                      {r.status}
+                    </Badge>
+                  </td>
                   <td className="px-4 py-3 text-right whitespace-nowrap space-x-2">
                     <form className="inline" action={setStatus}>
                       <input type="hidden" name="id" value={r.id} />
                       <input type="hidden" name="status" value="approved" />
-                      <button className="px-2 py-1 text-xs rounded bg-green-600 text-white">Approve</button>
+                      <Button size="xs">Approve</Button>
                     </form>
                     <form className="inline" action={setStatus}>
                       <input type="hidden" name="id" value={r.id} />
                       <input type="hidden" name="status" value="flagged" />
-                      <button className="px-2 py-1 text-xs rounded bg-yellow-600 text-white">Flag</button>
+                      <Button size="xs" variant="secondary">Flag</Button>
                     </form>
                     <form className="inline" action={deleteComment}>
                       <input type="hidden" name="id" value={r.id} />
-                      <button className="px-2 py-1 text-xs rounded bg-red-600 text-white">Delete</button>
+                      <Button size="xs" variant="destructive">Delete</Button>
                     </form>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
-        </div>
+        </Card>
       )}
     </div>
   );

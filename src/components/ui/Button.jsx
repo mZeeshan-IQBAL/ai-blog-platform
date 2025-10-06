@@ -13,6 +13,7 @@ const variants = {
   ghost: "hover:bg-accent hover:text-accent-foreground active:bg-accent/80",
   destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90 hover:shadow-md active:bg-destructive/95",
   link: "text-primary underline-offset-4 hover:underline hover:text-primary/80 active:text-primary/90",
+  gradient: "brand-gradient text-white shadow-glow hover:brightness-110 active:brightness-95 btn-glow",
 };
 
 const sizes = {

@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { connectToDB } from "@/lib/db";
 import AuditLog from "@/models/AuditLog";
 import { redirect } from "next/navigation";
+import { Card } from "@/components/ui/Card";
 
 export const metadata = { title: "Admin | Audit Log", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
@@ -38,9 +39,9 @@ export default async function AuditLogPage() {
       {rows.length === 0 ? (
         <div className="text-sm text-gray-600">No audit entries.</div>
       ) : (
-        <div className="overflow-hidden rounded-lg border border-gray-200">
+        <Card className="overflow-hidden">
           <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+            <thead className="bg-muted">
               <tr>
                 <th className="px-4 py-3 text-left text-xs font-medium">Time</th>
                 <th className="px-4 py-3 text-left text-xs font-medium">Actor</th>
@@ -49,7 +50,7 @@ export default async function AuditLogPage() {
                 <th className="px-4 py-3 text-left text-xs font-medium">Meta</th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="divide-y divide-border">
               {rows.map(r => (
                 <tr key={r.id}>
                   <td className="px-4 py-3 text-sm text-gray-600">{new Date(r.time).toLocaleString()}</td>
@@ -63,7 +64,7 @@ export default async function AuditLogPage() {
               ))}
             </tbody>
           </table>
-        </div>
+        </Card>
       )}
     </div>
   );

@@ -4,6 +4,7 @@
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import TipTapEditor from "@/components/editor/TipTapEditor";
+import { CATEGORIES } from "@/lib/categories";
 
 export default function PostForm() {
   const router = useRouter();
@@ -174,11 +175,9 @@ export default function PostForm() {
           onChange={(e) => setCategory(e.target.value)}
           className="w-full p-2 border rounded"
         >
-          <option>General</option>
-          <option>Technology</option>
-          <option>Design</option>
-          <option>Programming</option>
-          <option>Lifestyle</option>
+          {CATEGORIES.map((c) => (
+            <option key={c} value={c}>{c}</option>
+          ))}
         </select>
       </div>
 

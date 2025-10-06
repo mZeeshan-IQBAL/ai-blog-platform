@@ -5,7 +5,7 @@ import { getPostsByTag } from "@/lib/api";
 
 // Generate metadata dynamically based on tag
 export async function generateMetadata({ params }) {
-  const { tag } = params;
+  const { tag } = await params;
   return {
     title: `#${tag} | AI Knowledge Hub`,
     description: `Explore articles and posts tagged with #${tag} on AI Knowledge Hub.`,
@@ -13,7 +13,7 @@ export async function generateMetadata({ params }) {
 }
 
 export default async function TagPage({ params }) {
-  const { tag } = params;
+  const { tag } = await params;
   const posts = await getPostsByTag(tag);
 
   return (

@@ -49,7 +49,7 @@ export default function PublicProfileClient({ user, stats, initialPosts }) {
         </div>
 
         {/* Header */}
-        <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm border border-white/50 p-8 mb-8">
+        <div className="card card-padding card-hover mb-8">
           <div className="flex flex-col lg:flex-row lg:items-center gap-8">
             <div className="flex items-center gap-6">
               <Avatar
@@ -59,14 +59,14 @@ export default function PublicProfileClient({ user, stats, initialPosts }) {
                 className="border-4 border-white shadow-lg"
               />
               <div>
-                <h1 className="text-3xl font-bold text-gray-900">
+                <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
                   {user?.name || "Unknown User"}
                 </h1>
-                {user?.bio && <p className="text-gray-700 mt-2">{user.bio}</p>}
-                <div className="mt-2 text-sm text-gray-600 flex flex-wrap gap-4">
+                {user?.bio && <p className="text-muted-foreground mt-2">{user.bio}</p>}
+                <div className="mt-2 text-sm text-muted-foreground flex flex-wrap gap-4">
                   {user?.location && <span>📍 {user.location}</span>}
                   {user?.website && (
-                    <a href={user.website} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                    <a href={user.website} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
                       🌐 Website
                     </a>
                   )}
@@ -80,7 +80,7 @@ export default function PublicProfileClient({ user, stats, initialPosts }) {
             </div>
             <div className="lg:ml-auto flex gap-3">
               {isOwnProfile ? (
-                <Link href="/profile" className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                <Link href="/profile" className="px-6 py-2 rounded-lg text-white brand-gradient hover:brightness-110">
                   Edit Profile
                 </Link>
               ) : (
@@ -98,16 +98,16 @@ export default function PublicProfileClient({ user, stats, initialPosts }) {
             { label: "Following", value: stats?.following || 0, icon: "👤" },
             { label: "Total Likes", value: stats?.totalLikes || 0, icon: "❤️" },
           ].map((s) => (
-            <div key={s.label} className="bg-white/80 rounded-xl shadow-sm border border-white/50 p-6 text-center">
+            <div key={s.label} className="card card-padding text-center">
               <div className="text-2xl mb-2">{s.icon}</div>
-              <div className="text-2xl font-bold text-gray-900">{s.value.toLocaleString()}</div>
-              <div className="text-sm text-gray-600">{s.label}</div>
+              <div className="text-2xl font-bold text-foreground">{s.value.toLocaleString()}</div>
+              <div className="text-sm text-muted-foreground">{s.label}</div>
             </div>
           ))}
         </div>
 
         {/* Posts */}
-        <div className="bg-white/80 rounded-2xl shadow-sm border border-white/50 p-6">
+        <div className="card card-padding">
           <h2 className="text-lg font-semibold mb-4">Posts</h2>
           {loading ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -128,8 +128,8 @@ export default function PublicProfileClient({ user, stats, initialPosts }) {
           ) : (
             <div className="text-center py-12">
               <div className="text-6xl mb-4">📝</div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">No posts yet</h3>
-              <p className="text-gray-600">This user hasn’t published any posts yet.</p>
+              <h3 className="text-xl font-semibold text-foreground mb-2">No posts yet</h3>
+              <p className="text-muted-foreground">This user hasn’t published any posts yet.</p>
             </div>
           )}
         </div>

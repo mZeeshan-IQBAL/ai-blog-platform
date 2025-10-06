@@ -4,6 +4,9 @@ import { connectToDB } from "@/lib/db";
 import User from "@/models/User";
 import { logAudit } from "@/lib/audit";
 import { redirect } from "next/navigation";
+import { Card } from "@/components/ui/Card";
+import { Button } from "@/components/ui/Button";
+import { Badge } from "@/components/ui/Badge";
 
 export const metadata = { title: "Admin | Users", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
@@ -97,9 +100,9 @@ export default async function UsersPage() {
   return (
     <div className="max-w-6xl mx-auto px-4 py-10">
       <h1 className="text-2xl font-semibold mb-6">Users</h1>
-      <div className="overflow-hidden rounded-lg border border-gray-200">
+      <Card className="overflow-hidden">
         <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+          <thead className="bg-muted">
             <tr>
               <th className="px-4 py-3 text-left text-xs font-medium">Name</th>
               <th className="px-4 py-3 text-left text-xs font-medium">Email</th>
@@ -108,7 +111,7 @@ export default async function UsersPage() {
               <th className="px-4 py-3" />
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody className="divide-y divide-border">
             {users.map(u => (
               <tr key={u.id}>
                 <td className="px-4 py-3 text-sm">{u.name}</td>
@@ -120,14 +123,14 @@ export default async function UsersPage() {
                       <option value="USER">USER</option>
                       <option value="ADMIN">ADMIN</option>
                     </select>
-                    <button className="px-2 py-1 text-xs rounded bg-blue-600 text-white">Save</button>
+                    <Button size="xs">Save</Button>
                   </form>
                 </td>
                 <td className="px-4 py-3 text-sm">
                   {u.blocked ? (
-                    <span className="text-red-600">Blocked</span>
+                    <Badge variant="danger">Blocked</Badge>
                   ) : (
-                    <span className="text-green-600">Active</span>
+                    <Badge variant="success">Active</Badge>
                   )}
                 </td>
                 <td className="px-4 py-3 text-right">
@@ -135,16 +138,16 @@ export default async function UsersPage() {
                     <input type="hidden" name="userId" value={u.id} />
                     <input type="hidden" name="block" value={String(!u.blocked)} />
                     <input name="reason" className="border px-2 py-1 text-xs" placeholder="Reason (optional)" />
-                    <button className={`px-3 py-1.5 text-xs rounded text-white ${u.blocked ? 'bg-green-600' : 'bg-red-600'}`}>
+                    <Button size="xs" variant={u.blocked ? "secondary" : "destructive"}>
                       {u.blocked ? 'Unblock' : 'Block'}
-                    </button>
+                    </Button>
                   </form>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
-      </div>
+      </Card>
     </div>
   );
 }

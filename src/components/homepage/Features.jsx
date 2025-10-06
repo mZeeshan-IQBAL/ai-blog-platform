@@ -2,180 +2,175 @@
 'use client';
 import { useState } from 'react';
 import Link from 'next/link';
+import Reveal from '@/components/ui/Reveal';
+import { CheckCircle, PenTool, Users, LineChart, Sparkles } from 'lucide-react';
 
-const featuresData = [
+// Solutions-style data blocks
+const solutions = [
   {
-    id: 1,
-    title: "Smart Content Discovery",
-    shortDesc: "AI-powered recommendations help you find stories and writers that match your interests perfectly.",
-    detailedDesc: "Our intelligent recommendation system learns from your reading habits and preferences to surface the most engaging content, helping you discover new writers and topics you'll love.",
-    icon: "🔍",
-    color: "bg-blue-100",
-    benefits: [
-      "Personalized story recommendations",
-      "Discover new writers and genres", 
-      "Smart topic suggestions",
-      "Trending content alerts"
+    id: 'writing',
+    title: 'Writing Suite',
+    subtitle: 'Create polished content faster',
+    icon: PenTool,
+    color: 'from-blue-500 to-indigo-600',
+    bullets: [
+      'AI assistant for outlines and edits',
+      'Grammar and tone suggestions',
+      'Markdown/TipTap rich editor',
+      'Version history and drafts',
     ],
-    stats: "87% more relevant content"
+    cta: { label: 'Start writing', href: '/blog/create' },
   },
   {
-    id: 2,
-    title: "Thriving Writer Community",
-    shortDesc: "Connect with passionate writers, readers, and storytellers from around the globe.",
-    detailedDesc: "Join a vibrant community of creative minds where writers support each other, readers engage meaningfully, and everyone contributes to a rich literary ecosystem.",
-    icon: "👥",
-    color: "bg-green-100",
-    benefits: [
-      "Writer support groups",
-      "Reader feedback and engagement",
-      "Writing challenges and prompts",
-      "Literary events and discussions"
+    id: 'growth',
+    title: 'Growth & Analytics',
+    subtitle: 'Understand and grow your audience',
+    icon: LineChart,
+    color: 'from-emerald-500 to-teal-600',
+    bullets: [
+      'Views, reads, and retention',
+      'Top content and tags',
+      'Referrers and geography',
+      'Export insights',
     ],
-    stats: "50K+ active members"
+    cta: { label: 'View analytics', href: '/dashboard/analytics' },
   },
   {
-    id: 3,
-    title: "AI Writing Assistant",
-    shortDesc: "Enhance your writing with intelligent suggestions, grammar checking, and creative inspiration.",
-    detailedDesc: "Our advanced AI writing assistant helps you craft better content with real-time suggestions, grammar corrections, style improvements, and creative prompts to overcome writer's block.",
-    icon: "✍️",
-    color: "bg-purple-100",
-    benefits: [
-      "Real-time writing suggestions",
-      "Grammar and style corrections",
-      "Creative writing prompts",
-      "Content optimization tips"
+    id: 'community',
+    title: 'Community & Engagement',
+    subtitle: 'Build real relationships with readers',
+    icon: Users,
+    color: 'from-fuchsia-500 to-pink-600',
+    bullets: [
+      'Comments and reactions',
+      'Follow writers you love',
+      'Realtime updates via Pusher',
+      'Smart moderation tools',
     ],
-    stats: "95% writer satisfaction"
+    cta: { label: 'Explore community', href: '/blog' },
   },
   {
-    id: 4,
-    title: "Beautiful Reading Experience",
-    shortDesc: "Enjoy distraction-free reading with customizable themes and seamless cross-device sync.",
-    detailedDesc: "Experience content the way it was meant to be read with our clean, elegant interface, customizable reading preferences, and seamless synchronization across all your devices.",
-    icon: "📚",
-    color: "bg-gray-100",
-    benefits: [
-      "Distraction-free reading mode",
-      "Customizable themes and fonts",
-      "Cross-device synchronization",
-      "Offline reading capability"
+    id: 'discovery',
+    title: 'Discovery & Personalization',
+    subtitle: 'Help great stories find the right readers',
+    icon: Sparkles,
+    color: 'from-amber-500 to-orange-600',
+    bullets: [
+      'Trending and For You feeds',
+      'Powerful search and tags',
+      'Topic and author recommendations',
+      'SEO-friendly pages',
     ],
-    stats: "99.9% uptime"
-  }
+    cta: { label: 'Discover stories', href: '/search' },
+  },
 ];
 
-const FeatureCard = ({ feature, isExpanded, onToggle }) => {
+function SolutionCard({ s }) {
+  const Icon = s.icon;
   return (
-    <div 
-      className={`bg-card text-card-foreground rounded-xl border border-border overflow-hidden transition-all duration-300 cursor-pointer transform hover:scale-[1.02] active:scale-[0.98] ${
-        isExpanded ? 'shadow-xl border-primary/20 ring-1 ring-primary/10' : 'hover:shadow-lg hover:border-accent-foreground/20'
-      }`}
-      onClick={() => onToggle(feature.id)}
-    >
-      <div className="card-mobile">
-        {/* Header */}
-        <div className="flex items-start gap-4 mb-4">
-          <div className={`w-12 h-12 ${feature.color} rounded-xl flex items-center justify-center text-xl flex-shrink-0 shadow-md`}>
-            {feature.icon}
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-start justify-between gap-2">
-              <h3 className="text-lg font-semibold leading-tight">
-                {feature.title}
-              </h3>
-              <span className="text-xs text-primary font-medium bg-primary/10 px-2 py-1 rounded-full whitespace-nowrap">
-                {feature.stats}
-              </span>
-            </div>
-          </div>
+    <Reveal className="feature-card">
+      <div className="flex items-start gap-4 mb-4">
+        <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${s.color} text-white inline-flex items-center justify-center shadow-sm`}>
+          <Icon className="w-5 h-5" />
         </div>
-
-        {/* Description */}
-        <p className="text-muted-foreground text-sm leading-relaxed mb-4">
-          {isExpanded ? feature.detailedDesc : feature.shortDesc}
-        </p>
-
-        {/* Expandable content */}
-        <div className={`transition-all duration-300 overflow-hidden ${
-          isExpanded ? 'max-h-40 opacity-100' : 'max-h-0 opacity-0'
-        }`}>
-          <div className="pt-4 border-t border-border">
-            <h4 className="font-medium mb-3 text-sm">Key Benefits:</h4>
-            <ul className="space-y-2">
-              {feature.benefits.map((benefit, idx) => (
-                <li key={idx} className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <svg className="w-4 h-4 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                  {benefit}
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-
-        {/* Expand indicator */}
-        <div className="flex items-center justify-between mt-4 pt-4 border-t border-border">
-          <span className="text-xs sm:text-sm text-muted-foreground font-medium">
-            {isExpanded ? 'Tap to collapse' : 'Tap to learn more'}
-          </span>
-          <div className={`w-8 h-8 rounded-full bg-accent flex items-center justify-center transition-all duration-300 ${
-            isExpanded ? 'bg-primary text-primary-foreground rotate-180' : 'hover:bg-accent/80'
-          }`}>
-            <svg 
-              className="w-4 h-4 transition-transform duration-300" 
-              fill="none" 
-              stroke="currentColor" 
-              viewBox="0 0 24 24"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </svg>
-          </div>
+        <div className="flex-1">
+          <h3 className="text-base font-semibold mb-2">{s.title}</h3>
+          <p className="text-sm text-muted-foreground mb-3">{s.subtitle}</p>
         </div>
       </div>
-    </div>
+      
+      <ul className="space-y-2 mb-4">
+        {s.bullets.map((b, i) => (
+          <li key={i} className="flex items-start gap-2 text-xs">
+            <CheckCircle className="w-3 h-3 text-primary mt-0.5 flex-shrink-0" />
+            <span className="text-muted-foreground leading-relaxed">{b}</span>
+          </li>
+        ))}
+      </ul>
+      
+      <Link 
+        href={s.cta.href} 
+        className="inline-flex items-center text-xs font-medium text-primary hover:text-primary/80 transition-colors"
+      >
+        {s.cta.label}
+        <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+        </svg>
+      </Link>
+    </Reveal>
   );
-};
+}
 
 export default function Features() {
-  const [expandedCard, setExpandedCard] = useState(null);
-
-  const handleToggle = (id) => {
-    setExpandedCard(expandedCard === id ? null : id);
-  };
-
   return (
-    <section className="py-12 sm:py-16 lg:py-20 bg-background animate-fade-in">
-      <div className="max-w-6xl mx-auto container-mobile">
-        {/* Section Header */}
-        <div className="text-center mb-8 sm:mb-12 animate-slide-up">
-          <h2 className="heading-responsive font-bold mb-4 sm:mb-6">
-            Everything writers and readers need
-          </h2>
-          <p className="text-responsive text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-            Powerful tools for writing, discovering, and sharing amazing content with a global community of storytellers.
-          </p>
-        </div>
+    <>
+      {/* Hero continuation - Built for the intelligence age */}
+      <section className="content-section bg-background">
+        <div className="content-container">
+          <div className="text-center mb-16">
+            <Reveal>
+              <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-4">
+                Built for the intelligence age
+              </h2>
+              <p className="text-sm sm:text-base text-muted-foreground max-w-4xl mx-auto leading-relaxed">
+                Integrate AI into every part of your docs lifecycle. Woven into how your knowledge is
+                written, maintained, and understood by both users and LLMs.
+              </p>
+            </Reveal>
+          </div>
 
-        {/* Features Grid - Responsive Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
-          {featuresData.map((feature, index) => (
-            <div 
-              key={feature.id}
-              className="animate-slide-up"
-              style={{ animationDelay: `${index * 150}ms` }}
-            >
-              <FeatureCard
-                feature={feature}
-                isExpanded={expandedCard === feature.id}
-                onToggle={handleToggle}
-              />
-            </div>
-          ))}
+          {/* Two column feature layout */}
+          <div className="grid lg:grid-cols-2 gap-16 lg:gap-24 items-start">
+            {/* Left column - LLMs.txt & MCP */}
+            <Reveal className="space-y-8">
+              <div className="eyebrow-badge">
+                <span className="text-xs font-medium">LLMS.TXT & MCP</span>
+              </div>
+              <div>
+                <h3 className="text-lg sm:text-xl font-bold mb-3">
+                  Built for both people and AI
+                </h3>
+                <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
+                  Ensure your content shows up in the AI workflows users already rely on. We support llms.txt, MCP, and whatever comes next.
+                </p>
+              </div>
+            </Reveal>
+
+            {/* Right column - Agent */}
+            <Reveal className="space-y-8">
+              <div className="eyebrow-badge">
+                <span className="text-xs font-medium">AGENT</span>
+              </div>
+              <div>
+                <h3 className="text-lg sm:text-xl font-bold mb-3">
+                  Self-updating knowledge management
+                </h3>
+                <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
+                  Draft, edit, and maintain content with a context-aware agent. Move faster and more consistently without the documentation debt.
+                </p>
+              </div>
+            </Reveal>
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
+
+      {/* Feature cards section */}
+      <section className="content-section bg-muted/30">
+        <div className="content-container">
+          <Reveal className="text-center mb-12">
+            <h2 className="text-lg sm:text-xl font-bold mb-3">Everything you need to create</h2>
+            <p className="text-sm text-muted-foreground max-w-2xl mx-auto">
+              From AI-powered writing assistance to community engagement—all the tools creators need.
+            </p>
+          </Reveal>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
+            {solutions.map((s) => (
+              <SolutionCard key={s.id} s={s} />
+            ))}
+          </div>
+        </div>
+      </section>
+    </>
   );
 }

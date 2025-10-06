@@ -2,6 +2,8 @@
 const path = require('path');
 
 const nextConfig = {
+  // Silence monorepo/workspace root lockfile warning by pinning tracing root to this project
+  outputFileTracingRoot: path.join(__dirname),
   images: {
     remotePatterns: [
       {

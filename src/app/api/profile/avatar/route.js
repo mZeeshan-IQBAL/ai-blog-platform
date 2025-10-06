@@ -5,6 +5,7 @@ import { authOptions } from "@/lib/auth";
 import { connectToDB } from "@/lib/db";
 import User from "@/models/User";
 import { uploadAvatar } from "@/lib/cloudinary";
+import { cacheDel } from "@/lib/redis";
 
 export async function POST(request) {
   try {
@@ -38,6 +39,10 @@ export async function POST(request) {
       { image: url, updatedAt: new Date() },
       { new: true }
     ).lean();
+
+    // Invalidate cached blog lists so avatars refresh immediately
+    try { await cacheDel("posts:all:v2"); } catch (_) {}
+    try { await cacheDel("posts:all:v3"); } catch (_) {}
 
     return Response.json({ image: updated?.image || url });
   } catch (e) {

@@ -25,12 +25,26 @@ export async function GET() {
   const session = await getServerSession(authOptions);
   await connectToDB();
 
-  // If anonymous, just return trending
+  const isValidUrl = (url) => typeof url === 'string' && /^https?:\/\//.test(url);
+
+  // If anonymous, return recent with author backfill
   if (!session?.user?.id) {
     const posts = await Post.find({ published: true, $or: [{ scheduledAt: null }, { scheduledAt: { $lte: new Date() } }] })
       .sort({ createdAt: -1 })
       .limit(20)
       .lean();
+    try {
+      const authorIds = Array.from(new Set(posts.map(p => String(p.authorId)).filter(Boolean)));
+      if (authorIds.length) {
+        const users = await User.find({ _id: { $in: authorIds } }).select('name image').lean();
+        const userMap = new Map(users.map(u => [String(u._id), u]));
+        for (const p of posts) {
+          const u = userMap.get(String(p.authorId));
+          if (!p.authorName || p.authorName === '') p.authorName = u?.name || p.authorName || 'Anonymous';
+          if (!isValidUrl(p.authorImage)) p.authorImage = isValidUrl(u?.image) ? u.image : '';
+        }
+      }
+    } catch (_) {}
     return Response.json(posts);
   }
 
@@ -63,6 +77,20 @@ export async function GET() {
     .sort({ createdAt: -1 })
     .limit(200)
     .lean();
+
+  // Backfill/sanitize author info for candidates
+  try {
+    const authorIds = Array.from(new Set(candidates.map(p => String(p.authorId)).filter(Boolean)));
+    if (authorIds.length) {
+      const users = await User.find({ _id: { $in: authorIds } }).select('name image').lean();
+      const userMap = new Map(users.map(u => [String(u._id), u]));
+      for (const p of candidates) {
+        const u = userMap.get(String(p.authorId));
+        if (!p.authorName || p.authorName === '') p.authorName = u?.name || p.authorName || 'Anonymous';
+        if (!isValidUrl(p.authorImage)) p.authorImage = isValidUrl(u?.image) ? u.image : '';
+      }
+    }
+  } catch (_) {}
 
   const followedAuthorIdsSet = new Set(followedUserIds.map(String));
   const topTagsSet = new Set(topTags.map(String));
