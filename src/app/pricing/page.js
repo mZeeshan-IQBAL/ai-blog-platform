@@ -114,16 +114,16 @@ export default function PricingPage() {
           <div className="streak" style={{ top: '22%', right: '-30%', transform: 'rotate(18deg)' }} />
           <div className="streak" style={{ top: '38%', left: '-20%', transform: 'rotate(10deg)' }} />
         </div>
-        <div className="py-16 px-4 sm:px-6 lg:px-8">
+        <div className="relative z-10 py-16 px-4 sm:px-6 lg:px-8">
           <div className="max-w-4xl mx-auto text-center">
             <div className="inline-flex items-center gap-2 bg-white/10 text-white px-4 py-2 rounded-full text-sm font-semibold mb-4 border border-white/30">
               💎 One‑time purchase — no auto‑renewal
             </div>
             <h1 className="heading-hero mb-4 text-white">
-              Simple, transparent pricing
+              Plans & Pricing
             </h1>
             <p className="subheading-hero text-white/85 mb-8">
-              Pay once for 30 days of premium features. No hidden fees.
+              Choose the plan that fits your writing. Pay once for 30 days—no hidden fees.
             </p>
           </div>
         </div>

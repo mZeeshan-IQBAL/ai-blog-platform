@@ -117,7 +117,7 @@ export default function BillingContent() {
           onClick={handlePayment}
           disabled={loading}
           className={`w-full py-3 px-4 rounded-lg font-medium text-white ${
-            loading ? 'bg-blue-400' : 'bg-blue-600 hover:bg-blue-700'
+            loading ? 'bg-primary/60' : 'bg-primary hover:bg-primary/90'
           } transition`}
         >
           {loading ? 'Redirecting to Payment...' : 'Pay with EasyPaisa / JazzCash'}

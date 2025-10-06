@@ -486,7 +486,8 @@
 
 /* Button glow (for primary CTAs) */
 .btn-glow {
-  box-shadow: 0 8px 16px rgba(37,99,235,0.35);
+  /* Use brand teal instead of blue */
+  box-shadow: 0 8px 16px rgba(13,147,115,0.35);
 }
 
 /* Section wrapper with decorative background */
@@ -497,6 +498,7 @@
   content: "";
   position: absolute;
   inset: 0;
-  background: radial-gradient(800px 300px at 50% 0%, rgba(37,99,235,0.12), transparent 60%);
+  /* Align decorative glow with brand teal */
+  background: radial-gradient(800px 300px at 50% 0%, rgba(13,147,115,0.12), transparent 60%);
   pointer-events: none;
 }

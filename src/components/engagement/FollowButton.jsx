@@ -115,7 +115,7 @@ export default function FollowButton({ authorId }) {
       className={`px-3 py-1 rounded text-sm transition-all duration-200 font-medium ${
         following
           ? "bg-green-100 text-green-700 hover:bg-green-200"
-          : "bg-blue-100 text-blue-700 hover:bg-blue-200"
+          : "bg-primary/10 text-primary hover:bg-primary/20"
       } ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
     >
       {loading ? (

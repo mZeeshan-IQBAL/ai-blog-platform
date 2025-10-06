@@ -86,7 +86,7 @@ function SearchPageContent() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search by title, content, tags, or category..."
-              className="w-full pl-10 pr-12 py-4 text-lg border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm"
+              className="w-full pl-10 pr-12 py-4 text-lg border border-gray-300 rounded-xl focus:ring-2 focus:ring-ring focus:border-transparent shadow-sm"
               autoFocus
             />
             {query && (
@@ -129,7 +129,7 @@ function SearchPageContent() {
         {/* Loading State */}
         {loading && (
           <div className="flex justify-center py-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
           </div>
         )}
 
@@ -149,13 +149,13 @@ function SearchPageContent() {
             </h3>
             <p className="text-gray-600 mb-6">
               Try different keywords or browse our{" "}
-              <Link href="/blog" className="text-blue-600 hover:underline">
+              <Link href="/blog" className="text-primary hover:underline">
                 latest articles
               </Link>
             </p>
             <button
               onClick={clearSearch}
-              className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+              className="bg-primary text-primary-foreground px-6 py-2 rounded-lg hover:bg-primary/90 transition-colors"
             >
               Clear Search
             </button>
@@ -191,7 +191,7 @@ function SearchPageContent() {
                       <h2 className="text-xl font-semibold text-gray-900 mb-2 line-clamp-2">
                         <Link
                           href={`/blog/${post.slug || post._id}`}
-                          className="hover:text-blue-600 transition-colors"
+                          className="hover:text-primary transition-colors"
                         >
                           {post.title}
                         </Link>
@@ -243,7 +243,7 @@ function SearchPageContent() {
                           {post.tags.slice(0, 3).map((tag, index) => (
                             <span
                               key={index}
-                              className="px-2 py-1 bg-blue-50 text-blue-600 text-xs rounded-full"
+                              className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full"
                             >
                               #{tag}
                             </span>

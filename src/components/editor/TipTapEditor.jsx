@@ -52,14 +52,14 @@ const EditorToolbar = ({ editor }) => {
 
   return (
     <div className="border-b p-2 bg-gray-50 flex flex-wrap items-center gap-1">
-      <button onClick={() => editor.chain().focus().toggleBold().run()} className={editor.isActive("bold") ? "font-bold text-blue-600" : ""}>B</button>
-      <button onClick={() => editor.chain().focus().toggleItalic().run()} className={editor.isActive("italic") ? "italic text-blue-600" : ""}>I</button>
-      <button onClick={() => editor.chain().focus().toggleStrike().run()} className={editor.isActive("strike") ? "line-through text-blue-600" : ""}>S</button>
-      <button onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()} className={editor.isActive("heading", { level: 1 }) ? "text-blue-600 font-bold" : ""}>H1</button>
-      <button onClick={() => editor.chain().focus().toggleBulletList().run()} className={editor.isActive("bulletList") ? "text-blue-600" : ""}>•</button>
-      <button onClick={() => editor.chain().focus().toggleOrderedList().run()} className={editor.isActive("orderedList") ? "text-blue-600" : ""}>1.</button>
-      <button onClick={() => editor.chain().focus().toggleBlockquote().run()} className={editor.isActive("blockquote") ? "text-blue-600" : ""}>"</button>
-      <button onClick={() => editor.chain().focus().toggleCodeBlock().run()} className={editor.isActive("codeBlock") ? "text-blue-600" : ""}>{`{}`}</button>
+      <button onClick={() => editor.chain().focus().toggleBold().run()} className={editor.isActive("bold") ? "font-bold text-primary" : ""}>B</button>
+      <button onClick={() => editor.chain().focus().toggleItalic().run()} className={editor.isActive("italic") ? "italic text-primary" : ""}>I</button>
+      <button onClick={() => editor.chain().focus().toggleStrike().run()} className={editor.isActive("strike") ? "line-through text-primary" : ""}>S</button>
+      <button onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()} className={editor.isActive("heading", { level: 1 }) ? "text-primary font-bold" : ""}>H1</button>
+      <button onClick={() => editor.chain().focus().toggleBulletList().run()} className={editor.isActive("bulletList") ? "text-primary" : ""}>•</button>
+      <button onClick={() => editor.chain().focus().toggleOrderedList().run()} className={editor.isActive("orderedList") ? "text-primary" : ""}>1.</button>
+      <button onClick={() => editor.chain().focus().toggleBlockquote().run()} className={editor.isActive("blockquote") ? "text-primary" : ""}>"</button>
+      <button onClick={() => editor.chain().focus().toggleCodeBlock().run()} className={editor.isActive("codeBlock") ? "text-primary" : ""}>{`{}`}</button>
       <button onClick={() => setShowLinkDialog(true)}>🔗</button>
       <button onClick={() => setShowImageDialog(true)}>🖼️</button>
       <button onClick={() => editor.chain().focus().toggleHighlight().run()} className={editor.isActive("highlight") ? "bg-yellow-200" : ""}>🖍️</button>
@@ -74,7 +74,7 @@ const EditorToolbar = ({ editor }) => {
             placeholder="https://example.com"
             className="border px-2 py-1 text-sm"
           />
-          <button onClick={addLink} className="px-2 bg-blue-600 text-white text-sm">Add</button>
+          <button onClick={addLink} className="px-2 bg-primary text-primary-foreground text-sm">Add</button>
           <button onClick={() => setShowLinkDialog(false)} className="px-2 text-sm">✕</button>
         </div>
       )}
@@ -89,7 +89,7 @@ const EditorToolbar = ({ editor }) => {
             placeholder="https://example.com/image.jpg"
             className="border px-2 py-1 text-sm"
           />
-          <button onClick={addImage} className="px-2 bg-blue-600 text-white text-sm">Add</button>
+          <button onClick={addImage} className="px-2 bg-primary text-primary-foreground text-sm">Add</button>
           <button onClick={() => setShowImageDialog(false)} className="px-2 text-sm">✕</button>
         </div>
       )}

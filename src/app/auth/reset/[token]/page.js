@@ -45,14 +45,14 @@ export default function ResetPasswordPage({ params }) {
         {done ? (
           <div>
             <p className="text-green-700 text-sm mb-4">Password updated successfully.</p>
-            <a href="/auth/signin" className="text-blue-600 underline">Go to Sign In</a>
+            <a href="/auth/signin" className="text-primary underline">Go to Sign In</a>
           </div>
         ) : (
           <form onSubmit={onSubmit} className="space-y-4">
             {error && <div className="text-red-600 text-sm">{error}</div>}
             <input type="password" className="w-full p-3 border rounded" placeholder="New password" value={password} onChange={e => setPassword(e.target.value)} required />
             <input type="password" className="w-full p-3 border rounded" placeholder="Confirm password" value={confirm} onChange={e => setConfirm(e.target.value)} required />
-            <button type="submit" disabled={loading} className="w-full bg-blue-600 text-white py-3 rounded disabled:opacity-50">
+            <button type="submit" disabled={loading} className="w-full bg-primary text-primary-foreground py-3 rounded disabled:opacity-50">
               {loading ? 'Saving...' : 'Reset Password'}
             </button>
           </form>

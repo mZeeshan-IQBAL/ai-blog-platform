@@ -2,7 +2,7 @@
 
 This project uses Tailwind CSS with CSS variable-driven design tokens and a small set of accessible, reusable UI primitives.
 
-- Theme: light/dark, toggled via `document.documentElement.classList.toggle('dark')` and initialized from localStorage or OS preference.
+- Theme: token-based. Dark mode toggle is currently not exposed in the UI.
 - Tokens: defined in `src/app/globals.css` under `:root` and `.dark`, mapped in `tailwind.config.js` (background, foreground, primary, secondary, accent, destructive, muted, border, ring, card, popover).
 - Typography: Inter via `next/font/google` in `src/app/layout.js`.
 - Container: centered with responsive padding via Tailwind container config.
@@ -57,8 +57,8 @@ This project uses Tailwind CSS with CSS variable-driven design tokens and a smal
 
 ## Theming
 
-- Toggle via `ThemeToggle` component (`src/components/ui/ThemeToggle.jsx`).
-- Initial theme is set in `src/app/layout.js` to avoid FOUC.
+- The app ships with design tokens for both light and dark in globals.css. UI does not expose a theme toggle.
+- Initial theme is determined by tokens; you can add a toggle later if needed.
 
 ## Migrating existing components
 

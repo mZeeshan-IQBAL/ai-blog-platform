@@ -100,7 +100,7 @@ export default async function AdminCommentsPage() {
                   <td className="px-4 py-3 text-sm">{r.author?.name || '—'}</td>
                   <td className="px-4 py-3 text-sm">
                     {r.post?.slug ? (
-                      <Link className="text-blue-600 hover:underline" href={`/blog/${r.post.slug}`}>{r.post.title || r.post.slug}</Link>
+                      <Link className="text-primary hover:underline" href={`/blog/${r.post.slug}`}>{r.post.title || r.post.slug}</Link>
                     ) : '—'}
                   </td>
                   <td className="px-4 py-3 text-sm">

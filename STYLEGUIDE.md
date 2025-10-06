@@ -27,7 +27,7 @@ Components
 - Button: variant="default|secondary|outline|ghost|destructive|link|gradient"
 - Card: src/components/ui/Card.jsx (wrapper + header/content/title/description)
 - Inputs: microinteractions w/ focus ring and glow; placeholder transitions
-- NavbarPro: glass background, brand gradient, theme toggle, notification dropdown
+- NavbarPro: glass background, brand gradient, notification dropdown (theme toggle removed)
 - Testimonials: clean grid of cards (industry standard)
 
 Layout patterns

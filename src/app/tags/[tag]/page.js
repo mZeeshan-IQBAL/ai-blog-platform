@@ -31,7 +31,7 @@ export default async function TagPage({ params }) {
 
       {/* Page Title */}
       <h1 className="text-3xl font-bold mb-6">
-        Tag: <span className="text-blue-600">#{tag}</span>
+        Tag: <span className="text-primary">#{tag}</span>
       </h1>
 
       {/* Posts */}

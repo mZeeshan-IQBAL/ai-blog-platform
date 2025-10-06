@@ -75,7 +75,7 @@ export default function Avatar({
       ) : (
         /* Fallback avatar with initials */
         <div 
-          className="rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold shadow-sm"
+          className="rounded-full bg-gradient-to-br from-teal-500 to-emerald-600 flex items-center justify-center text-white font-semibold shadow-sm"
           style={{
             fontSize: size * 0.4,
             width: size,
@@ -119,7 +119,7 @@ export default function Avatar({
     return (
       <button
         onClick={onClick}
-        className="hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-full"
+        className="hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 rounded-full"
         title={alt}
       >
         {avatarContent}

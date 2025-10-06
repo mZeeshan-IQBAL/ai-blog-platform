@@ -68,7 +68,7 @@ export default function ReactionBar({ targetType, targetId }) {
           onClick={() => react(t.key)}
           className={`inline-flex items-center gap-1 text-sm px-2 py-1 rounded transition ${
             userReaction === t.key
-              ? "bg-blue-100 text-blue-700"
+              ? "bg-primary/10 text-primary"
               : "bg-gray-100 hover:bg-gray-200"
           }`}
         >

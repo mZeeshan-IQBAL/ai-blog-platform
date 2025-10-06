@@ -12,7 +12,7 @@ export default function FeaturesPage() {
       description:
         "Get intelligent suggestions for compelling titles, engaging content ideas, and style improvements while you write. Overcome writer's block with creative prompts and helpful guidance.",
       highlight: "Write better stories with AI help",
-      color: "bg-blue-100",
+      color: "bg-primary/10",
     },
     {
       id: "daily-blogging",
@@ -138,7 +138,7 @@ export default function FeaturesPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="text-center">
-              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-2xl">✍️</span>
               </div>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">1. Start Writing</h3>
@@ -262,7 +262,7 @@ export default function FeaturesPage() {
             <div className="flex flex-col sm:flex-row justify-center gap-4">
               <Link
                 href="/create"
-                className="bg-blue-600 text-white px-8 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors"
+className="bg-primary text-primary-foreground px-8 py-3 rounded-lg font-medium hover:bg-primary/90 transition-colors"
               >
                 Start Writing Today
               </Link>

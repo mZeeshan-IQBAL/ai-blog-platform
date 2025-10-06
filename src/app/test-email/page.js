@@ -69,7 +69,7 @@ export default function TestEmailPage() {
             value={testEmail}
             onChange={(e) => setTestEmail(e.target.value)}
             placeholder={session.user.email}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent"
           />
           <p className="text-sm text-gray-500 mt-1">
             Leave empty to send to your account email: {session.user.email}
@@ -79,7 +79,7 @@ export default function TestEmailPage() {
         <button
           onClick={sendTestEmail}
           disabled={loading}
-          className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="bg-primary text-primary-foreground px-6 py-2 rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {loading ? "Sending..." : "🧪 Send Test Email"}
         </button>
@@ -107,9 +107,9 @@ export default function TestEmailPage() {
         </div>
       </div>
 
-      <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-6">
-        <h3 className="font-semibold text-blue-800 mb-2">📚 Troubleshooting Guide</h3>
-        <div className="text-sm text-blue-700 space-y-2">
+      <div className="mt-6 bg-primary/10 border border-primary/20 rounded-lg p-6">
+        <h3 className="font-semibold text-primary mb-2">📚 Troubleshooting Guide</h3>
+        <div className="text-sm text-primary space-y-2">
           <p><strong>1. Check Spam Folder:</strong> Test emails might end up in spam</p>
           <p><strong>2. Verify Email Address:</strong> Make sure the recipient email is valid</p>
           <p><strong>3. API Key Issues:</strong> Check if Resend API key is valid and has permissions</p>

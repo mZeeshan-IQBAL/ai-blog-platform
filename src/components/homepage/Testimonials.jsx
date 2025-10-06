@@ -59,7 +59,7 @@ const Stars = ({ value = 5, size = 14 }) => (
 
 function Card({ t }) {
   const avatarColor = useMemo(() => {
-    const colors = ['bg-blue-100 text-blue-700','bg-purple-100 text-purple-700','bg-pink-100 text-pink-700','bg-emerald-100 text-emerald-700','bg-amber-100 text-amber-700'];
+    const colors = ['bg-primary/10 text-primary','bg-purple-100 text-purple-700','bg-pink-100 text-pink-700','bg-emerald-100 text-emerald-700','bg-amber-100 text-amber-700'];
     return colors[(t.initials.charCodeAt(0) + t.initials.charCodeAt(1)) % colors.length];
   }, [t.initials]);
 

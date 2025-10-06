@@ -35,7 +35,7 @@ function SuccessContent() {
         <h1 className="text-3xl font-bold mb-4 text-green-700">Payment Successful!</h1>
         <p className="text-lg mb-6">
           Welcome to the <strong>{plan}</strong> plan,{" "}
-          <span className="text-blue-600">{session.user?.name || "User"}</span>!
+          <span className="text-primary">{session.user?.name || "User"}</span>!
         </p>
         <p className="text-gray-600 mb-8">
           You now have <strong>30 days of full access</strong>. 
@@ -44,7 +44,7 @@ function SuccessContent() {
         <div className="space-y-3">
           <button
             onClick={() => router.push("/dashboard")}
-            className="w-full bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition"
+            className="w-full bg-primary text-primary-foreground px-6 py-3 rounded-lg hover:bg-primary/90 transition"
           >
             Go to Dashboard
           </button>

@@ -238,7 +238,7 @@ export default function AvatarCropper({ file, initialUrl = "", onCancel, onCropp
 
         <div className="flex gap-3 mt-5">
           <button className="flex-1 px-4 py-2 border rounded-lg" onClick={onCancel} type="button">Cancel</button>
-          <button className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg" onClick={cropAndCompress} type="button">Save</button>
+          <button className="flex-1 px-4 py-2 bg-primary text-primary-foreground rounded-lg" onClick={cropAndCompress} type="button">Save</button>
         </div>
       </motion.div>
     </div>

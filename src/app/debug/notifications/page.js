@@ -129,7 +129,7 @@ export default function NotificationDebugPage() {
       <h1 className="text-2xl font-bold mb-4">Notification System Debug</h1>
       
       {/* User Info */}
-      <div className="bg-blue-50 p-4 rounded-lg mb-6">
+      <div className="bg-primary/10 p-4 rounded-lg mb-6">
         <h2 className="font-semibold mb-2">Session Info</h2>
         <p><strong>Name:</strong> {session.user.name}</p>
         <p><strong>Email:</strong> {session.user.email}</p>
@@ -150,7 +150,7 @@ export default function NotificationDebugPage() {
       <div className="mb-6">
         <button
           onClick={testNotificationAPI}
-          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 mr-4"
+          className="bg-primary text-primary-foreground px-4 py-2 rounded hover:bg-primary/90 mr-4"
         >
           Test Notification API
         </button>
@@ -177,7 +177,7 @@ export default function NotificationDebugPage() {
               <p className="text-gray-500">No test results yet</p>
             ) : (
               testResults.map((result, i) => (
-                <div key={i} className="bg-white p-3 rounded border-l-4 border-blue-500">
+                <div key={i} className="bg-white p-3 rounded border-l-4 border-primary">
                   <div className="flex justify-between items-start">
                     <span className="font-medium">{result.test}</span>
                     <span className="text-xs text-gray-500">{result.timestamp}</span>

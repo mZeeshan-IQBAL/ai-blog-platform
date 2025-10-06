@@ -20,9 +20,9 @@ export default function TagList({ tags = [], limit }) {
           key={tag}
           href={`/tags/${encodeURIComponent(tag)}`}
           aria-label={`View posts tagged with ${tag}`}
-          className="bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-xs font-medium 
-                     border border-blue-200 shadow-sm
-                     hover:bg-blue-100 hover:text-blue-800 
+          className="bg-primary/10 text-primary px-3 py-1 rounded-full text-xs font-medium 
+                     border border-primary/20 shadow-sm
+                     hover:bg-primary/20 hover:text-primary 
                      transition-colors duration-200"
         >
           #{tag}

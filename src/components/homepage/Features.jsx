@@ -12,7 +12,7 @@ const solutions = [
     title: 'Writing Suite',
     subtitle: 'Create polished content faster',
     icon: PenTool,
-    color: 'from-blue-500 to-indigo-600',
+    color: 'from-teal-500 to-emerald-600',
     bullets: [
       'AI assistant for outlines and edits',
       'Grammar and tone suggestions',

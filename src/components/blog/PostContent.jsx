@@ -82,7 +82,7 @@ export default function PostContent({ content }) {
         <button
           onClick={handleSummarize}
           disabled={loading}
-          className="w-12 h-12 rounded-full bg-blue-600 text-white hover:bg-blue-700 disabled:bg-gray-400 transition-all shadow-lg hover:shadow-xl flex items-center justify-center"
+          className="w-12 h-12 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 disabled:bg-gray-400 transition-all shadow-lg hover:shadow-xl flex items-center justify-center"
           title={loading ? "Summarizing..." : "Get AI Summary"}
         >
           {loading ? (
@@ -104,7 +104,7 @@ export default function PostContent({ content }) {
           <button
             onClick={handleSummarize}
             disabled={loading}
-            className="px-3 py-1.5 rounded-md bg-blue-600 text-white hover:bg-blue-700 disabled:bg-gray-400 transition-colors text-xs font-medium"
+            className="px-3 py-1.5 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 disabled:bg-gray-400 transition-colors text-xs font-medium"
           >
             {loading ? "..." : "📝 Summarize"}
           </button>

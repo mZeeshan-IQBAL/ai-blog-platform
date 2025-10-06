@@ -153,7 +153,7 @@ export default function Footer() {
   ];
 
   return (
-    <footer className="bg-background text-foreground mt-auto border-t border-border">
+    <footer className="bg-[#0f0f0f] text-foreground mt-auto border-t border-[#1a1a1a]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
         {/* Top section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-12">
@@ -184,7 +184,7 @@ export default function Footer() {
         </div>
 
         {/* Links section */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 pb-8 border-b border-border">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 pb-8 border-b border-[#1a1a1a]">
           {footerSections.map((section) => (
             <div key={section.title}>
               <h3 className="text-sm font-semibold uppercase tracking-wider mb-4">

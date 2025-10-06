@@ -7,7 +7,6 @@ import { useSession, signIn, signOut } from "next-auth/react";
 import { getPusherClient } from "@/lib/pusherClient";
 import { Button } from "@/components/ui/Button";
 import Avatar, { AvatarSizes } from "@/components/ui/Avatar";
-import ThemeToggle from "@/components/layout/ThemeToggle";
 
 const NAV = [
   { name: "Home", href: "/" },
@@ -187,7 +186,6 @@ export default function NavbarPro() {
                 </div>
               )}
 
-              <ThemeToggle />
 
               {status === "loading" ? (
                 <span className="text-sm text-muted-foreground">Loading…</span>
@@ -234,10 +232,6 @@ export default function NavbarPro() {
 
             <div className="mt-auto grid gap-2">
               <Link href="/search" className="inline-flex items-center justify-center rounded-md border border-border px-3 py-2 text-sm hover:bg-accent">Search</Link>
-              <div className="flex items-center gap-2">
-                <ThemeToggle />
-                <span className="text-sm text-muted-foreground">Theme</span>
-              </div>
               {status === "authenticated" ? (
                 <Button onClick={() => { setMobileOpen(false); signOut(); }} variant="ghost">Sign out</Button>
               ) : (

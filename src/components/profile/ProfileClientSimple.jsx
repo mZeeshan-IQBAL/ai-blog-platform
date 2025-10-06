@@ -14,7 +14,7 @@ export default function ProfileClientSimple() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
           <p>Loading profile...</p>
         </div>
       </div>
@@ -29,7 +29,7 @@ export default function ProfileClientSimple() {
           <p className="text-gray-600 mb-6">Please sign in to view your profile.</p>
           <a
             href="/api/auth/signin"
-            className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+            className="bg-primary text-primary-foreground px-6 py-2 rounded-lg hover:bg-primary/90 transition-colors"
           >
             Sign In
           </a>

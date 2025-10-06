@@ -113,7 +113,7 @@ function SignUpContent() {
             required
           />
           <div className="text-xs text-gray-500">By joining, you agree to our terms and become part of our storytelling community.</div>
-          <button disabled={loading} className="bg-blue-600 text-white w-full py-3 rounded">
+          <button disabled={loading} className="bg-primary text-primary-foreground w-full py-3 rounded">
             {loading ? "Signing up..." : "Sign Up"}
           </button>
         </form>

@@ -23,7 +23,7 @@ const BookmarksPeriodSelector = ({ selectedPeriod, onPeriodChange }) => {
           onClick={() => onPeriodChange(period.value)}
           className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
             selectedPeriod === period.value
-              ? 'bg-white text-blue-600 shadow-sm'
+              ? 'bg-white text-primary shadow-sm'
               : 'text-gray-600 hover:text-gray-900'
           }`}
         >
@@ -37,7 +37,7 @@ const BookmarksPeriodSelector = ({ selectedPeriod, onPeriodChange }) => {
 // Enhanced stat card (similar to analytics)
 function StatCard({ title, value, icon, color, subtitle }) {
   const colorMap = {
-    blue: { bg: 'bg-blue-50', text: 'text-blue-600', icon: 'text-blue-500' },
+    blue: { bg: 'bg-primary/10', text: 'text-primary', icon: 'text-primary' },
     green: { bg: 'bg-green-50', text: 'text-green-600', icon: 'text-green-500' },
     purple: { bg: 'bg-purple-50', text: 'text-purple-600', icon: 'text-purple-500' },
     orange: { bg: 'bg-orange-50', text: 'text-orange-600', icon: 'text-orange-500' }
@@ -119,7 +119,7 @@ const BookmarksError = ({ error, onRetry }) => (
     <p className="text-gray-600 mb-6 max-w-md mx-auto">{error}</p>
     <button
       onClick={onRetry}
-      className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+      className="bg-primary text-primary-foreground px-6 py-2 rounded-lg hover:bg-primary/90 transition-colors"
     >
       Try Again
     </button>
@@ -130,7 +130,7 @@ const BookmarksError = ({ error, onRetry }) => (
 const BookmarksEmptyState = () => (
   <div className="text-center py-16">
     <div className="max-w-md mx-auto">
-      <div className="mx-auto w-24 h-24 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center mb-6 shadow-lg">
+      <div className="mx-auto w-24 h-24 bg-gradient-to-br from-teal-500 to-emerald-600 rounded-full flex items-center justify-center mb-6 shadow-lg">
         <span className="text-4xl">🔖</span>
       </div>
       <h2 className="text-2xl font-bold text-gray-900 mb-4">Start Your Knowledge Collection</h2>
@@ -140,7 +140,7 @@ const BookmarksEmptyState = () => (
       <div className="space-y-4">
         <a
           href="/blog"
-          className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-medium rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-sm"
+          className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-teal-600 to-emerald-600 text-white font-medium rounded-lg hover:from-teal-700 hover:to-emerald-700 transition-all duration-200 shadow-sm"
         >
           ✨ Explore Articles
         </a>
@@ -381,7 +381,7 @@ export default function BookmarksClient() {
                   placeholder="Search bookmarks..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent transition-all duration-200"
                 />
               </div>
 
@@ -394,7 +394,7 @@ export default function BookmarksClient() {
                   <select
                     value={filterBy}
                     onChange={(e) => setFilterBy(e.target.value)}
-                    className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                    className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent text-sm"
                   >
                     <option value="all">All Categories</option>
                     {categories.map(category => (
@@ -408,7 +408,7 @@ export default function BookmarksClient() {
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
-                  className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                  className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent text-sm"
                 >
                   <option value="newest">Newest First</option>
                   <option value="oldest">Oldest First</option>
@@ -434,7 +434,7 @@ export default function BookmarksClient() {
                   setSortBy("newest");
                   setSelectedPeriod("all");
                 }}
-                className="mt-4 text-blue-600 hover:text-blue-700 font-medium"
+                className="mt-4 text-primary hover:text-primary/90 font-medium"
               >
                 Clear all filters
               </button>
@@ -500,7 +500,7 @@ export default function BookmarksClient() {
                         onClick={() => setCurrentPage(page)}
                         className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors duration-200 ${
                           currentPage === page
-                            ? "bg-blue-600 text-white"
+                            ? "bg-primary text-primary-foreground"
                             : "text-gray-700 bg-white border border-gray-300 hover:bg-gray-50"
                         }`}
                       >

@@ -73,13 +73,13 @@ function SignInContent() {
             required
           />
           <div className="flex items-center justify-between text-sm">
-            <a href="/auth/forgot" className="text-blue-600 hover:underline">Forgot password?</a>
+            <a href="/auth/forgot" className="text-primary hover:underline">Forgot password?</a>
             <a href="/admin/login" className="text-gray-500 hover:underline">Admin login</a>
           </div>
           <button 
             type="submit"
             disabled={loading} 
-            className="bg-blue-600 text-white w-full py-3 rounded hover:bg-blue-700 disabled:opacity-50"
+            className="bg-primary text-primary-foreground w-full py-3 rounded hover:bg-primary/90 disabled:opacity-50"
           >
             {loading ? "Signing in..." : "Sign In"}
           </button>
@@ -103,7 +103,7 @@ function SignInContent() {
         <div className="mt-4 text-center">
           <p className="text-sm text-gray-600">
             New to our community?{' '}
-            <a href="/auth/signup" className="text-blue-600 hover:underline">
+            <a href="/auth/signup" className="text-primary hover:underline">
               Join thousands of writers
             </a>
           </p>
@@ -118,7 +118,7 @@ export default function SignInPage() {
     <Suspense fallback={
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading...</p>
         </div>
       </div>

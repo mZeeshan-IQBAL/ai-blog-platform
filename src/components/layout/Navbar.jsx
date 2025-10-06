@@ -8,7 +8,6 @@ import { usePathname } from "next/navigation";
 import { getPusherClient } from "@/lib/pusherClient";
 import { Button } from "@/components/ui/Button";
 import Avatar, { AvatarSizes } from "@/components/ui/Avatar";
-import ThemeToggle from "@/components/layout/ThemeToggle";
 
 // Lazy-load the portal on client only
 const ChatbotPortal = dynamic(() => import("@/components/chat/ChatBotPortal"), {
