@@ -61,8 +61,8 @@ export async function GET(req) {
       await connectToDB();
       const user = await User.findOne({ email: session.user.email });
       if (user) {
+        // Create a completely new subscription, clearing any cancelled status
         user.subscription = {
-          ...user.subscription,
           plan: checkoutSession.metadata?.plan || 'starter',
           status: subscription.status,
           stripeSubscriptionId: subscription.id,
@@ -71,12 +71,18 @@ export async function GET(req) {
           currentPeriodStart: subscriptionData.currentPeriodStart,
           currentPeriodEnd: subscriptionData.currentPeriodEnd,
           expiresAt: subscriptionData.currentPeriodEnd,
+          startDate: user.subscription?.startDate || subscriptionData.currentPeriodStart,
           amount: subscriptionData.amount,
           currency: 'PKR',
           interval: subscriptionData.interval,
+          gateway: 'stripe',
           payerEmail: session.user.email,
           transactionId: subscription.latest_invoice,
-          updatedAt: new Date()
+          updatedAt: new Date(),
+          // Clear any cancellation-related fields from previous subscription
+          cancelledAt: null,
+          paypalOrderId: null,
+          paypalPayerId: null
         };
         await user.save();
       }

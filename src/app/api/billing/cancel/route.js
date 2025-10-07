@@ -57,13 +57,32 @@ export async function POST() {
         });
       } catch (stripeError) {
         console.error('Stripe cancellation error:', stripeError);
+        
+        // Handle the case where the subscription doesn't exist in Stripe
+        // This can happen if the subscription was already cancelled/deleted in Stripe
+        // but the local database still has a reference to it
+        if (stripeError.code === 'resource_missing' && stripeError.type === 'StripeInvalidRequestError') {
+          console.log('Subscription not found in Stripe, updating local database only');
+          
+          user.subscription.status = 'cancelled';
+          user.subscription.cancelledAt = new Date();
+          await user.save();
+          
+          return NextResponse.json({ 
+            success: true, 
+            status: 'cancelled',
+            message: 'Subscription has been cancelled. The subscription was not found in Stripe but has been updated locally.'
+          });
+        }
+        
+        // For other Stripe errors, return the original error response
         return NextResponse.json({ 
           error: 'Failed to cancel Stripe subscription',
           details: process.env.NODE_ENV === 'development' ? stripeError.message : undefined
         }, { status: 500 });
       }
     } else {
-      // Handle local subscription cancellation (for legacy EasyPaisa/JazzCash)
+      // Handle local subscription cancellation (for PayPal one-time payments)
       user.subscription.status = 'cancelled';
       user.subscription.cancelledAt = new Date();
       await user.save();

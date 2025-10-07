@@ -140,7 +140,7 @@ export default function ManageSubscription() {
                   ) : subscription.paypalOrderId || subscription.paypalSubscriptionId ? (
                     <>Paid via <strong>PayPal</strong> (one-time payment)</>
                   ) : (
-                    <>Paid via <strong>EasyPaisa / JazzCash</strong> (one-time payment)</>
+                    <>One-time payment</>
                   )}
                 </p>
                 {subscription.payerEmail && (

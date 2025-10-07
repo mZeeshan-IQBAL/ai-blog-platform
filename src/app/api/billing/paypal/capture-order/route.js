@@ -55,8 +55,8 @@ export async function POST(req) {
     const now = new Date();
     const expiresAt = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
 
+    // Create a completely new subscription, clearing any cancelled status
     user.subscription = {
-      ...user.subscription,
       plan,
       status: 'active',
       interval: 'month',
@@ -66,9 +66,13 @@ export async function POST(req) {
       payerEmail,
       amount: amountValue,
       currency,
-      startDate: user.subscription?.startDate || now,
+      startDate: now,
       expiresAt,
       updatedAt: now,
+      // Clear any cancellation-related fields from previous subscription
+      cancelledAt: null,
+      stripeSubscriptionId: null,
+      stripeCustomerId: null,
     };
 
     await user.save();

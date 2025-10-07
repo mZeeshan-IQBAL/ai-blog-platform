@@ -35,10 +35,20 @@ export async function GET() {
       if (expirationDate < now) {
         // Subscription has expired
         effectiveStatus = 'expired';
-      } else if (sub.status === 'cancelled') {
+      } else if (sub.status === 'cancelled' && !sub.cancelledAt) {
+        // This handles the edge case where status is 'cancelled' but cancelledAt is null
+        // This usually means it's an old cancelled subscription that was replaced
+        effectiveStatus = 'active';
+      } else if (sub.status === 'cancelled' && sub.cancelledAt) {
         // Subscription is cancelled but still active until expiration
         effectiveStatus = 'cancelled_active';
       }
+    }
+    
+    // CRITICAL FIX: If we have an active Stripe subscription ID and status is 'active',
+    // always trust that over any other logic
+    if (sub.status === 'active' && sub.stripeSubscriptionId) {
+      effectiveStatus = 'active';
     }
 
     return NextResponse.json({ 

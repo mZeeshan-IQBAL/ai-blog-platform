@@ -215,7 +215,7 @@ async function updateUserSubscription(user, stripeSubscription, plan, isReplacem
   // Update user subscription data
   user.subscription = {
     plan: plan,
-    status: stripeSubscription.status,
+    status: 'active', // ALWAYS set to active for new/updated subscriptions
     stripeSubscriptionId: stripeSubscription.id,
     stripeCustomerId: stripeSubscription.customer,
     stripePriceId: stripeSubscription.items.data[0]?.price?.id,
@@ -230,8 +230,20 @@ async function updateUserSubscription(user, stripeSubscription, plan, isReplacem
     payerEmail: user.email,
     transactionId: stripeSubscription.latest_invoice,
     updatedAt: new Date(),
-    // Clear cancellation data for immediate plan changes
-    cancelledAt: isReplacement ? null : user.subscription?.cancelledAt
+    // ALWAYS clear cancellation data for active subscriptions
+    cancelledAt: null,
+    // Reset usage for immediate plan changes
+    usage: isReplacement ? {
+      storage: user.subscription?.usage?.storage || 0,
+      posts: 0,
+      aiCalls: 0,
+      aiTokens: 0,
+      fileUploads: 0,
+      customDomains: user.subscription?.usage?.customDomains || 0,
+      teamMembers: user.subscription?.usage?.teamMembers || 0,
+      analyticsViews: 0,
+      emailsSent: 0,
+    } : user.subscription?.usage || {}
   };
 
   await user.save();

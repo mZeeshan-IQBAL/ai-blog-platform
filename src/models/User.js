@@ -16,8 +16,8 @@ const subscriptionSchema = new mongoose.Schema(
       enum: ["active", "cancelled", "expired", "past_due", "trialing"],
       default: "active",
     },
-    // Payment details (generic for EasyPaisa/JazzCash/Stripe/PayPal)
-    transactionId: String, // e.g., EasyPaisa transaction ID
+    // Payment details (generic for Stripe/PayPal)
+    transactionId: String, // Generic transaction/invoice ID
     // Stripe fields
     stripeSubscriptionId: String, // For Stripe recurring subscriptions
     stripeCustomerId: String,
@@ -30,7 +30,7 @@ const subscriptionSchema = new mongoose.Schema(
     amount: { type: Number, default: 0 }, // monetary amount
     currency: { type: String, default: "USD" },
     interval: { type: String, enum: ["month", "year", "one-time"], default: "one-time" },
-    gateway: { type: String, enum: ["stripe", "paypal", "local"], default: "local" },
+    gateway: { type: String, enum: ["stripe", "paypal"], default: "paypal" },
 
     // Time-based access (CRITICAL for one-time payments)
     startDate: Date,        // Set when payment succeeds
@@ -194,6 +194,11 @@ UserSchema.pre("save", function (next) {
       // Set expiresAt to 30 days from now (adjust per plan if needed)
       this.subscription.expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
     }
+    this.updatePlanLimits();
+  }
+  
+  // CRITICAL FIX: Update plan limits whenever subscription data is modified
+  if (this.isModified("subscription")) {
     this.updatePlanLimits();
   }
 
