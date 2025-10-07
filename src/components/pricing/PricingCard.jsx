@@ -7,8 +7,8 @@ import { Button } from "@/components/ui/Button";
 import { useSubscription } from "@/hooks/useSubscription";
 
 export default function PricingCard({ plan, isPopular, isHighlighted }) {
-  const { subscription, isPremium } = useSubscription();
-  const isCurrentPlan = subscription?.plan === plan.slug;
+  const { subscription, isPremium, isCancelled } = useSubscription();
+  const isCurrentPlan = subscription?.plan === plan.slug && !isCancelled;
   // Determine the correct href based on plan type
   const getHref = () => {
     if (plan.slug === "free") {
@@ -36,7 +36,12 @@ export default function PricingCard({ plan, isPopular, isHighlighted }) {
             Current Plan
           </span>
         )}
-        {isPopular && !isCurrentPlan && (
+        {subscription?.plan === plan.slug && isCancelled && (
+          <span className="bg-yellow-600 text-white text-xs font-medium px-3 py-1 rounded">
+            Cancelling • Reactivate Available
+          </span>
+        )}
+        {isPopular && !isCurrentPlan && !(subscription?.plan === plan.slug && isCancelled) && (
           <span className="bg-primary text-primary-foreground text-xs font-medium px-3 py-1 rounded">
             Popular
           </span>
@@ -112,17 +117,53 @@ export default function PricingCard({ plan, isPopular, isHighlighted }) {
             Manage Subscription
           </Button>
         </div>
+      ) : subscription?.plan === plan.slug && isCancelled ? (
+        <div className="w-full">
+          <Button
+            as="link"
+            href={getHref()}
+            variant="gradient"
+            size="lg"
+            className="w-full mb-2 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800"
+          >
+            🔄 Reactivate Immediately
+          </Button>
+          <p className="text-xs text-green-600 text-center mb-2 font-medium">
+            ⚡ No waiting period - starts right away!
+          </p>
+          <Button
+            as="link"
+            href="/billing"
+            variant="ghost"
+            size="sm"
+            className="w-full text-xs text-gray-600"
+          >
+            Manage Subscription
+          </Button>
+        </div>
       ) : (
-        <Button
-          as="link"
-          href={getHref()}
-          variant={plan.slug === "enterprise" ? "secondary" : plan.slug === "free" ? "outline" : "gradient"}
-          size="lg"
-          className="w-full"
-          disabled={subscription?.plan === 'free' && plan.slug === 'free'}
-        >
-          {subscription?.plan === 'free' && plan.slug === 'free' ? 'Current Plan' : plan.cta}
-        </Button>
+        <div className="w-full">
+          <Button
+            as="link"
+            href={getHref()}
+            variant={plan.slug === "enterprise" ? "secondary" : plan.slug === "free" ? "outline" : "gradient"}
+            size="lg"
+            className="w-full mb-2"
+            disabled={subscription?.plan === 'free' && plan.slug === 'free'}
+          >
+            {subscription?.plan === 'free' && plan.slug === 'free' ? 'Current Plan' : 
+             isCancelled && plan.slug !== 'free' ? 
+             (plan.slug === 'starter' ? 'Switch to Starter' :
+              plan.slug === 'pro' ? 'Switch to Pro' :
+              plan.slug === 'business' ? 'Switch to Business' : plan.cta) :
+             plan.cta}
+          </Button>
+          {isCancelled && plan.slug !== 'free' && (
+            <p className="text-xs text-blue-600 text-center font-medium">
+              ⚡ Immediate switch - no waiting!
+            </p>
+          )}
+        </div>
       )}
     </div>
   );

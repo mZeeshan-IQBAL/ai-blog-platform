@@ -25,11 +25,20 @@ export async function GET() {
     // Safely extract subscription data with defaults
     const sub = user.subscription || {};
     
-    // Optional: auto-expire if past expiresAt (enhancement)
+    // Determine effective status based on expiration and cancellation
     const now = new Date();
     let effectiveStatus = sub.status || 'inactive';
-    if (sub.expiresAt && new Date(sub.expiresAt) < now && sub.status !== 'cancelled') {
-      effectiveStatus = 'expired';
+    
+    if (sub.expiresAt) {
+      const expirationDate = new Date(sub.expiresAt);
+      
+      if (expirationDate < now) {
+        // Subscription has expired
+        effectiveStatus = 'expired';
+      } else if (sub.status === 'cancelled') {
+        // Subscription is cancelled but still active until expiration
+        effectiveStatus = 'cancelled_active';
+      }
     }
 
     return NextResponse.json({ 

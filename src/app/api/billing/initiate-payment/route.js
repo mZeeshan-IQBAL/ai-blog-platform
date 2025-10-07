@@ -47,12 +47,17 @@ export async function POST(req) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
+    // Check if user has a cancelled subscription that can be immediately replaced
+    const currentSubscription = user.subscription;
+    const hasCancelledSubscription = currentSubscription?.status === 'cancelled' && 
+                                   currentSubscription?.stripeSubscriptionId;
+
     // Get or create Stripe price for this plan
     const stripePrice = await getOrCreateStripePrice(plan);
     const planConfig = STRIPE_PLANS[plan];
 
-    // Create Stripe checkout session
-    const checkoutSession = await stripe.checkout.sessions.create({
+    // If user has a cancelled subscription, we'll handle immediate plan change
+    let checkoutSessionOptions = {
       payment_method_types: ['card'],
       line_items: [
         {
@@ -61,29 +66,38 @@ export async function POST(req) {
         },
       ],
       mode: 'subscription',
-      success_url: `${successUrl}&session_id={CHECKOUT_SESSION_ID}`,
+      success_url: `${successUrl}&session_id={CHECKOUT_SESSION_ID}&immediate_change=${hasCancelledSubscription}`,
       cancel_url: cancelUrl,
       customer_email: session.user.email,
       metadata: {
         userId: user._id.toString(),
         userEmail: session.user.email,
         plan: plan,
-        platform: 'ai-blog-platform'
+        platform: 'ai-blog-platform',
+        replacesCancelledSubscription: hasCancelledSubscription ? 'true' : 'false',
+        oldSubscriptionId: hasCancelledSubscription ? currentSubscription.stripeSubscriptionId : ''
       },
       subscription_data: {
         metadata: {
           userId: user._id.toString(),
           userEmail: session.user.email,
           plan: plan,
-          platform: 'ai-blog-platform'
+          platform: 'ai-blog-platform',
+          replacesCancelledSubscription: hasCancelledSubscription ? 'true' : 'false'
         }
       }
-    });
+    };
+
+    // Create Stripe checkout session
+    const checkoutSession = await stripe.checkout.sessions.create(checkoutSessionOptions);
 
     return NextResponse.json({
       checkoutUrl: checkoutSession.url,
       sessionId: checkoutSession.id,
-      message: "Stripe checkout session created successfully",
+      message: hasCancelledSubscription 
+        ? "Checkout session created for immediate plan change" 
+        : "Stripe checkout session created successfully",
+      immediateChange: hasCancelledSubscription
     });
 
   } catch (error) {

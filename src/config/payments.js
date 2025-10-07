@@ -155,7 +155,8 @@ export const STRIPE_CONFIG = {
   }
 };
 
-export default {
+// Centralized payments configuration object
+const paymentsConfig = {
   CURRENCY,
   PAYMENT_PLANS,
   PAYPAL_PLANS,
@@ -165,3 +166,6 @@ export default {
   getAllPlans,
   getPaidPlans
 };
+
+export default paymentsConfig;
+

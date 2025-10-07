@@ -3,6 +3,7 @@
 
 import { useSession } from 'next-auth/react';
 import Link from "next/link";
+import Image from 'next/image';
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
 import { Card } from "@/components/ui/Card";
 import SubscriptionStatus from "@/components/subscription/SubscriptionStatus";
@@ -18,9 +19,11 @@ export default function DashboardPage() {
       {/* Welcome Section */}
       <div className="flex items-center gap-4 mb-6">
         {session?.user?.image && (
-          <img
+          <Image
             src={session.user.image}
             alt={session.user.name}
+            width={48}
+            height={48}
             className="w-12 h-12 rounded-full"
           />
         )}

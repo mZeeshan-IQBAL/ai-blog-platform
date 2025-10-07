@@ -51,45 +51,40 @@ export async function getOrCreateStripeProduct(plan) {
   return product;
 }
 
-// Helper function to create or retrieve a Stripe price
+// Helper function to get Stripe price ID from environment variables
+export function getStripePriceId(plan) {
+  const priceIdMap = {
+    'starter': process.env.STRIPE_STARTER_PRICE_ID,
+    'pro': process.env.STRIPE_PRO_PRICE_ID,
+    'business': process.env.STRIPE_BUSINESS_PRICE_ID
+  };
+
+  const priceId = priceIdMap[plan];
+  if (!priceId) {
+    throw new Error(`No Stripe price ID configured for plan: ${plan}`);
+  }
+
+  return priceId;
+}
+
+// Helper function to get or retrieve a Stripe price by ID
 export async function getOrCreateStripePrice(plan) {
-  const planConfig = STRIPE_PLANS[plan];
-  if (!planConfig) {
-    throw new Error(`Invalid plan: ${plan}`);
+  try {
+    // Use the actual price ID from environment variables
+    const priceId = getStripePriceId(plan);
+    
+    // Retrieve the existing price to validate it exists
+    const price = await stripe.prices.retrieve(priceId);
+    
+    if (!price.active) {
+      throw new Error(`Stripe price ${priceId} for plan ${plan} is not active`);
+    }
+
+    return price;
+  } catch (error) {
+    console.error(`Error retrieving Stripe price for plan ${plan}:`, error.message);
+    throw new Error(`Failed to retrieve Stripe price for plan: ${plan}`);
   }
-
-  const product = await getOrCreateStripeProduct(plan);
-
-  // List existing prices for this product
-  const prices = await stripe.prices.list({
-    product: product.id,
-    active: true,
-  });
-
-  // Look for existing price with matching amount and currency
-  let price = prices.data.find(p => 
-    p.unit_amount === planConfig.price && // Already in cents from STRIPE_CONFIG
-    p.currency === planConfig.currency &&
-    p.recurring?.interval === planConfig.interval
-  );
-
-  if (!price) {
-    // Create new price
-    price = await stripe.prices.create({
-      product: product.id,
-      unit_amount: planConfig.price, // Already in cents from STRIPE_CONFIG
-      currency: planConfig.currency,
-      recurring: {
-        interval: planConfig.interval,
-      },
-      metadata: {
-        plan: plan,
-        platform: 'ai-blog-platform'
-      }
-    });
-  }
-
-  return price;
 }
 
 export default stripe;

@@ -44,7 +44,7 @@ export function useSubscription() {
   }, [fetchSubscription]);
 
   const hasFeatureAccess = (feature) => {
-    if (!subscription || subscription.status !== 'active') {
+    if (!subscription || !['active', 'cancelled_active'].includes(subscription.status)) {
       return feature === 'basic';
     }
     
@@ -83,8 +83,9 @@ export function useSubscription() {
     return Math.min((usageValue / limitValue) * 100, 100);
   };
 
-  const isActive = subscription?.status === 'active';
+  const isActive = ['active', 'cancelled_active'].includes(subscription?.status);
   const isPremium = subscription?.plan !== 'free' && isActive;
+  const isCancelled = subscription?.status === 'cancelled_active';
 
   return {
     subscription,
@@ -97,6 +98,7 @@ export function useSubscription() {
     canPerformAction,
     getUsagePercentage,
     isActive,
-    isPremium
+    isPremium,
+    isCancelled
   };
 }

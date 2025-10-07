@@ -7,10 +7,12 @@ import ComparisonTable from "@/components/pricing/ComparisonTable";
 import FAQ from "@/components/pricing/FAQ";
 import PricingGrid from "@/components/pricing/PricingGrid";
 import SubscriptionStatus from "@/components/subscription/SubscriptionStatus";
+import { useSubscription } from "@/hooks/useSubscription";
 import { getAllPlans, formatPrice } from "@/config/payments";
 
 export default function PricingPage() {
   const { data: session } = useSession();
+  const { subscription, isCancelled } = useSubscription();
   
   // Get plans from centralized configuration with USD pricing
   const configPlans = getAllPlans();
@@ -108,6 +110,28 @@ export default function PricingPage() {
           </div>
         </div>
       </div>
+
+      {/* Immediate Change Banner for Cancelled Subscriptions */}
+      {session && isCancelled && (
+        <div className="bg-gradient-to-r from-blue-50 to-green-50 border-l-4 border-blue-500">
+          <div className="max-w-4xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-center">
+              <div className="text-center">
+                <div className="flex items-center justify-center gap-2 mb-2">
+                  <span className="text-2xl">⚡</span>
+                  <h3 className="text-lg font-semibold text-blue-900">
+                    Immediate Plan Changes Available!
+                  </h3>
+                </div>
+                <p className="text-blue-700">
+                  Since your subscription is cancelled, you can switch to any plan immediately without waiting. 
+                  Your new plan will start right away!
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Current Subscription Status */}
       {session && (

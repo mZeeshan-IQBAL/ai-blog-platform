@@ -69,7 +69,7 @@ export async function POST(req) {
 async function handleCheckoutSessionCompleted(session) {
   console.log("Processing checkout.session.completed:", session.id);
   
-  const { userId, userEmail, plan } = session.metadata;
+  const { userId, userEmail, plan, replacesCancelledSubscription, oldSubscriptionId } = session.metadata;
   
   if (!userId || !userEmail || !plan) {
     console.error("Missing metadata in checkout session:", session.metadata);
@@ -83,10 +83,22 @@ async function handleCheckoutSessionCompleted(session) {
     return;
   }
 
+  // If this replaces a cancelled subscription, delete the old one from Stripe
+  if (replacesCancelledSubscription === 'true' && oldSubscriptionId) {
+    try {
+      console.log(`Deleting old cancelled subscription: ${oldSubscriptionId}`);
+      await stripe.subscriptions.del(oldSubscriptionId);
+      console.log(`Successfully deleted old subscription: ${oldSubscriptionId}`);
+    } catch (error) {
+      console.error(`Failed to delete old subscription ${oldSubscriptionId}:`, error.message);
+      // Continue with creating new subscription even if deletion fails
+    }
+  }
+
   // Get subscription details
   const subscription = await stripe.subscriptions.retrieve(session.subscription);
   
-  await updateUserSubscription(user, subscription, plan);
+  await updateUserSubscription(user, subscription, plan, replacesCancelledSubscription === 'true');
 }
 
 async function handleSubscriptionCreated(subscription) {
@@ -196,7 +208,7 @@ async function handleInvoicePaymentFailed(invoice) {
   }
 }
 
-async function updateUserSubscription(user, stripeSubscription, plan) {
+async function updateUserSubscription(user, stripeSubscription, plan, isReplacement = false) {
   const currentPeriodStart = new Date(stripeSubscription.current_period_start * 1000);
   const currentPeriodEnd = new Date(stripeSubscription.current_period_end * 1000);
   
@@ -210,16 +222,20 @@ async function updateUserSubscription(user, stripeSubscription, plan) {
     currentPeriodStart: currentPeriodStart,
     currentPeriodEnd: currentPeriodEnd,
     expiresAt: currentPeriodEnd,
-    startDate: user.subscription?.startDate || currentPeriodStart,
+    startDate: isReplacement ? currentPeriodStart : (user.subscription?.startDate || currentPeriodStart),
     amount: stripeSubscription.items.data[0]?.price?.unit_amount / 100, // Convert from cents to dollars
     currency: 'USD',
     interval: stripeSubscription.items.data[0]?.price?.recurring?.interval,
     gateway: 'stripe',
     payerEmail: user.email,
     transactionId: stripeSubscription.latest_invoice,
-    updatedAt: new Date()
+    updatedAt: new Date(),
+    // Clear cancellation data for immediate plan changes
+    cancelledAt: isReplacement ? null : user.subscription?.cancelledAt
   };
 
   await user.save();
-  console.log(`Subscription updated for user: ${user.email} - Plan: ${plan} - Status: ${stripeSubscription.status}`);
+  
+  const actionType = isReplacement ? 'replaced' : 'updated';
+  console.log(`Subscription ${actionType} for user: ${user.email} - Plan: ${plan} - Status: ${stripeSubscription.status}`);
 }
