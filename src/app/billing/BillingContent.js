@@ -4,6 +4,7 @@ import { useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from 'next-auth/react';
+import { getPlan, formatPrice } from '@/config/payments';
 
 export default function BillingContent() {
   const { data: session, status } = useSession();
@@ -20,18 +21,11 @@ export default function BillingContent() {
     }
   }, [session, status, router]);
 
-  // PKR amounts (approx: $1 = ₨280)
-  const planConfig = {
-    free: { name: "Free", pricePKR: 0 },
-    starter: { name: "Starter", pricePKR: 1120 }, // $4
-    pro: { name: "Pro", pricePKR: 2240 },        // $8
-    business: { name: "Business", pricePKR: 4200 } // $15
-  };
-
-  const selectedPlan = planConfig[plan.toLowerCase()] || planConfig.starter;
+  // Get plan configuration from centralized config
+  const selectedPlan = getPlan(plan.toLowerCase());
 
   // Handle Free Plan
-  if (selectedPlan.pricePKR === 0) {
+  if (selectedPlan.price === 0) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50">
         <div className="bg-white p-8 rounded-xl shadow-md max-w-lg w-full text-center">
@@ -51,7 +45,7 @@ export default function BillingContent() {
     );
   }
 
-  // Initiate payment via your backend
+  // Initiate Stripe checkout
   const handlePayment = async () => {
     setLoading(true);
     setError("");
@@ -62,10 +56,6 @@ export default function BillingContent() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           plan,
-          amount: selectedPlan.pricePKR,
-          currency: 'PKR',
-          userId: session.user.id,
-          userEmail: session.user.email,
           successUrl: `${window.location.origin}/billing/success?plan=${plan}`,
           cancelUrl: `${window.location.origin}/billing?plan=${plan}`,
         }),
@@ -73,14 +63,44 @@ export default function BillingContent() {
 
       const data = await response.json();
 
-      if (response.ok && data.paymentUrl) {
-        window.location.href = data.paymentUrl;
+      if (response.ok && data.checkoutUrl) {
+        // Redirect to Stripe Checkout
+        window.location.href = data.checkoutUrl;
       } else {
-        setError(data.error || 'Failed to start payment');
+        setError(data.error || 'Failed to create payment session');
+        console.error('Payment session error:', data.details);
       }
     } catch (err) {
       console.error('Payment initiation error:', err);
       setError('Unable to start payment. Please try again.');
+    }
+    setLoading(false);
+  };
+
+  // Initiate PayPal checkout (redirect flow)
+  const handlePayPalPayment = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const response = await fetch('/api/billing/paypal/create-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          plan,
+          successUrl: `${window.location.origin}/billing/success?plan=${plan}&gateway=paypal`,
+          cancelUrl: `${window.location.origin}/billing?plan=${plan}`,
+        }),
+      });
+      const data = await response.json();
+      if (response.ok && data.approveUrl) {
+        window.location.href = data.approveUrl;
+      } else {
+        setError(data.error || 'Failed to create PayPal order');
+        console.error('PayPal order error:', data.details);
+      }
+    } catch (err) {
+      console.error('PayPal initiation error:', err);
+      setError('Unable to start PayPal checkout. Please try again.');
     }
     setLoading(false);
   };
@@ -96,12 +116,12 @@ export default function BillingContent() {
       <div className="bg-white p-8 rounded-xl shadow-md max-w-lg w-full">
         <h1 className="text-3xl font-bold mb-4 text-center">Complete Your Purchase</h1>
         
-        <div className="bg-gray-50 p-4 rounded-lg mb-6">
+          <div className="bg-gray-50 p-4 rounded-lg mb-6">
           <div className="flex justify-between items-center mb-2">
             <span className="font-medium">{selectedPlan.name} Plan</span>
-            <span className="font-bold">₨{selectedPlan.pricePKR}</span>
+            <span className="font-bold">{formatPrice(selectedPlan.price)}/month</span>
           </div>
-          <p className="text-sm text-gray-600">One-time payment for 30 days of access</p>
+          <p className="text-sm text-gray-600">Monthly plan — choose your payment method</p>
           <p className="text-sm text-gray-600 mt-2">
             Logged in as: <strong>{session.user.email}</strong>
           </p>
@@ -113,26 +133,37 @@ export default function BillingContent() {
           </div>
         )}
 
-        <button
-          onClick={handlePayment}
-          disabled={loading}
-          className={`w-full py-3 px-4 rounded-lg font-medium text-white ${
-            loading ? 'bg-primary/60' : 'bg-primary hover:bg-primary/90'
-          } transition`}
-        >
-          {loading ? 'Redirecting to Payment...' : 'Pay with EasyPaisa / JazzCash'}
-        </button>
+        <div className="grid grid-cols-1 gap-3">
+          <button
+            onClick={handlePayment}
+            disabled={loading}
+            className={`w-full py-3 px-4 rounded-lg font-medium text-white ${
+              loading ? 'bg-primary/60' : 'bg-primary hover:bg-primary/90'
+            } transition`}
+          >
+            {loading ? 'Redirecting...' : 'Pay with Stripe'}
+          </button>
+          <button
+            onClick={handlePayPalPayment}
+            disabled={loading}
+            className={`w-full py-3 px-4 rounded-lg font-medium border ${
+              loading ? 'bg-gray-100 text-gray-400' : 'bg-white hover:bg-gray-50 text-gray-800'
+            } transition`}
+          >
+            {loading ? 'Redirecting...' : 'Pay with PayPal'}
+          </button>
+        </div>
 
         {loading && (
           <div className="text-center mt-4 text-sm text-gray-500">
-            Please wait while we redirect you to the secure payment page...
+            Please wait while we redirect you to the payment page...
           </div>
         )}
 
         <div className="mt-6 pt-6 border-t">
           <p className="text-xs text-gray-500 text-center">
-            Secure one-time payment via EasyPaisa or JazzCash. 
-            Access lasts 30 days. No automatic renewal.
+            Secure payment via Stripe or PayPal. 
+            Cancel anytime. All major credit/debit cards accepted.
           </p>
         </div>
       </div>

@@ -4,11 +4,12 @@ export const dynamic = "force-dynamic";
 import { NextResponse } from 'next/server';
 import { connectToDB } from '@/lib/db';
 import User from '@/models/User';
-import { auth } from '@/lib/auth';
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 
 export async function GET() {
   try {
-    const session = await auth();
+    const session = await getServerSession(authOptions);
     
     if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -36,7 +37,7 @@ export async function GET() {
         plan: sub.plan || 'free',
         status: effectiveStatus,
         amount: sub.amount || 0,
-        currency: sub.currency || 'PKR',
+        currency: sub.currency || 'USD',
         startDate: sub.startDate || null,
         expiresAt: sub.expiresAt || null,
         payerEmail: sub.payerEmail || null,

@@ -5,10 +5,12 @@ import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import TipTapEditor from "@/components/editor/TipTapEditor";
 import { CATEGORIES } from "@/lib/categories";
+import { useSubscription } from "@/hooks/useSubscription";
 
 export default function PostForm() {
   const router = useRouter();
   const editorRef = useRef(null);
+  const { subscription, usage, limits, canPerformAction, getUsagePercentage, isPremium } = useSubscription();
 
   // Form state
   const [title, setTitle] = useState("");
@@ -19,6 +21,13 @@ export default function PostForm() {
   const [previewUrl, setPreviewUrl] = useState("");
   const [content, setContent] = useState("");
   const [showPreview, setShowPreview] = useState(false);
+  
+  // Subscription limits
+  const maxTags = subscription?.plan === 'free' ? 3 : subscription?.plan === 'starter' ? 5 : 10;
+  const maxFileSize = limits?.maxFileSize || 5; // MB
+  const postsUsed = usage?.posts || 0;
+  const postsLimit = limits?.posts || 5;
+  const canCreatePost = canPerformAction?.('create_post') !== false;
 
   // Status
   const [loading, setLoading] = useState(false);
@@ -44,6 +53,19 @@ export default function PostForm() {
       setLoading(false);
       return;
     }
+    
+    // Check subscription limits before submitting
+    if (!canCreatePost) {
+      setError(`You've reached your post limit (${postsLimit} posts per month). Upgrade to create more posts!`);
+      setLoading(false);
+      return;
+    }
+    
+    if (tags.length > maxTags) {
+      setError(`Your ${subscription?.plan || 'free'} plan allows maximum ${maxTags} tags per post.`);
+      setLoading(false);
+      return;
+    }
 
     try {
       const formData = new FormData();
@@ -53,7 +75,7 @@ export default function PostForm() {
       formData.append("tags", JSON.stringify(tags));
       if (imageFile) formData.append("image", imageFile);
 
-      const res = await fetch("/api/blogs", { method: "POST", body: formData });
+      const res = await fetch("/api/posts", { method: "POST", body: formData });
       const data = await res.json();
 
       if (!res.ok) throw new Error(data.error || "Failed to create blog");
@@ -69,7 +91,13 @@ export default function PostForm() {
       router.push("/blog");
     } catch (err) {
       console.error("❌ Blog creation failed:", err);
-      setError(err.message || "Network error. Try again.");
+      
+      // Handle subscription-specific errors
+      if (err.message.includes('limit exceeded') || err.message.includes('upgrade')) {
+        setError(err.message + ' Click here to upgrade your plan.');
+      } else {
+        setError(err.message || "Network error. Try again.");
+      }
     } finally {
       setLoading(false);
     }
@@ -83,8 +111,8 @@ export default function PostForm() {
       setPreviewUrl("");
       return;
     }
-    if (file.size > 5 * 1024 * 1024) {
-      setError("Image must be smaller than 5MB.");
+    if (file.size > maxFileSize * 1024 * 1024) {
+      setError(`Image must be smaller than ${maxFileSize}MB. Your ${subscription?.plan || 'free'} plan limit is ${maxFileSize}MB.`);
       return;
     }
     setImageFile(file);
@@ -98,8 +126,15 @@ export default function PostForm() {
   const handleTagAdd = (e) => {
     if (e.key === "Enter" && tagInput.trim()) {
       e.preventDefault();
+      
+      if (tags.length >= maxTags) {
+        setError(`Maximum ${maxTags} tags allowed for ${subscription?.plan || 'free'} plan. Remove a tag first or upgrade your plan.`);
+        return;
+      }
+      
       if (!tags.includes(tagInput.trim())) {
         setTags([...tags, tagInput.trim()]);
+        setError(""); // Clear any tag limit errors
       }
       setTagInput("");
     }
@@ -152,7 +187,108 @@ export default function PostForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {error && <p className="text-red-600">{error}</p>}
+      {/* Subscription Status Widget */}
+      {subscription && (
+        <div className={`p-4 rounded-lg border ${
+          isPremium ? 'bg-green-50 border-green-200' : 'bg-yellow-50 border-yellow-200'
+        }`}>
+          <div className="flex justify-between items-center mb-2">
+            <h3 className="font-semibold text-sm">
+              {subscription.plan.charAt(0).toUpperCase() + subscription.plan.slice(1)} Plan
+              {isPremium && <span className="ml-2 text-green-600">✓ Active</span>}
+            </h3>
+            {!isPremium && (
+              <a href="/billing" className="text-xs bg-blue-600 text-white px-2 py-1 rounded">
+                Upgrade
+              </a>
+            )}
+          </div>
+          
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
+            <div>
+              <span className="text-gray-600">Posts:</span>
+              <div className={`font-medium ${
+                postsLimit === -1 ? 'text-green-600' : 
+                postsUsed >= postsLimit ? 'text-red-600' : 
+                postsUsed / postsLimit > 0.8 ? 'text-yellow-600' : 'text-gray-800'
+              }`}>
+                {postsUsed}/{postsLimit === -1 ? '∞' : postsLimit}
+              </div>
+              {postsLimit !== -1 && (
+                <div className="w-full bg-gray-200 rounded-full h-1 mt-1">
+                  <div 
+                    className={`h-1 rounded-full ${
+                      postsUsed >= postsLimit ? 'bg-red-500' : 
+                      postsUsed / postsLimit > 0.8 ? 'bg-yellow-500' : 'bg-green-500'
+                    }`}
+                    style={{ width: `${Math.min((postsUsed / postsLimit) * 100, 100)}%` }}
+                  />
+                </div>
+              )}
+            </div>
+            
+            <div>
+              <span className="text-gray-600">Tags:</span>
+              <div className={`font-medium ${
+                tags.length >= maxTags ? 'text-red-600' : 
+                tags.length / maxTags > 0.8 ? 'text-yellow-600' : 'text-gray-800'
+              }`}>
+                {tags.length}/{maxTags}
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-1 mt-1">
+                <div 
+                  className={`h-1 rounded-full ${
+                    tags.length >= maxTags ? 'bg-red-500' : 
+                    tags.length / maxTags > 0.8 ? 'bg-yellow-500' : 'bg-green-500'
+                  }`}
+                  style={{ width: `${Math.min((tags.length / maxTags) * 100, 100)}%` }}
+                />
+              </div>
+            </div>
+            
+            <div>
+              <span className="text-gray-600">File Size:</span>
+              <div className="font-medium text-gray-800">
+                Max {maxFileSize}MB
+              </div>
+            </div>
+            
+            <div>
+              <span className="text-gray-600">Features:</span>
+              <div className="font-medium text-gray-800">
+                {isPremium ? (
+                  <span className="text-green-600">All ✓</span>
+                ) : (
+                  <span className="text-yellow-600">Basic</span>
+                )}
+              </div>
+            </div>
+          </div>
+          
+          {!canCreatePost && (
+            <div className="mt-3 p-2 bg-red-100 border border-red-300 rounded text-red-700 text-sm">
+              ⚠️ You've reached your post limit. <a href="/billing" className="underline">Upgrade now</a> to create more posts!
+            </div>
+          )}
+        </div>
+      )}
+      
+      {error && (
+        <div className={`p-3 rounded border ${
+          error.includes('upgrade') || error.includes('limit') 
+            ? 'bg-red-50 border-red-200 text-red-700' 
+            : 'bg-red-50 border-red-200 text-red-600'
+        }`}>
+          {error}
+          {(error.includes('upgrade') || error.includes('limit')) && (
+            <div className="mt-2">
+              <a href="/billing" className="inline-block bg-blue-600 text-white px-3 py-1 rounded text-sm">
+                Upgrade Plan →
+              </a>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Title */}
       <div>

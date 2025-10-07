@@ -50,6 +50,7 @@
     "remark-gfm": "^4.0.1",
     "remark-html": "^16.0.1",
     "resend": "^4.8.0",
+    "stripe": "^19.1.0",
     "zod": "^3.25.76"
   },
   "devDependencies": {

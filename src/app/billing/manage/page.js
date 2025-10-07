@@ -5,6 +5,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Calendar, AlertCircle, Settings, CreditCard } from "lucide-react";
+import { formatPrice } from "@/config/payments";
 
 export default function ManageSubscription() {
   const router = useRouter();
@@ -81,7 +82,7 @@ export default function ManageSubscription() {
                     {subscription.plan || "Free"}
                   </p>
                   {subscription.amount > 0 && (
-                    <p className="text-gray-600">₨{subscription.amount}/month</p>
+                    <p className="text-gray-600">{formatPrice(subscription.amount)}/month</p>
                   )}
                 </div>
                 <div className="text-right">
@@ -134,7 +135,13 @@ export default function ManageSubscription() {
                   Payment Method
                 </h3>
                 <p className="text-gray-600">
-                  Paid via <strong>EasyPaisa / JazzCash</strong> (one-time payment)
+                  {subscription.stripeSubscriptionId ? (
+                    <>Paid via <strong>Stripe</strong> (recurring subscription)</>
+                  ) : subscription.paypalOrderId || subscription.paypalSubscriptionId ? (
+                    <>Paid via <strong>PayPal</strong> (one-time payment)</>
+                  ) : (
+                    <>Paid via <strong>EasyPaisa / JazzCash</strong> (one-time payment)</>
+                  )}
                 </p>
                 {subscription.payerEmail && (
                   <p className="text-sm text-gray-500 mt-2">
@@ -172,9 +179,12 @@ export default function ManageSubscription() {
                   >
                     <div className="flex items-center">
                       <AlertCircle className="w-5 h-5 mr-3" />
-                      <div>
-                        <p className="font-medium">Cancel Auto-Renewal</p>
-                      </div>
+                    <div>
+                      <p className="font-medium">Cancel Subscription</p>
+                      <p className="text-sm text-gray-600">
+                        Subscription will remain active until {formatDate(subscription.expiresAt)}
+                      </p>
+                    </div>
                     </div>
                   </button>
                 )}

@@ -1,9 +1,14 @@
 // components/pricing/PricingCard.jsx
+"use client";
+
 import React from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
+import { useSubscription } from "@/hooks/useSubscription";
 
 export default function PricingCard({ plan, isPopular, isHighlighted }) {
+  const { subscription, isPremium } = useSubscription();
+  const isCurrentPlan = subscription?.plan === plan.slug;
   // Determine the correct href based on plan type
   const getHref = () => {
     if (plan.slug === "free") {
@@ -24,14 +29,19 @@ export default function PricingCard({ plan, isPopular, isHighlighted }) {
         transition-all hover:shadow-lg hover:-translate-y-0.5
       `}
     >
-      {/* Popular Label */}
-      {isPopular && (
-        <div className="absolute -top-3 left-6">
+      {/* Labels */}
+      <div className="absolute -top-3 left-6 flex gap-2">
+        {isCurrentPlan && (
+          <span className="bg-green-600 text-white text-xs font-medium px-3 py-1 rounded">
+            Current Plan
+          </span>
+        )}
+        {isPopular && !isCurrentPlan && (
           <span className="bg-primary text-primary-foreground text-xs font-medium px-3 py-1 rounded">
             Popular
           </span>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* Plan Name */}
       <h3 className="text-xl font-semibold mb-2 mt-2">
@@ -81,15 +91,39 @@ export default function PricingCard({ plan, isPopular, isHighlighted }) {
       </ul>
 
       {/* CTA Button */}
-      <Button
-        as="link"
-        href={getHref()}
-        variant={plan.slug === "enterprise" ? "secondary" : plan.slug === "free" ? "outline" : "gradient"}
-        size="lg"
-        className="w-full"
-      >
-        {plan.cta}
-      </Button>
+      {isCurrentPlan ? (
+        <div className="w-full">
+          <Button
+            as="link"
+            href="/billing"
+            variant="outline"
+            size="lg"
+            className="w-full mb-2 border-green-300 text-green-700 hover:bg-green-50"
+          >
+            ✓ Current Plan
+          </Button>
+          <Button
+            as="link"
+            href="/billing"
+            variant="ghost"
+            size="sm"
+            className="w-full text-xs text-gray-600"
+          >
+            Manage Subscription
+          </Button>
+        </div>
+      ) : (
+        <Button
+          as="link"
+          href={getHref()}
+          variant={plan.slug === "enterprise" ? "secondary" : plan.slug === "free" ? "outline" : "gradient"}
+          size="lg"
+          className="w-full"
+          disabled={subscription?.plan === 'free' && plan.slug === 'free'}
+        >
+          {subscription?.plan === 'free' && plan.slug === 'free' ? 'Current Plan' : plan.cta}
+        </Button>
+      )}
     </div>
   );
 }

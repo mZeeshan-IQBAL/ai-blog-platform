@@ -1,85 +1,65 @@
+"use client";
+
 import Image from "next/image";
+import { useSession } from "next-auth/react";
 import PricingCard from "@/components/pricing/PricingCard";
 import ComparisonTable from "@/components/pricing/ComparisonTable";
 import FAQ from "@/components/pricing/FAQ";
 import PricingGrid from "@/components/pricing/PricingGrid";
+import SubscriptionStatus from "@/components/subscription/SubscriptionStatus";
+import { getAllPlans, formatPrice } from "@/config/payments";
 
 export default function PricingPage() {
-  // PKR amounts (approx: $1 = ₨280)
+  const { data: session } = useSession();
+  
+  // Get plans from centralized configuration with USD pricing
+  const configPlans = getAllPlans();
+  
+  // Transform config plans to match existing UI structure
   const plans = [
     {
-      name: "Free",
-      slug: "free",
-      price: "₨0",
+      name: configPlans[0].name,
+      slug: configPlans[0].id,
+      price: formatPrice(configPlans[0].price),
       period: "forever",
-      description: "Perfect for new writers getting started.",
-      features: [
-        "5 GB storage",
-        "Up to 5 stories per month",
-        "Basic writing assistant",
-        "Reader community access",
-        "Standard support",
-      ],
+      description: configPlans[0].description,
+      features: configPlans[0].features,
       cta: "Start Free",
-      popular: false,
-      highlighted: false,
+      popular: configPlans[0].popular,
+      highlighted: configPlans[0].popular,
     },
     {
-      name: "Starter",
-      slug: "starter",
-      price: "₨1,120",
-      period: "for 30 days",
-      description: "Ideal for serious writers and storytellers.",
-      features: [
-        "20 GB storage",
-        "Unlimited stories",
-        "Advanced writing assistant",
-        "Custom writer profile",
-        "Priority support",
-        "Reader engagement analytics",
-      ],
+      name: configPlans[1].name,
+      slug: configPlans[1].id,
+      price: formatPrice(configPlans[1].price),
+      period: "per month",
+      description: configPlans[1].description,
+      features: configPlans[1].features,
       cta: "Get Starter",
-      popular: true,
-      highlighted: true,
+      popular: configPlans[1].popular,
+      highlighted: configPlans[1].popular,
     },
     {
-      name: "Pro",
-      slug: "pro",
-      price: "₨2,240",
-      period: "for 30 days",
-      description: "For professional writers and content creators.",
-      features: [
-        "50 GB storage",
-        "Unlimited everything",
-        "Premium AI writing tools",
-        "Custom domain for portfolio",
-        "24/7 priority support",
-        "Advanced reader analytics",
-        "Collaboration features",
-      ],
+      name: configPlans[2].name,
+      slug: configPlans[2].id,
+      price: formatPrice(configPlans[2].price),
+      period: "per month",
+      description: configPlans[2].description,
+      features: configPlans[2].features,
       cta: "Get Pro",
-      popular: false,
-      highlighted: false,
+      popular: configPlans[2].popular,
+      highlighted: configPlans[2].popular,
     },
     {
-      name: "Business",
-      slug: "business",
-      price: "₨4,200",
-      period: "for 30 days",
-      description: "For publishing houses and media companies.",
-      features: [
-        "100 GB storage",
-        "Unlimited content & authors",
-        "All AI tools + API access",
-        "Multiple custom domains",
-        "Dedicated support manager",
-        "Publisher-grade analytics",
-        "White-label branding",
-        "SLA guarantee",
-      ],
+      name: configPlans[3].name,
+      slug: configPlans[3].id,
+      price: formatPrice(configPlans[3].price),
+      period: "per month",
+      description: configPlans[3].description,
+      features: configPlans[3].features,
       cta: "Get Business",
-      popular: false,
-      highlighted: false,
+      popular: configPlans[3].popular,
+      highlighted: configPlans[3].popular,
     },
     {
       name: "Enterprise",
@@ -129,8 +109,25 @@ export default function PricingPage() {
         </div>
       </div>
 
+      {/* Current Subscription Status */}
+      {session && (
+        <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-6">
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Your Current Plan</h2>
+            <p className="text-gray-600">Manage your subscription and see what you can unlock</p>
+          </div>
+          <SubscriptionStatus showUsage={true} showFeatures={false} />
+        </div>
+      )}
+
       {/* Pricing grid */}
       <div className="max-w-7xl mx-auto py-16 px-4 sm:px-6 lg:px-8">
+        {session && (
+          <div className="text-center mb-12">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Upgrade Your Plan</h2>
+            <p className="text-gray-600">Choose a plan that fits your growing needs</p>
+          </div>
+        )}
         <PricingGrid plans={plans} />
 
         {/* Visual */}

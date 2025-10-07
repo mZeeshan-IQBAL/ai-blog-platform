@@ -5,6 +5,7 @@ import { NextResponse } from 'next/server';
 import { connectToDB } from '@/lib/db';
 import User from '@/models/User';
 import { auth } from '@/lib/auth';
+import { stripe } from '@/lib/stripe';
 
 export async function POST() {
   try {
@@ -39,12 +40,36 @@ export async function POST() {
       );
     }
 
-    // Mark as cancelled (local only — no gateway call needed for EasyPaisa/JazzCash)
-    user.subscription.status = 'cancelled';
-    user.subscription.cancelledAt = new Date().toISOString(); // Use ISO string for consistency
-    await user.save();
-    
-    return NextResponse.json({ success: true, status: 'cancelled' });
+    // Handle Stripe subscription cancellation
+    if (user.subscription.stripeSubscriptionId) {
+      try {
+        // Cancel the subscription in Stripe (will remain active until end of billing period)
+        await stripe.subscriptions.cancel(user.subscription.stripeSubscriptionId);
+        
+        user.subscription.status = 'cancelled';
+        user.subscription.cancelledAt = new Date();
+        await user.save();
+        
+        return NextResponse.json({ 
+          success: true, 
+          status: 'cancelled',
+          message: 'Stripe subscription cancelled successfully. Access will continue until the end of your billing period.'
+        });
+      } catch (stripeError) {
+        console.error('Stripe cancellation error:', stripeError);
+        return NextResponse.json({ 
+          error: 'Failed to cancel Stripe subscription',
+          details: process.env.NODE_ENV === 'development' ? stripeError.message : undefined
+        }, { status: 500 });
+      }
+    } else {
+      // Handle local subscription cancellation (for legacy EasyPaisa/JazzCash)
+      user.subscription.status = 'cancelled';
+      user.subscription.cancelledAt = new Date();
+      await user.save();
+      
+      return NextResponse.json({ success: true, status: 'cancelled' });
+    }
     
   } catch (error) {
     console.error('Error cancelling subscription:', error);
