@@ -59,7 +59,7 @@ Includes rich text editing, real-time engagement with **Pusher**, file uploads w
 ## 📂 Folder Structure
 ai-blog-platform/
 │
-├── app/
+├── src/app/
 │   ├── api/
 │   │   ├── auth/[...nextauth]/route.js
 │   │   ├── blogs/route.js
@@ -85,7 +85,7 @@ ai-blog-platform/
 │   ├── providers.js
 │   └── page.js
 │
-├── components/
+├── src/components/
 │   ├── layout/Navbar.jsx
 │   ├── layout/Footer.jsx
 │   ├── homepage/Hero.jsx
@@ -102,7 +102,7 @@ ai-blog-platform/
 │   ├── likes/LikeButton.jsx
 │   └── ui/MarkdownRenderer.jsx
 │
-├── lib/
+├── src/lib/
 │   ├── analytics.js
 │   ├── api.js
 │   ├── auth.js
@@ -113,7 +113,7 @@ ai-blog-platform/
 │   ├── redis.js
 │   └── search.js
 │
-├── models/
+├── src/models/
 │   ├── User.js
 │   ├── Post.js
 │   ├── Comment.js
@@ -176,7 +176,9 @@ GITHUB_SECRET=your-github-oauth-app-secret
 
 # Email Provider (Resend)
 RESEND_API_KEY=your-resend-api-key
-FROM_EMAIL=noreply@yourdomain.com
+EMAIL_FROM=noreply@yourdomain.com
+# Development-only: optionally redirect all outgoing emails to a safe address
+# RESEND_DEV_REDIRECT_TO=developer@example.com
 
 # Cloudinary (for image uploads)
 CLOUDINARY_CLOUD_NAME=your-cloudinary-cloud-name
@@ -234,7 +236,7 @@ Open [http://localhost:3000](http://localhost:3000) to view the application.
    - Copy your **Publishable key** (`pk_test_...`) and **Secret key** (`sk_test_...`)
 3. **Webhook Setup**:
    - Go to Developers > Webhooks
-   - Add endpoint: `https://yourdomain.com/api/billing/webhooks/stripe`
+- Add endpoint: `https://yourdomain.com/api/billing/webhook`
    - Select events: `checkout.session.completed`, `invoice.payment_succeeded`
    - Copy the **Signing secret** (`whsec_...`)
 

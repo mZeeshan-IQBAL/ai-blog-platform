@@ -58,6 +58,9 @@ export default async function ForYou() {
       );
     }
 
+    // Convert MongoDB objects to plain objects to avoid toJSON method issues
+    const plainPosts = JSON.parse(JSON.stringify(posts));
+
     return (
       <section className="py-12">
         <div className="max-w-6xl mx-auto px-6">
@@ -66,7 +69,7 @@ export default async function ForYou() {
             <Button as="link" href="/blog" variant="link" size="sm">See all</Button>
           </div>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {posts.map((post) => (
+            {plainPosts.map((post) => (
               <BlogCard key={post._id || post.id} blog={{
                 _id: String(post._id || post.id),
                 id: String(post._id || post.id),

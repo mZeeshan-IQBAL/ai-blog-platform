@@ -79,6 +79,11 @@ export default function NavbarPro() {
   const [notifications, setNotifications] = useState([]);
   const [notifOpen, setNotifOpen] = useState(false);
 
+  // Close mobile menu on route change
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [pathname]);
+
   // Pusher notifications (kept lightweight)
   useEffect(() => {
     const uid = session?.user?.providerId || session?.user?.id;

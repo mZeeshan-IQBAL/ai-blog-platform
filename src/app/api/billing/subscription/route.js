@@ -6,6 +6,7 @@ import { connectToDB } from '@/lib/db';
 import User from '@/models/User';
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { syncPostUsage } from '@/lib/usageSync';
 
 export async function GET() {
   try {
@@ -20,6 +21,20 @@ export async function GET() {
     const user = await User.findOne({ email: session.user.email });
     if (!user) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    }
+
+    // Auto-sync post usage to ensure accurate counts
+    try {
+      await syncPostUsage(user._id.toString());
+      console.log('📊 Post usage synced for user:', user._id);
+      // Refetch user to get updated usage data
+      const updatedUser = await User.findById(user._id);
+      if (updatedUser) {
+        user.subscription = updatedUser.subscription;
+      }
+    } catch (syncError) {
+      console.warn('⚠️ Failed to sync post usage:', syncError.message);
+      // Continue without failing the request
     }
 
     // Safely extract subscription data with defaults

@@ -127,10 +127,16 @@ const NavLinks = () => {
 /* -------------------- Navbar -------------------- */
 export default function Navbar() {
   const { data: session, status } = useSession();
+  const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [notifOpen, setNotifOpen] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
+
+  // Close mobile menu on route change
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [pathname]);
 
   // Close dropdowns when clicking outside
   useEffect(() => {

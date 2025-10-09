@@ -153,8 +153,6 @@ async function createPostHandler(request) {
     // Increment post usage counter (handled by middleware, but ensure it's tracked)
     await user.incrementUsage('posts', 1);
 
-    // Populate author for response
-    await savedPost.populate("author", "name image");
 
     // 🧹 Invalidate cache and revalidate routes
     await cacheDel("posts:all");

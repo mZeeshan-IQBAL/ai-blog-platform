@@ -101,7 +101,10 @@ const TrendingContent = async ({ limit = 6 }) => {
       return <EmptyTrending />;
     }
 
-    const blogs = trending.map((p) => ({
+    // Convert MongoDB objects to plain objects to avoid toJSON method issues
+    const plainTrending = JSON.parse(JSON.stringify(trending));
+
+    const blogs = plainTrending.map((p) => ({
       id: p._id?.toString?.() || p.id,
       slug: p.slug,
       title: p.title,

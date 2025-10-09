@@ -51,6 +51,9 @@ const subscriptionSchema = new mongoose.Schema(
       teamMembers: { type: Number, default: 0 },
       analyticsViews: { type: Number, default: 0 },
       emailsSent: { type: Number, default: 0 },
+      // New usage fields
+      commentsToday: { type: Number, default: 0 },
+      dailyChats: { type: Number, default: 0 },
     },
 
     // Enhanced plan limits
@@ -486,6 +489,8 @@ UserSchema.methods.incrementUsage = async function (actionType, amount = 1) {
         teamMembers: this.subscription.usage.teamMembers || 0, // Don't reset team members
         analyticsViews: 0,
         emailsSent: 0,
+        commentsToday: 0,
+        dailyChats: 0,
       };
       this.subscription.lastResetDate = now;
     }
@@ -519,6 +524,12 @@ UserSchema.methods.incrementUsage = async function (actionType, amount = 1) {
       break;
     case "customDomains": 
       this.subscription.usage.customDomains += amount; 
+      break;
+    case "commentsToday": 
+      this.subscription.usage.commentsToday += amount; 
+      break;
+    case "dailyChats": 
+      this.subscription.usage.dailyChats += amount; 
       break;
   }
   

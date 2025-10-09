@@ -1,5 +1,7 @@
 // src/app/api/ai-suggest/route.js
+export const dynamic = "force-dynamic";
 import OpenAI from "openai";
+import { withSubscription } from "@/lib/subscriptionMiddleware";
 
 // Initialize OpenAI client with OpenRouter
 const openai = new OpenAI({
@@ -11,12 +13,28 @@ const openai = new OpenAI({
   },
 });
 
-export async function POST(req) {
+async function aiSuggestHandler(req) {
   try {
+    // Get user and subscription from middleware
+    const user = req.user;
+    const subscription = req.subscription;
     const { content, mode = "rewrite" } = await req.json();
 
     if (!content) {
       return new Response(JSON.stringify({ error: "Missing content" }), { status: 400 });
+    }
+
+    // Check content length limits based on subscription
+    const maxContentLength = subscription.plan === 'free' ? 1000 : 
+                           subscription.plan === 'starter' ? 3000 : 
+                           subscription.plan === 'pro' ? 10000 : 50000;
+    
+    if (content.length > maxContentLength) {
+      return new Response(JSON.stringify({ 
+        error: `Content too long. Your ${subscription.plan} plan allows maximum ${maxContentLength} characters.`,
+        upgradeRequired: true,
+        currentPlan: subscription.plan
+      }), { status: 400 });
     }
 
     // Build prompt dynamically
@@ -36,15 +54,26 @@ Return only the continuation text:\n\n${content}`;
       return new Response(JSON.stringify({ error: "Invalid mode" }), { status: 400 });
     }
 
-    // Call OpenRouter
+    // Call OpenRouter with a reliable model
     const completion = await openai.chat.completions.create({
-      model: "deepseek/deepseek-chat-v3.1:free", // you can swap for gpt-4o, claude, etc.
+      model: "openai/gpt-4o-mini", // Reliable OpenAI model via OpenRouter
       messages: [{ role: "user", content: prompt }],
     });
 
     const text = completion.choices[0]?.message?.content?.trim();
+    
+    // Estimate token usage (rough approximation: 1 token ≈ 0.75 words)
+    const estimatedTokens = Math.ceil((content.length + (text?.length || 0)) * 0.75 / 4);
+    
+    // Increment token usage (aiCalls is handled by middleware)
+    await user.incrementUsage('aiTokens', estimatedTokens);
 
-    return new Response(JSON.stringify({ suggestion: text }), { status: 200 });
+    return new Response(JSON.stringify({ 
+      suggestion: text,
+      tokensUsed: estimatedTokens,
+      remainingCalls: user.getRemainingQuota('aiCalls'),
+      remainingTokens: user.getRemainingQuota('aiTokens')
+    }), { status: 200 });
   } catch (err) {
     console.error("❌ OpenRouter API error:", err.message);
     return new Response(
@@ -56,6 +85,16 @@ Return only the continuation text:\n\n${content}`;
     );
   }
 }
+
+// Apply subscription middleware with AI usage tracking
+export const POST = withSubscription(aiSuggestHandler, {
+  requiredAction: 'ai_call',
+  requireActiveSubscription: false, // Allow free tier with limits
+  incrementUsage: {
+    type: 'aiCalls',
+    amount: 1
+  }
+});
 
 export async function GET() {
   return new Response(JSON.stringify({ error: "Use POST instead" }), { status: 405 });

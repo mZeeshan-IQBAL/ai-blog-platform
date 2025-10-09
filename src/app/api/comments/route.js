@@ -42,6 +42,35 @@ export async function POST(request) {
     const user = await User.findOne({ providerId });
     if (!user) return Response.json({ error: "User not found" }, { status: 404 });
     if (user.blocked) return Response.json({ error: "User is blocked" }, { status: 403 });
+    
+    // Check subscription limits for comments
+    const subscription = user.subscription;
+    const commentsToday = subscription.usage?.commentsToday || 0;
+    const maxCommentsPerDay = subscription.plan === 'free' ? 10 : 
+                             subscription.plan === 'starter' ? 50 : 
+                             subscription.plan === 'pro' ? 200 : -1;
+    
+    if (maxCommentsPerDay !== -1 && commentsToday >= maxCommentsPerDay) {
+      return Response.json({ 
+        error: `Daily comment limit reached. Your ${subscription.plan} plan allows ${maxCommentsPerDay} comments per day.`,
+        upgradeRequired: true,
+        currentPlan: subscription.plan,
+        resetTime: "24 hours"
+      }, { status: 429 });
+    }
+    
+    // Check content length limits
+    const maxContentLength = subscription.plan === 'free' ? 500 : 
+                            subscription.plan === 'starter' ? 1000 : 
+                            subscription.plan === 'pro' ? 2000 : 5000;
+    
+    if (content.length > maxContentLength) {
+      return Response.json({ 
+        error: `Comment too long. Your ${subscription.plan} plan allows maximum ${maxContentLength} characters per comment.`,
+        upgradeRequired: true,
+        currentPlan: subscription.plan
+      }, { status: 400 });
+    }
 
     // Content rules: banned words + link limits
     try {
@@ -56,6 +85,12 @@ export async function POST(request) {
     await comment.save();
     post.comments.push(comment._id);
     await post.save();
+    
+    // Increment comment usage counters
+    if (!user.subscription.usage.commentsToday) {
+      user.subscription.usage.commentsToday = 0;
+    }
+    await user.incrementUsage('commentsToday', 1);
 
     // Live update
     pusherServer.trigger(`post-${postId}`, "comment-update", {

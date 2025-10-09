@@ -8,7 +8,13 @@
     "start": "cross-env NEXT_SKIP_NATIVE_POSTINSTALL=1 next start",
     "lint": "eslint . --report-unused-disable-directives --max-warnings=0",
     "prepare": "husky install",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "debug:health": "node debug-health.mjs",
+    "debug:mongodb": "node debug-health.mjs mongodb",
+    "debug:redis": "node debug-health.mjs redis",
+    "debug:env": "node debug-health.mjs env",
+    "debug:api": "node debug-health.mjs api",
+    "debug:models": "node debug-health.mjs models"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
@@ -24,7 +30,6 @@
     "@tiptap/starter-kit": "^3.4.4",
     "ai": "^5.0.56",
     "axios": "^1.12.2",
-    "bcrypt": "^6.0.0",
     "bcryptjs": "^2.4.3",
     "chart.js": "^4.5.0",
     "cloudinary": "^2.7.0",
@@ -70,5 +75,8 @@
       "prettier --write",
       "eslint --fix"
     ]
+  },
+  "engines": {
+    "node": ">=18.18.0"
   }
 }

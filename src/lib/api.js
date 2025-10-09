@@ -70,7 +70,7 @@ function toSummary(content, summary) {
  */
 export async function getAllBlogs() {
   // Bump the cache key version to avoid stale values that had missing author info
-  const cacheKey = "posts:all:v3";
+  const cacheKey = "posts:all:v4";
   const cached = await cacheGet(cacheKey);
   if (cached) return JSON.parse(cached);
 
@@ -111,13 +111,18 @@ export async function getAllBlogs() {
       const words = String(post.content || "").trim().split(/\s+/).length;
       const readTimeMins = Math.max(1, Math.ceil(words / 200));
       return {
+        _id: post._id.toString(),
         id: post._id.toString(),
         slug: post.slug,
         title: post.title,
         excerpt: toSummary(post.content, post.summary),
         content: post.content,
+        category: post.category,
+        authorId: post.authorId?.toString(),
+        authorName: post.authorName || "Anonymous",
+        authorImage: isValidUrl(post.authorImage) ? post.authorImage : undefined,
         author: {
-          id: post.authorId,
+          id: post.authorId?.toString(),
           name: post.authorName || "Anonymous",
           image: isValidUrl(post.authorImage) ? post.authorImage : undefined,
         },
@@ -125,7 +130,8 @@ export async function getAllBlogs() {
         likes: Array.isArray(post.likes) ? post.likes.length : post.likes || 0,
         comments: Array.isArray(post.comments) ? post.comments.length : 0,
         published: post.published,
-        createdAt: post.createdAt,
+        createdAt: post.createdAt?.toISOString(),
+        updatedAt: post.updatedAt?.toISOString(),
         views: post.views || 0,
         readTimeMins,
         coverImage: post.coverImage || "/images/placeholder.jpg",
