@@ -155,6 +155,23 @@ UserSchema.add({
   blockedAt: { type: Date },
 });
 
+// 🔒 SECURITY: Enhanced security tracking fields
+UserSchema.add({
+  lastLogin: { type: Date },
+  lastFailedLogin: { type: Date },
+  loginCount: { type: Number, default: 0 },
+  failedAttempts: { type: Number, default: 0 },
+  accountLockedUntil: { type: Date },
+  ipAddresses: [{ type: String }], // Track recent IP addresses
+  mfaEnabled: { type: Boolean, default: false },
+  mfaSecret: { type: String }, // For TOTP
+  backupCodes: [{ type: String }], // MFA backup codes
+  securityQuestions: [{
+    question: String,
+    answerHash: String,
+  }],
+});
+
 UserSchema.index({ blocked: 1, active: 1 });
 
 // Email preferences

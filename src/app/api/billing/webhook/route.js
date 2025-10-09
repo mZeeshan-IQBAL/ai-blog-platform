@@ -7,7 +7,11 @@ import { stripe } from "@/lib/stripe";
 import { connectToDB } from "@/lib/db";
 import User from "@/models/User";
 
-export async function POST(req) {
+// 🔒 SECURITY: Import rate limiting
+import { withRateLimit, RATE_LIMITS } from "@/lib/rateLimit";
+import { logSecurityEvent } from "@/lib/securityLogger";
+
+async function webhookHandler(req) {
   const body = await req.text();
   const sig = headers().get("stripe-signature");
 
@@ -22,6 +26,26 @@ export async function POST(req) {
     );
   } catch (err) {
     console.error("Webhook signature verification failed:", err.message);
+    
+    // 🔒 SECURITY: Log webhook signature verification failures
+    const clientIP = req.headers?.get?.('x-forwarded-for') ||
+                    req.headers?.get?.('x-real-ip') || 'unknown';
+    
+    await logSecurityEvent({
+      event: 'WEBHOOK_MANIPULATION',
+      identifier: clientIP,
+      details: {
+        webhook: 'stripe',
+        error: err.message,
+        hasSignature: !!sig,
+        bodyLength: body?.length || 0,
+      },
+      severity: 'HIGH',
+      source: 'webhook_handler',
+      userAgent: req.headers?.get?.('user-agent'),
+      ipAddress: clientIP,
+    });
+    
     return NextResponse.json({ error: "Webhook signature verification failed" }, { status: 400 });
   }
 
@@ -251,3 +275,38 @@ async function updateUserSubscription(user, stripeSubscription, plan, isReplacem
   const actionType = isReplacement ? 'replaced' : 'updated';
   console.log(`Subscription ${actionType} for user: ${user.email} - Plan: ${plan} - Status: ${stripeSubscription.status}`);
 }
+
+// 🔒 SECURITY: Apply rate limiting to webhook handler
+export const POST = withRateLimit(webhookHandler, RATE_LIMITS.WEBHOOK, {
+  keyPrefix: 'webhook',
+  getIdentifier: (req) => {
+    // For webhooks, use IP address
+    return req.headers?.get?.('x-forwarded-for') ||
+           req.headers?.get?.('x-real-ip') || 'unknown';
+  },
+  onRateLimitExceeded: async (req, result) => {
+    const clientIP = req.headers?.get?.('x-forwarded-for') ||
+                    req.headers?.get?.('x-real-ip') || 'unknown';
+                    
+    await logSecurityEvent({
+      event: 'WEBHOOK_RATE_LIMIT_EXCEEDED',
+      identifier: clientIP,
+      details: {
+        webhook: 'stripe',
+        limit: result.limit,
+        attempts: result.current,
+        window: '5 minutes',
+      },
+      severity: 'HIGH',
+      source: 'webhook_rate_limiter',
+      userAgent: req.headers?.get?.('user-agent'),
+      ipAddress: clientIP,
+    });
+    
+    return NextResponse.json({
+      error: 'Webhook rate limit exceeded',
+      message: 'Too many webhook requests',
+      retryAfter: result.retryAfter,
+    }, { status: 429 });
+  },
+});

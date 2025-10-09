@@ -86,14 +86,28 @@ Return only the continuation text:\n\n${content}`;
   }
 }
 
-// Apply subscription middleware with AI usage tracking
-export const POST = withSubscription(aiSuggestHandler, {
+// 🔒 SECURITY: Apply both subscription and rate limiting middleware
+import { withRateLimit, RATE_LIMITS } from "@/lib/rateLimit";
+
+// First apply subscription middleware, then rate limiting
+const subscriptionProtectedHandler = withSubscription(aiSuggestHandler, {
   requiredAction: 'ai_call',
   requireActiveSubscription: false, // Allow free tier with limits
   incrementUsage: {
     type: 'aiCalls',
     amount: 1
   }
+});
+
+// Then apply rate limiting
+export const POST = withRateLimit(subscriptionProtectedHandler, RATE_LIMITS.AI_SUGGEST, {
+  keyPrefix: 'ai',
+  getIdentifier: (req) => {
+    // For AI routes, combine IP with user session if available
+    const ip = req.headers?.get?.('x-forwarded-for') ||
+              req.headers?.get?.('x-real-ip') || 'unknown';
+    return `ai:${ip}`;
+  },
 });
 
 export async function GET() {
