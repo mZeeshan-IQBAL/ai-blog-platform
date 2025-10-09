@@ -25,9 +25,9 @@ const NewsletterSignup = () => {
 
   return (
     <div className="p-6 rounded-lg border border-border bg-card">
-      <h3 className="text-lg font-semibold mb-2">Stay inspired</h3>
+      <h3 className="text-lg font-semibold mb-2">Join 50,000+ writers</h3>
       <p className="text-sm text-muted-foreground mb-4">
-        Get the best stories and writing tips delivered to your inbox.
+        Get AI writing tips, trending topics, and success stories delivered weekly.
       </p>
       
       <form onSubmit={handleSubmit} className="flex gap-2">
@@ -171,7 +171,7 @@ export default function Footer() {
             </Link>
 
             <p className="text-muted-foreground mb-6 max-w-md">
-              Empowering writers and readers to share amazing stories and connect through the power of storytelling.
+              The AI-powered platform where writers create viral content and build engaged audiences. Transform your ideas into stories that matter.
             </p>
 
             <SocialLinks />

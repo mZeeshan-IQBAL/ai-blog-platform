@@ -104,49 +104,48 @@ function SolutionCard({ s }) {
 export default function Features() {
   return (
     <>
-      {/* Hero continuation - Built for the intelligence age */}
+      {/* Hero continuation - AI-powered blogging */}
       <section className="content-section bg-background">
         <div className="content-container">
           <div className="text-center mb-16">
             <Reveal>
               <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-4">
-                Built for the intelligence age
+                AI-Powered Content Creation
               </h2>
               <p className="text-sm sm:text-base text-muted-foreground max-w-4xl mx-auto leading-relaxed">
-                Integrate AI into every part of your docs lifecycle. Woven into how your knowledge is
-                written, maintained, and understood by both users and LLMs.
+                Harness the power of artificial intelligence to enhance every aspect of your blogging journey. From idea generation to audience engagement, we've got you covered.
               </p>
             </Reveal>
           </div>
 
           {/* Two column feature layout */}
           <div className="grid lg:grid-cols-2 gap-16 lg:gap-24 items-start">
-            {/* Left column - LLMs.txt & MCP */}
+            {/* Left column - AI Writing Assistant */}
             <Reveal className="space-y-8">
               <div className="eyebrow-badge">
-                <span className="text-xs font-medium">LLMS.TXT & MCP</span>
+                <span className="text-xs font-medium">AI WRITING ASSISTANT</span>
               </div>
               <div>
                 <h3 className="text-lg sm:text-xl font-bold mb-3">
-                  Built for both people and AI
+                  Never face writer's block again
                 </h3>
                 <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
-                  Ensure your content shows up in the AI workflows users already rely on. We support llms.txt, MCP, and whatever comes next.
+                  Get instant topic suggestions, outline generation, and content enhancement. Our AI helps you create compelling stories that resonate with your audience.
                 </p>
               </div>
             </Reveal>
 
-            {/* Right column - Agent */}
+            {/* Right column - Smart Analytics */}
             <Reveal className="space-y-8">
               <div className="eyebrow-badge">
-                <span className="text-xs font-medium">AGENT</span>
+                <span className="text-xs font-medium">SMART ANALYTICS</span>
               </div>
               <div>
                 <h3 className="text-lg sm:text-xl font-bold mb-3">
-                  Self-updating knowledge management
+                  Understand your audience better
                 </h3>
                 <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
-                  Draft, edit, and maintain content with a context-aware agent. Move faster and more consistently without the documentation debt.
+                  Get actionable insights about your readers' behavior, preferences, and engagement patterns. Grow your audience with data-driven decisions.
                 </p>
               </div>
             </Reveal>
@@ -158,9 +157,9 @@ export default function Features() {
       <section className="content-section bg-muted/30">
         <div className="content-container">
           <Reveal className="text-center mb-12">
-            <h2 className="text-lg sm:text-xl font-bold mb-3">Everything you need to create</h2>
+            <h2 className="text-lg sm:text-xl font-bold mb-3">Everything you need to succeed as a blogger</h2>
             <p className="text-sm text-muted-foreground max-w-2xl mx-auto">
-              From AI-powered writing assistance to community engagement—all the tools creators need.
+              From AI-powered writing assistance to audience engagement—all the essential tools to turn your ideas into viral stories.
             </p>
           </Reveal>
 

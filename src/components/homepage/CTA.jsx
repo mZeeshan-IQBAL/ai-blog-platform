@@ -34,20 +34,20 @@ export default function CTA() {
             <div className="grid lg:grid-cols-2 gap-10 items-center">
               <div>
                 <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-3 py-1 rounded-full text-xs font-semibold mb-4 border border-primary/20">
-                  🚀 Start creating today
+                  🚀 Start your blogging journey today
                 </div>
                 <h3 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold leading-tight mb-4">
-                  Turn your ideas into stories people love
+                  Transform your thoughts into viral content
                 </h3>
                 <p className="text-muted-foreground text-lg mb-6 max-w-xl">
-                  Join a vibrant community of writers and readers. Create, publish, and grow your audience with powerful tools and AI assistance.
+                  Join thousands of successful bloggers who trust BlogSphere to amplify their voice. Write with AI, engage with readers, and watch your audience grow exponentially.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-3">
                   <Button as="link" href="/auth/signup" variant="gradient" size="lg" className="min-w-[180px]">
-                    Get Started Free
+                    Start Writing for Free
                   </Button>
-                  <Button as="link" href="/features" variant="outline" size="lg">
-                    Explore Features
+                  <Button as="link" href="/blog" variant="outline" size="lg">
+                    Read Success Stories
                   </Button>
                 </div>
                 <div className="flex items-center gap-3 mt-6">
@@ -62,7 +62,7 @@ export default function CTA() {
                     ))}
                   </div>
                   <span className="text-sm text-muted-foreground">
-                    Join 10,000+ creators already publishing on BlogSphere
+                    Join 50,000+ writers building their audience on BlogSphere
                   </span>
                 </div>
               </div>

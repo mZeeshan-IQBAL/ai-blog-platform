@@ -4,45 +4,45 @@ import { useMemo } from 'react';
 
 const data = [
   {
-    name: 'Lorette F.',
-    initials: 'LF',
-    title: 'Saving Time and Increase Production',
-    text: 'Writing various types of content with the AI Writer allows me to expand the breadth and depth of my articles.',
-    rating: 4,
-  },
-  {
-    name: 'Christi H.',
-    initials: 'CH',
-    title: 'New to writing a Blog',
-    text: "The only thing I haven't figured out yet is how to set a tone for every article I write – such as through the lens of gardening or as a Law enforcement Officer. But I am learning!!",
+    name: 'Sarah M.',
+    initials: 'SM',
+    title: 'My blog went from 0 to 50K monthly readers',
+    text: 'BlogSphere\'s AI suggestions helped me find my unique voice. The analytics showed me exactly what my audience wanted, and now I\'m making a living from my passion.',
     rating: 5,
   },
   {
-    name: 'Regis I.',
-    initials: 'RI',
-    title: 'Revolutionize your content creation',
-    text: "What I love about BlogSphere is that it's super easy to use. Choose your output language and tone, complete the prompt, and click 'Generate'. Then pick the one that suits your needs best.",
+    name: 'David L.',
+    initials: 'DL',
+    title: 'Finally, a platform that gets creators',
+    text: "The community features are incredible. I've connected with readers who became lifelong fans. The real-time engagement keeps me motivated to write more.",
     rating: 5,
   },
   {
-    name: 'Tracey J.',
-    initials: 'TJ',
-    title: 'A great help to scheduling software',
-    text: 'I would like it if there was a menu across the top allowing easier access back to scheduling posts. I also wish it allowed tagging within the social media element.',
+    name: 'Maya P.',
+    initials: 'MP',
+    title: 'AI writing assistant is a game-changer',
+    text: "I used to stare at blank pages for hours. Now BlogSphere\'s AI gives me the perfect starting point, and I can focus on crafting stories that resonate.",
+    rating: 5,
+  },
+  {
+    name: 'James W.',
+    initials: 'JW',
+    title: 'Turned my hobby into a business',
+    text: 'The growth analytics helped me understand which topics performed best. Within 6 months, I was getting brand partnership offers. BlogSphere changed my life.',
+    rating: 5,
+  },
+  {
+    name: 'Elena R.',
+    initials: 'ER',
+    title: 'Beautiful design, powerful features',
+    text: 'The editor is so intuitive and the published posts look professional. My readers always compliment how clean and readable my blog looks.',
     rating: 4,
   },
   {
-    name: 'Qasim K.',
-    initials: 'QK',
-    title: 'Best Content Generating AI Tool',
-    text: 'Being a company owner, the best thing I found about BlogSphere is the ease of using it and generating multiple posts. The UI meets my needs and is quite like the current UI.',
-    rating: 4,
-  },
-  {
-    name: 'Rachelle C.',
-    initials: 'RC',
-    title: 'Best Writing Tool & Easy To Use',
-    text: 'It is benefiting me in many ways. The titles are always spot on and very easy to read. This helps a great deal.',
+    name: 'Alex C.',
+    initials: 'AC',
+    title: 'Best decision for my content strategy',
+    text: 'Switched from WordPress and never looked back. The AI content suggestions and built-in SEO optimization doubled my organic traffic in 3 months.',
     rating: 5,
   },
 ];
@@ -90,16 +90,16 @@ export default function Testimonials() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-10">
-          <p className="text-sm font-medium text-muted-foreground">Trusted By <span className="brand-gradient-text font-bold">10 million+</span> People.</p>
+          <p className="text-sm font-medium text-muted-foreground">Trusted By <span className="brand-gradient-text font-bold">50,000+</span> Content Creators.</p>
           <h2 className="heading-responsive font-extrabold mt-2">
-            What our users are saying about <span className="brand-gradient-text">BlogSphere</span>
+            Real stories from real bloggers on <span className="brand-gradient-text">BlogSphere</span>
           </h2>
           <div className="mt-6">
-            <p className="text-sm font-semibold text-foreground">Aggregate Review Rating</p>
+            <p className="text-sm font-semibold text-foreground">Average User Rating</p>
             <div className="mt-2 flex items-center justify-center gap-3 text-sm text-muted-foreground">
               <span className="font-medium text-foreground">4.9/5 Stars</span>
               <Stars value={5} />
-              <span>(1764)</span>
+              <span>(2,847 reviews)</span>
             </div>
           </div>
         </div>

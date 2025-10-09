@@ -37,56 +37,56 @@ export default function Hero() {
         <div className="streak" style={{ top: '40%', left: '-15%', transform: 'rotate(8deg)' }} />
       </div>
       <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Mintlify-style eyebrow */}
+        {/* Brand eyebrow */}
         <div className="mb-4 sm:mb-6 animate-slide-up">
           <span className="inline-flex items-center px-3 py-1 text-xs font-medium bg-white/10 text-white/90 rounded-full border border-white/20 backdrop-blur-sm">
-            ✨ The Intelligent Documentation Platform
+            ✨ AI-Powered Storytelling Platform
           </span>
         </div>
         
-        {/* Main heading - Mintlify style */}
+        {/* Main heading */}
         <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight mb-4 sm:mb-6 animate-slide-up text-white" style={{ animationDelay: '100ms' }}>
-          The Intelligent<br />
-          <span className="text-yellow-200">Blog Platform</span>
+          Where Stories Come to Life with<br />
+          <span className="text-yellow-200">AI Intelligence</span>
         </h1>
         
-        {/* Subtitle - clean and focused */}
+        {/* Subtitle - compelling and clear */}
         <p className="text-sm sm:text-base lg:text-lg text-white/85 max-w-3xl mx-auto mb-6 sm:mb-8 leading-relaxed animate-slide-up" style={{ animationDelay: '200ms' }}>
-          Meet the next generation of blogging. AI-native, beautiful out-of-the-box, and built for collaboration.
+          Create captivating blog posts with AI assistance, connect with engaged readers, and grow your audience on the most intelligent blogging platform ever built.
         </p>
         
-        {/* Mintlify-style email signup */}
+        {/* Email signup with compelling CTA */}
         <div className="max-w-sm mx-auto mb-6 sm:mb-8 animate-slide-up" style={{ animationDelay: '300ms' }}>
           <div className="flex gap-2">
             <input
               type="email"
-              placeholder="Email address"
+              placeholder="Enter your email to get started"
               className="flex-1 px-3 py-2 text-sm rounded-lg bg-white/10 backdrop-blur-sm border border-white/20 text-white placeholder:text-white/60 focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-transparent"
             />
             <button className="px-4 py-2 bg-white text-gray-900 font-medium text-sm rounded-lg hover:bg-white/90 transition-colors duration-200 shadow-lg">
-              Start now
+              Start Writing
             </button>
           </div>
         </div>
         
-        {/* Action buttons - secondary */}
+        {/* Action buttons - compelling CTAs */}
         <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 mb-8 animate-slide-up" style={{ animationDelay: '400ms' }}>
           {status === "authenticated" ? (
             <>
               <Button as="link" href="/dashboard" variant="outline" size="md" className="text-white border-white/30 hover:bg-white/10">
-                Go to Dashboard
+                Continue Writing
               </Button>
               <Button as="link" href="/blog" variant="ghost" size="md" className="text-white hover:bg-white/10">
-                Discover Blogs
+                Explore Stories
               </Button>
             </>
           ) : (
             <>
               <Button as="link" href="/auth/signin" variant="outline" size="md" className="text-white border-white/30 hover:bg-white/10">
-                Start Writing
+                Create Your First Story
               </Button>
               <Button as="link" href="/blog" variant="ghost" size="md" className="text-white hover:bg-white/10">
-                Discover Stories
+                Read Amazing Stories
               </Button>
             </>
           )}
